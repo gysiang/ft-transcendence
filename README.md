@@ -6,3 +6,12 @@ FrontEnd
 - cd website
 - npm install
 - npm run dev
+
+Backend
+- docker build -t pong-backend .
+- docker run -p 3000:3000 pong-backend
+- curl or visit http://localhost:3000/api/hello
+
+Stop and remove container
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
