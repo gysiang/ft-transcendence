@@ -9,7 +9,7 @@ FrontEnd
 
 Backend
 - docker build -t pong-backend .
-- docker run -p 3000:3000 pong-backend
+- docker run --name backend -p 3000:3000 pong-backend
 - curl or visit http://localhost:3000/api/hello
 
 SQLite Commands
@@ -21,4 +21,3 @@ SELECT * FROM users;
 
 Stop and remove container
 docker stop $(docker ps -qa); docker rm $(docker ps -qa); docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q); docker network rm $(docker network ls -q) 2>/dev/null
-

@@ -19,6 +19,8 @@ services:
       - pong-network
     volumes:
       - sqlite_data:/app/data
+    env_file:
+      - ../secrets/.env
     expose:
       - "3000"
     restart: always

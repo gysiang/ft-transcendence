@@ -4,11 +4,13 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN apk update && apk sqlite
+RUN apk update && apk add sqlite
 
 RUN npm install
 
 COPY . .
+
+COPY secrets/.env ./secrets/.env
 
 RUN npm run build
 

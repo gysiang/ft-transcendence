@@ -15,8 +15,7 @@ export async function initializeDatabase() {
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				username TEXT NOT NULL,
 				email TEXT NOT NULL UNIQUE,
-				hash_password TEXT NOT NULL,
-				profile TEXT
+				hash_password TEXT NOT NULL
 				);
 			`);
 
@@ -24,7 +23,7 @@ export async function initializeDatabase() {
 			return (db);
 			} catch (error) {
 			console.error('Error initializing database:', error);
-			}
+		}
 }
 
-	initializeDatabase();
+initializeDatabase();
