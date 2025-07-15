@@ -44,8 +44,21 @@ services:
       - mariadb_data:/var/lib/mysql
     restart: always;
 
+  sqlite:
+    build: ./sqlite
+    container_name: sqlite
+    networks: pong-network
+    env_file:
+      - ../secrets/.env
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlite_data:/var/lib/mysql
+    restart: always;
+
 volumes:
   mariadb_data:
+  sqlite_data:
   frontend_dist:
 
 networks:
