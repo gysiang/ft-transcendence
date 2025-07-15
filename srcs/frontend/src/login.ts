@@ -1,4 +1,5 @@
 import { createHeader } from "./components/header";
+import { renderApp } from "./router";
 
 export function renderLoginPage(container: HTMLElement) {
 
@@ -28,8 +29,39 @@ export function renderLoginPage(container: HTMLElement) {
 			required />
 		<br>
 		<button class="w-2xs bg-sky-500 text-white p-2 rounded-md">Login</button>
+		<div id="error" class="text-red-500 mt-2"></div>
 	</form>
   </div>
   `
 	container.appendChild(loginForm);
+
+	// handle the login click
+
+	const form = document.getElementById("loginForm") as HTMLFormElement;
+	const errorDiv = document.getElementById("error") as HTMLFormElement;
+
+	form.onsubmit = async (e) => {
+		e.preventDefault();
+		const username = (document.getElementById("username") as HTMLInputElement).value;
+		const password = (document.getElementById("password") as HTMLInputElement).value;
+
+		try {
+			const res = await fetch("/api/login", {
+				method: "POST",
+				headers : {"Content-Type": "application/json"},
+				body: JSON.stringify({ username, password }),
+				credentials: "include"
+			});
+
+			if (!res.ok)
+				throw new Error("Invalid Login");
+
+			const { token } = await res.json();
+			localStorage.setItem("auth_token", token);
+			window.history.pushState({}, "", "/home");
+			renderApp();
+		} catch (err) {
+			errorDiv.textContent = "Login Failed.";
+		}
+	}
 }
