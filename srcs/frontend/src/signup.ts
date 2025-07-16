@@ -1,5 +1,5 @@
 import { createHeader } from "./components/header";
-import { renderApp } from "./router";
+import { signupHandler } from "./handlers/signupHandler";
 
 export function renderSignUpPage(container: HTMLElement) {
 
@@ -8,19 +8,26 @@ export function renderSignUpPage(container: HTMLElement) {
 	const header = createHeader();
 	container.appendChild(header);
 
-	const loginForm = document.createElement("loginForm");
+	const signUpForm = document.createElement("div");
 
-	loginForm.innerHTML = `
+	signUpForm.innerHTML = `
 	<div class="h-screen flex items-center justify-center flex-col bg-gray-100">
 	<h1 class="text-2xl font-bold">Sign Up</h1>
-	<form id="login-form" class="space-y-1">
+	<form id="signup-form" class="space-y-1">
 		<input
 			id="username"
 			type="text"
 			placeholder="Username"
 			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
 			required />
-			<br>
+		<br>
+		<input
+			id="email"
+			type="email"
+			placeholder="email"
+			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
+			required />
+		<br>
 		<input
 			id="password"
 			type="password"
@@ -28,11 +35,12 @@ export function renderSignUpPage(container: HTMLElement) {
 			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
 			required />
 		<br>
-		<button class="w-2xs bg-sky-500 text-white p-2 rounded-md">Sign Up</button>
+		<button type="submit" class="w-2xs bg-sky-500 text-white p-2 rounded-md">Sign Up</button>
 		<div id="error" class="text-red-500 mt-2"></div>
 	</form>
   </div>
   `
-
+	container.appendChild(signUpForm);
+	signupHandler("signup-form");
 
 }

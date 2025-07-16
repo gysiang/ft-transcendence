@@ -13,7 +13,7 @@ export async function signupRoute(app: FastifyInstance) {
 
 	try {
 		await app.db.run(`INSERT INTO users (username, email, hash_password)
-			VALUES (?, ?, ?, ?)`,
+			VALUES (?, ?, ?)`,
 			[username, email, hashedPassword]
 		)
 		return reply.status(201).send({ message: 'success' });

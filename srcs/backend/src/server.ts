@@ -25,7 +25,7 @@ const startServer = async () => {
 				expiresIn: '1 day'
 			}
 		})
-		//console.log('JWT secret:', process.env.JWT_SECRET);
+		console.log('JWT secret:', process.env.JWT_SECRET);
 
 		app.register(fastifyCors, {
 			origin: 'http://localhost:5173',
