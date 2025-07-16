@@ -23,10 +23,21 @@ export async function loginRoute(app: FastifyInstance)
 		reply.status(401).send({ message: 'Invalid password' });
 	}
 
+	const payload = {
+		id: user.id,
+		username : user.username,
+	}
+
+	const token = app.jwt.sign(payload);
+	if (!token) {
+		reply.status(500).send({ message: 'JWT Error' });
+	}
+
 	return reply.status(200).send({
 		message: 'success',
 		username: user.username,
 		email: user.email
+		token:
 		})
 	})
 }
