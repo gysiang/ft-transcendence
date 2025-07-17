@@ -1,12 +1,12 @@
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors';
 import { initializeDatabase } from "./database"
-import { loginRoute } from './routes/login';
-import { signupRoute } from './routes/signup';
+import { authRoutes } from './routes/user.routes';
 import { fpSqlitePlugin } from "fastify-sqlite-typed";
+
 import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
-import path from 'path';
+import cookie from '@fastify/cookie'
 
 const app = Fastify({ logger: true })
 
@@ -19,6 +19,7 @@ const startServer = async () => {
 		app.register(fpSqlitePlugin, {
 			dbFilename: "./pong.db",
 		})
+		app.register(cookie);
 		app.register(jwt, {
 			secret: process.env.JWT_SECRET!,
 			sign: {
@@ -32,8 +33,7 @@ const startServer = async () => {
 			credentials: true
 		});
 
-		await app.register(loginRoute);
-		await app.register(signupRoute);
+		await app.register(authRoutes);
 		await app.listen({ port: 3000, host: '0.0.0.0' });
 
 		console.log('Server running at http://localhost:3000')
