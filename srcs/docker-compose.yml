@@ -1,18 +1,5 @@
 services:
 
-  nginx:
-    build: ./nginx
-    container_name: nginx
-    networks:
-      - pong-network
-    ports:
-      - "443:443"
-    volumes:
-      - frontend_dist:/usr/share/nginx/html:ro
-    depends_on:
-      - frontend
-    restart: always
-
   frontend:
     build:
       context: ./frontend
@@ -30,31 +17,17 @@ services:
     container_name: backend
     networks:
       - pong-network
+    volumes:
+      - sqlite_data:/app/data
     env_file:
       - ../secrets/.env
     expose:
       - "3000"
-    depends_on:
-      - mariadb
-    volumes:
-      - mariadb_data:/var/lib/mysql
     restart: always
 
-  mariadb:
-    build: ./mariadb
-    container_name: mariadb
-    networks:
-      - pong-network
-    env_file:
-      - ../secrets/.env
-    expose:
-      - "3306"
-    volumes:
-      - mariadb_data:/var/lib/mysql
-    restart: always
 
 volumes:
-  mariadb_data:
+  sqlite_data:
   frontend_dist:
 
 networks:
