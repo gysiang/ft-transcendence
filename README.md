@@ -32,3 +32,7 @@ How to test backend
 - POST http://localhost:3000/api/login
 - Headers Content-Type: application/json
 - Body email, password
+
+<br>
+
+![Database Schema](pong.drawio.png)
