@@ -1,28 +1,26 @@
 import { Database } from 'sqlite';
+import { getTimestamp } from "../utils/time";
 import bcrypt from 'bcryptjs';
 
 export interface User {
 	id?: number;
-	username: string;
+	name: string;
 	email: string;
 	hash_password: string;
 }
 
-export async function createUser(db: Database, user: { username: string; email: string; password: string }) {
+export async function createUser(db: Database, user: { name: string; email: string; password: string; alias?: string }) {
 	const saltRounds = 10;
 	const hash = await bcrypt.hash(user.password, saltRounds);
+	const date = getTimestamp();
 
 	const result = await db.run(
-		`INSERT INTO users (username, email, hash_password)
-		VALUES (?, ?, ?)`,
-		[user.username, user.email, hash]
+		`INSERT INTO users (name, email, hash_password, alias, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?)`,
+		[user.name, user.email, hash, user.alias ?? null, date, date]
 	);
 
-	return { id: result.lastID, username: user.username, email: user.email };
-}
-
-export async function findUserByUsername(db: Database, username: string) {
-	return db.get<User>(`SELECT * FROM users WHERE username = ?`, [username]);
+	return { id: result.lastID, name: user.name, email: user.email };
 }
 
 export async function findUserByEmail(db: Database, email: string) {

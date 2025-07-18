@@ -15,9 +15,9 @@ export function renderLoginPage(container: HTMLElement) {
 	<h1 class="text-2xl font-bold">Login</h1>
 	<form id="login-form" class="space-y-1">
 		<input
-			id="username"
-			type="text"
-			placeholder="Username"
+			id="email"
+			type="email"
+			placeholder="email"
 			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
 			required />
 			<br>

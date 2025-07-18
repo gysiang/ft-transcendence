@@ -13,9 +13,12 @@ export async function initializeDatabase() {
 			await db.exec(`
 				CREATE TABLE IF NOT EXISTS users (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				username TEXT NOT NULL,
+				name TEXT NOT NULL,
 				email TEXT NOT NULL UNIQUE,
-				hash_password TEXT NOT NULL
+				hash_password TEXT NOT NULL,
+				alias TEXT,
+				created_at TIMESTAMP NOT NULL,
+				updated_at TIMESTAMP NOT NULL
 				);
 			`);
 
