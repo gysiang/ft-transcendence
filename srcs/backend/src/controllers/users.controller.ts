@@ -112,3 +112,8 @@ export async function getUser(req: FastifyRequest, reply: FastifyReply) {
 	return reply.status(500).send({ message: 'Internal Server Error' });
 	}
 }
+
+export async function logOut(req: FastifyRequest, reply: FastifyReply) {
+	reply.clearCookie('access_token')
+	return reply.send({ message: 'Logout successful' })
+}

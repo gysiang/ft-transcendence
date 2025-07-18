@@ -1,8 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { signupUser, loginUser, getUser } from '../controllers/users.controller';
+import { signupUser, loginUser, getUser, logOut } from '../controllers/users.controller';
 
 export async function authRoutes(app: FastifyInstance) {
 	app.post('/api/signup', signupUser);
 	app.post('/api/login', loginUser);
-	app.get('/api/login', {preHandler: [app.authenticate]}, getUser);
+	app.delete('/api/logout', {preHandler: [app.authenticate]}, logOut);
+	app.get('/api/profile', {preHandler: [app.authenticate]}, getUser);
 }
