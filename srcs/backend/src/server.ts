@@ -7,25 +7,29 @@ import { fpSqlitePlugin } from "fastify-sqlite-typed";
 import authPlugin from './plugins/auth';
 import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
-import cookie from '@fastify/cookie'
+//import cookie from '@fastify/cookie'
 
 const app = Fastify({ logger: true })
 
 const registerPlugins = async (app : FastifyInstance) =>
 {
-		app.register(fpSqlitePlugin, {
+		await app.register(fpSqlitePlugin, {
 			dbFilename: "./pong.db",
 		})
-		app.register(cookie);
+		/** *
+		await app.register(cookie, {
+				secret: process.env.COOKE_SECRET,
+				hook: 'preHandler'
+			}); **/
 
-		app.register(jwt, {
+		await app.register(jwt, {
 			secret: process.env.JWT_SECRET!,
 			sign: {
 				expiresIn: '1 day'
 			}
 		})
-		app.register(authPlugin);
-		app.register(fastifyCors, {
+		await app.register(authPlugin);
+		await app.register(fastifyCors, {
 			origin: 'http://localhost:5173',
 			credentials: true
 		});
@@ -37,6 +41,7 @@ const startServer = async () => {
 
 		await initializeDatabase();
 		await registerPlugins(app);
+		console.log("Authenticate exists:", typeof app.authenticate);
 		await app.register(authRoutes);
 		await app.listen({ port: 3000, host: '0.0.0.0' });
 

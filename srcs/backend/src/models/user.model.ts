@@ -16,7 +16,7 @@ export async function createUser(db: Database, user: { name: string; email: stri
 
 	const result = await db.run(
 		`INSERT INTO users (name, email, hash_password, alias, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?)`,
+		VALUES (?, ?, ?, ?, ?, ?)`,
 		[user.name, user.email, hash, user.alias ?? null, date, date]
 	);
 

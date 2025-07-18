@@ -23,24 +23,22 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 
 	const payload = {
 		id: user.id,
+		name: user.name,
 		email : user.email,
 	}
 
 	const token = req.server.jwt.sign(payload);
 
-	reply.setCookie('access_token', token, {
-		path: '/',
-		httpOnly: true,
-		secure: true,
-	})
-
-	return (reply.status(201).send({ message: 'success' }))
+	return (reply.status(200)
+				.send({
+					message: 'success',
+					access_token: token
+				}))
 	} catch (err: any) {
 	req.log.error(err);
 	return reply.status(500).send({ message: 'Internal Server Error' });
 	}
 }
-
 
 export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 	try {
@@ -64,18 +62,15 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 		name: user.name,
 		email : user.email,
 	}
-
 	const token = req.server.jwt.sign(payload);
 	if (!token) {
 		reply.status(500).send({ message: 'JWT Error' });
 	}
 	return (reply
 			.status(201)
-			.send({ message: 'success' })
-			.setCookie('auth_token', token, {
-				httpOnly: true,
-				sameSite: 'lax',
-				path: '/',
+			.send({
+				message: 'success',
+				access_token: token
 			}));
 	} catch (err : any) {
 	req.log.error(err);
@@ -86,34 +81,28 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 export async function getUser(req: FastifyRequest, reply: FastifyReply) {
 
 	try {
-	const { email } = req.query as {
-		email: string;
-	}
-	if (!email) {
-		return reply.status(400).send({ message: "Email is required" });
-	}
+		const { email } = req.query as {
+			email: string;
+		}
+		if (!email) {
+			return reply.status(400).send({ message: "Email is required" });
+		}
 
-	const db = req.server.db;
-	const user = await findUserByEmail(db, email);
-	if (!user) {
-		return reply.status(401).send({ message: "Invalid email" });
-	}
-	return (reply
-			.status(200)
-			.send({
-				message: "success",
-				id: user.id,
-				name: user.name,
-				email: user.email
-			})
-	)
-	} catch (err: any) {
-	req.log.error(err);
-	return reply.status(500).send({ message: 'Internal Server Error' });
-	}
-}
-
-export async function logOut(req: FastifyRequest, reply: FastifyReply) {
-	reply.clearCookie('access_token')
-	return reply.send({ message: 'Logout successful' })
+		const db = req.server.db;
+		const user = await findUserByEmail(db, email);
+		if (!user) {
+			return reply.status(401).send({ message: "Invalid email" });
+		}
+		return (reply
+				.status(200)
+				.send({
+					message: "Authentication success",
+					id: user.id,
+					name: user.name,
+					email: user.email
+				}));
+		} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+		}
 }
