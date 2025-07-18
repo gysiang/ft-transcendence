@@ -10,7 +10,7 @@ FrontEnd
 Backend
 - docker build -t pong-backend .
 - docker run --name backend -p 3000:3000 pong-backend
-- curl or visit http://localhost:3000/api/hello
+- http://localhost:3000/api/
 
 SQLite Commands
 - .tables
@@ -26,12 +26,18 @@ How to test backend
 1. Signup Via Thunderclient
 - POST http://localhost:3000/api/signup
 - Headers Content-Type: application/json
-- Body username, email, password
+- Body name, email, password
 
 2. Login via Thunderclient
 - POST http://localhost:3000/api/login
 - Headers Content-Type: application/json
 - Body email, password
+
+3. Get User Info via Thunderclient
+- GET http://localhost:3000/api/profile
+- Copy the access_token into Auth Bearer
+- return id, name and email
+- If remove the token, this route cannot be accessed
 
 <br>
 

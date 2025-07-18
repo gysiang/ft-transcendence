@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { createUser, findUserByUsername, findUserByEmail } from '../models/user.model';
+import { createUser, findUserByEmail } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 
-export async function loginController(req: FastifyRequest, reply: FastifyReply) {
+export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 
 	try {
 			const { email , password } = req.body as
@@ -23,35 +23,28 @@ export async function loginController(req: FastifyRequest, reply: FastifyReply) 
 
 	const payload = {
 		id: user.id,
-		username : user.username,
+		name: user.name,
+		email : user.email,
 	}
 
 	const token = req.server.jwt.sign(payload);
-	if (!token) {
-		reply.status(500).send({ message: 'JWT Error' });
-	}
 
-	return (reply
-			.status(201)
-			.send({ message: 'success' })
-			.setCookie('auth_token', token, {
-				httpOnly: true,
-				sameSite: 'lax',
-				path: '/',
-			}));
-
-	} catch (err) {
+	return (reply.status(200)
+				.send({
+					message: 'success',
+					access_token: token
+				}))
+	} catch (err: any) {
 	req.log.error(err);
 	return reply.status(500).send({ message: 'Internal Server Error' });
 	}
 }
 
-
-export async function signupController(req: FastifyRequest, reply: FastifyReply) {
+export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 	try {
-			const { username, email, password } = req.body as
+			const { name, email, password } = req.body as
 			{
-				username: string;
+				name: string;
 				email: string;
 				password: string;
 			};
@@ -62,27 +55,54 @@ export async function signupController(req: FastifyRequest, reply: FastifyReply)
 		return reply.status(400).send({ message: 'Email already exists' });
 	}
 
-	const user = await createUser(db, { username, email, password });
+	const user = await createUser(db, { name, email, password });
 
 	const payload = {
 		id: user.id,
-		username : user.username,
+		name: user.name,
+		email : user.email,
 	}
-
 	const token = req.server.jwt.sign(payload);
 	if (!token) {
 		reply.status(500).send({ message: 'JWT Error' });
 	}
 	return (reply
 			.status(201)
-			.send({ message: 'success' })
-			.setCookie('auth_token', token, {
-				httpOnly: true,
-				sameSite: 'lax',
-				path: '/',
+			.send({
+				message: 'success',
+				access_token: token
 			}));
-	} catch (err) {
+	} catch (err : any) {
 	req.log.error(err);
 	return reply.status(500).send({ message: 'Internal Server Error' });
 	}
+}
+
+export async function getUser(req: FastifyRequest, reply: FastifyReply) {
+
+	try {
+		const { email } = req.query as {
+			email: string;
+		}
+		if (!email) {
+			return reply.status(400).send({ message: "Email is required" });
+		}
+
+		const db = req.server.db;
+		const user = await findUserByEmail(db, email);
+		if (!user) {
+			return reply.status(401).send({ message: "Invalid email" });
+		}
+		return (reply
+				.status(200)
+				.send({
+					message: "Authentication success",
+					id: user.id,
+					name: user.name,
+					email: user.email
+				}));
+		} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+		}
 }

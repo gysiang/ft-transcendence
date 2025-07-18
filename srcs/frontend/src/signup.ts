@@ -15,9 +15,9 @@ export function renderSignUpPage(container: HTMLElement) {
 	<h1 class="text-2xl font-bold">Sign Up</h1>
 	<form id="signup-form" class="space-y-1">
 		<input
-			id="username"
+			id="name"
 			type="text"
-			placeholder="Username"
+			placeholder="name"
 			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
 			required />
 		<br>
