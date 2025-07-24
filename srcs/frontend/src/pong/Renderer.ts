@@ -1,14 +1,17 @@
 import { Paddle } from "./Paddle.js";
 import { Ball } from "./Ball.js";
+import type { Player } from "./types.js";
 
 export class Renderer {
     private ctx: CanvasRenderingContext2D;
     private canvas: HTMLCanvasElement;
+    private players: Player[];
 
-    constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
+    constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, players: Player[])
     {
         this.canvas = canvas;
         this.ctx = ctx;
+        this.players=players;
     }
     clear(): void
     {
@@ -34,10 +37,16 @@ export class Renderer {
     }
     drawScore(leftScore: number, rightScore: number): void
     {
+        const leftPlayer = this.players.find(p => p.side === "left");
+        const rightPlayer = this.players.find(p => p.side === "right");
+
+        const leftName = leftPlayer?.name || "Left";
+        const rightName = rightPlayer?.name || "Right";
+
         this.ctx.fillStyle = "white";
         this.ctx.font = "40px Arial";
         this.ctx.textAlign = "center";
-        this.ctx.fillText(`${leftScore}    ${rightScore}`, this.canvas.width / 2, 50);
+        this.ctx.fillText(`${leftName}: ${leftScore}   ${rightName}: ${rightScore}`,this.canvas.width / 2,50);
     }
     drawCountdown(text: string): void
     {

@@ -7,18 +7,16 @@ export function startGame(canvas : HTMLCanvasElement)
         {
             throw new Error("Canvas not supported");
         }
-    const game = new Game(canvas, ctx);
-    game.startCountdown();
+    const mode =localStorage.getItem("mode");
+    if (mode === "quickplay")
+        {
+            const players = JSON.parse(localStorage.getItem("players") || "[]");
+            const goalLimit = parseInt(localStorage.getItem("goalLimit") || "5", 10);
+            console.log("Quickplay starting with players:", players);
+            console.log("Goals to win:", goalLimit);
+            const game = new Game(canvas, ctx, players, goalLimit);
+            game.startCountdown();
+        }
+    //const game = new Game(canvas, ctx);
+    //game.startCountdown();
 }
-/*
-window.addEventListener("load", () => {
-    const canvas = document.getElementById("game") as HTMLCanvasElement;
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-        alert("Canvas not supported");
-        return;
-    }
-    const game = new Game(canvas, context);
-    game.startCountdown();
-});*/
