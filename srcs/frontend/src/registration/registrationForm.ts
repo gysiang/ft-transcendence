@@ -33,26 +33,69 @@ export function quickplayForm(app: HTMLElement): void
                 const button = document.getElementById("quickplayStart");
                 button?.addEventListener("click", () => {
                     const sideToggle = document.querySelector("input[type='checkbox'].peer") as HTMLInputElement;
-                  
                     const players: { name: string; side: "left" | "right" }[] = [];
-                  
                     const name1 = (document.getElementById("player1") as HTMLInputElement).value || "Player 1";
                     const name2 = (document.getElementById("player2") as HTMLInputElement).value || "Player 2";
-                  
                     const side1: "left" | "right" = sideToggle?.checked ? "right" : "left";
                     const side2: "left" | "right" = side1 === "left" ? "right" : "left";
-                  
                     players.push({ name: name1, side: side1 });
                     players.push({ name: name2, side: side2 });
-                  
                     const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
-                  
                     localStorage.setItem("players", JSON.stringify(players));
                     localStorage.setItem("goalLimit", goals.toString());
                     localStorage.setItem("mode", "quickplay");
-                  
                     window.history.pushState({}, "", "/game");
                     window.dispatchEvent(new Event("popstate"));
                 });
             }, 0);
+}
+
+export function tournamentForm(app: HTMLElement): void{
+    app.innerHTML=
+    `
+    <div class = "max-w-md mx-auto mt-12 text-whitw space-y-6">
+    <h2 class="text-3xl text-center"> Tournament Setup </h2>
+
+    <div>
+    <label class="block mb-2">Tournament Name</label>
+    <input id="tournamentName" type="text" class="w-full px-4 py-2 text-black rounded-md" />
+    </div>
+
+    <div>
+        <label class="block mb-2">Number of Players (2-8)</label>
+        <input id="numPlayers" type="number" min="2" max="8" value="4" class="w-full px-4 py-2 text-black rounded-md" />
+    </div>
+
+    <div id="playerInputs" class="space-y-4"></div>
+
+    <div>
+        <label class="block mb-2">Goals to Win</label>
+        <input id="goalLimit" type="number" min="1" max="20" value="5" class="w-full px-4 py-2 text-black rounded-md" />
+    </div>
+
+    <button id="startTournament" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md text-xl">
+        Start Tournament
+    </button>
+</div>
+`;
+const numPlayersInput = document.getElementById("numPlayers") as HTMLInputElement;
+  const playerInputsContainer = document.getElementById("playerInputs")!;
+
+  function renderPlayerInputs(count: number) {
+    playerInputsContainer.innerHTML = "";
+    for (let i = 1; i <= count; i++) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = `Player ${i} Alias`;
+      input.id = `player${i}`;
+      input.className = "w-full px-4 py-2 text-black rounded-md";
+      playerInputsContainer.appendChild(input);
+    }
+  }
+  renderPlayerInputs(parseInt(numPlayersInput.value, 10));
+
+  numPlayersInput.addEventListener("input", () => {
+    const count = Math.max(2, Math.min(8, parseInt(numPlayersInput.value, 10)));
+    renderPlayerInputs(count);
+  });
 }

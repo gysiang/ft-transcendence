@@ -1,4 +1,4 @@
-import { quickplayForm } from "./registrationForm";
+import { tournamentForm, quickplayForm } from "./registrationForm";
 
 export function renderModes(app: HTMLElement): void {
 
@@ -9,7 +9,7 @@ export function renderModes(app: HTMLElement): void {
         <button id="quickplayBtn" class="bg-indigo-800 w-56 px-10 py-5 text-xl uppercase tracking-widest text-white hover:bg-white hover:text-black rounded-full transition">
             Quickplay
         </button>
-        <button class="bg-indigo-800 w-56 px-10 py-5 text-xl uppercase tracking-widest text-white hover:bg-white hover:text-black rounded-full transition">
+        <button id="TournamentBtn" class="bg-indigo-800 w-56 px-10 py-5 text-xl uppercase tracking-widest text-white hover:bg-white hover:text-black rounded-full transition">
             Tournament
         </button>
         </div>
@@ -19,5 +19,10 @@ export function renderModes(app: HTMLElement): void {
     document.getElementById("quickplayBtn")?.addEventListener("click", () => {
         quickplayForm(app);
     });
+  setTimeout(()=> {
+    document.getElementById("TournamentBtn")?.addEventListener("click", () => {
+      tournamentForm(app);
+    })
+  })
   },0);
 }

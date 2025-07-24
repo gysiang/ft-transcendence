@@ -2,7 +2,7 @@ export type Vector2D = {
     x: number;
     y: number;
 };
-export interface Player{
+export type Player ={
     name: string;
     side: "left" | "right";
 }
