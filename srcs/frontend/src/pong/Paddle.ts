@@ -6,6 +6,7 @@ export class Paddle{
     width: number = 10;
     speed: number = 6;
     side: PlayerSide;
+    name: string = "";
 
     constructor(y: number, canvasWidth: number, side: PlayerSide)
     {
@@ -14,6 +15,10 @@ export class Paddle{
             x: side == 'left' ? 10 :canvasWidth - 20,
             y: y
         };
+        if (this.side == 'left')
+            this.name = "Player 1";
+        else
+            this.name = "Player 2";
     }
 
     moveUp()

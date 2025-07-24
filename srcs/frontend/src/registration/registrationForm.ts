@@ -9,12 +9,21 @@ export function quickplayForm(app: HTMLElement): void
                 <input id ="player1" type ="text" class="w-full px-4 py-2 text-black rounded-md "/>
             </div>
             <div>
-                <label class="block mb-2"> Player 2 Alias </lable>
+                <label class="block mb-2"> Player 2 Alias </label>
                 <input id ="player2" type ="text" class="w-full px-4 py-2 text-black rounded-md"/>
+            </div>
+            <div class="flex items-center">
+            <p class="mr-4 text-sm font-medium text-gray-900 dark:text-black"> Player 1 side</p>
+            <label class="relative cursor-pointer">
+            <input type="checkbox" class="sr-only peer" />
+            <div class="w-[53px] h-7 flex items-center bg-gray-300 rounded-full text-[9px] peer-checked:text-[#007bff] text-gray-300 font-extrabold after:flex after:items-center after:justify-center peer after:content-['left'] peer-checked:after:content-['Right'] peer-checked:after:translate-x-full after:absolute after:left-[2px] peer-checked:after:border-white after:bg-white after:border after:border-gray-300 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#007bff]">
+            </div>
+            </label>
             </div>
             <div>
                 <label for="goalLimit" class="block mb-2"> Goals </label>
                 <input id="goalLimit" type = "number" min="1" max="10" value="5" class="w-full px-4 py-2 text-black rounded-md" />
+            
             <button id ="quickplayStart" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md text-xl">
                 Start
             </button>
@@ -23,14 +32,27 @@ export function quickplayForm(app: HTMLElement): void
             setTimeout(() => {
                 const button = document.getElementById("quickplayStart");
                 button?.addEventListener("click", () => {
-                  const player1 = (document.getElementById("player1") as HTMLInputElement).value || "Player 1";
-                  const player2 = (document.getElementById("player2") as HTMLInputElement).value || "Player 2";
-                  const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
-            
-                  console.log("Starting game with:", player1, player2, goals);
-            
-                  window.history.pushState({}, "", "/game");
-                  window.dispatchEvent(new Event("popstate"));
+                    const sideToggle = document.querySelector("input[type='checkbox'].peer") as HTMLInputElement;
+                  
+                    const players: { name: string; side: "left" | "right" }[] = [];
+                  
+                    const name1 = (document.getElementById("player1") as HTMLInputElement).value || "Player 1";
+                    const name2 = (document.getElementById("player2") as HTMLInputElement).value || "Player 2";
+                  
+                    const side1: "left" | "right" = sideToggle?.checked ? "right" : "left";
+                    const side2: "left" | "right" = side1 === "left" ? "right" : "left";
+                  
+                    players.push({ name: name1, side: side1 });
+                    players.push({ name: name2, side: side2 });
+                  
+                    const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
+                  
+                    localStorage.setItem("players", JSON.stringify(players));
+                    localStorage.setItem("goalLimit", goals.toString());
+                    localStorage.setItem("mode", "quickplay");
+                  
+                    window.history.pushState({}, "", "/game");
+                    window.dispatchEvent(new Event("popstate"));
                 });
-              }, 0);
+            }, 0);
 }

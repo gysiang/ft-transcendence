@@ -1,7 +1,8 @@
 import {Ball} from "./Ball.js"
 import { Paddle } from "./Paddle.js";
-import type { PlayerSide, Vector2D } from "./types.js";
+import type { Vector2D } from "./types.js";
 import { Renderer } from "./Renderer.js";
+import type { Player } from "./types.js";
 
 export class Game {
 
@@ -11,21 +12,31 @@ export class Game {
     private keys: Record<string, boolean>;
     private renderer: Renderer;
     private canvas: HTMLCanvasElement;
+    private players: Player[];
+    private goalLimit: number;
+    private gameFinished: boolean;
     leftScore: number = 0;
     rightScore: number = 0;
 
-    constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
+    constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, players: Player[], goalLimit: number)
     {
         this.canvas = canvas;
-        this.renderer = new Renderer(canvas, ctx);
+        this.players = JSON.parse(localStorage.getItem("players") || "[]");
+        this.goalLimit = parseInt(localStorage.getItem("goalLimit") || "5", 10);
+        this.renderer = new Renderer(canvas, ctx,players);
+        this.gameFinished = false;
         const center: Vector2D = {
           x: canvas.width / 2,
           y: canvas.height / 2,
         };
-    
+        
+        const leftPlayer =players.find((p: any) => p.side === "left");
+        const rightPlayer=players.find((p: any) => p.side === "right"); 
         this.ball = new Ball(center);
-        this.leftPaddle = new Paddle(center.y - 50, canvas.width, "left");
+        this.leftPaddle = new Paddle(center.y - 50, canvas.width, "left",);
         this.rightPaddle = new Paddle(center.y - 50, canvas.width, "right");
+        this.leftPaddle.name = leftPlayer?.name || "Left";
+        this.rightPaddle.name = rightPlayer?.name || "Right";
     
         this.keys = {};
     
@@ -52,12 +63,22 @@ export class Game {
         if (this.ball.position.x + this.ball.radius < 0)
         {
             this.rightScore++;
+            if (this.rightScore >= this.goalLimit) {
+              alert(`${this.rightPaddle.name} wins!`);
+              this.gameFinished = true;
+              return;
+            }
             this.resetRound();
         }
 
         if (this.ball.position.x - this.ball.radius > this.canvas.width)
         {
             this.leftScore++;
+            if (this.leftScore >= this.goalLimit) {
+              alert(`${this.leftPaddle.name} wins!`);
+              this.gameFinished = true;
+              return;
+            }
             this.resetRound();
         }
         
@@ -101,6 +122,16 @@ export class Game {
       }
     
       loop(): void {
+        if (this.gameFinished)
+          {
+            setTimeout(() => window.location.href = "/play", 2000);
+            const mode =localStorage.getItem("mode");
+            if (mode === "quickplay")
+              {
+                localStorage.clear();
+              }
+            return;
+          }
         this.update();
         this.draw();
         requestAnimationFrame(() => this.loop());
