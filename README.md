@@ -41,4 +41,11 @@ How to test backend
 
 <br>
 
+Google Sign in
+- turn on both backend and frontend with npm run dev
+- Go to incognito mode in browser, http://localhost:5173/signup
+- Follow the instructions to login and redirect to home page
+- Check if cookie is set as access_token.
+- The access token allows access into protected routes.
+
 ![Database Schema](pong.drawio.png)
