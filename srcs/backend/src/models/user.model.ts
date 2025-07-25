@@ -6,12 +6,12 @@ export interface User {
 	id?: number;
 	name: string;
 	email: string;
-	hash_password: string;
+	hash_password: string | null;
 }
 
-export async function createUser(db: Database, user: { name: string; email: string; password: string; alias?: string }) {
+export async function createUser(db: Database, user: { name: string; email: string; password?: string | null; alias?: string }) {
 	const saltRounds = 10;
-	const hash = await bcrypt.hash(user.password, saltRounds);
+	const hash = user.password ? await bcrypt.hash(user.password, saltRounds) : null;
 	const date = getTimestamp();
 
 	const result = await db.run(

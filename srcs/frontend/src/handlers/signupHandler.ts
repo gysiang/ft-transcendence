@@ -29,3 +29,12 @@ const errorDiv = document.getElementById("error");
 		}
 	});
 }
+
+export async function googleHandler(buttonId: string) {
+	const googleButton = document.getElementById(buttonId);
+	if (!googleButton) return;
+
+	googleButton.addEventListener('click', () => {
+		window.location.href = 'http://localhost:3000/auth/google';
+	});
+}

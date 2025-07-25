@@ -1,4 +1,5 @@
-import { FastifyJWT } from '@fastify/jwt';
+const jwt = require('jsonwebtoken');
+const cookie = require("cookie");
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
@@ -6,15 +7,18 @@ import fp from 'fastify-plugin';
 export default fp(async function authentication(app: FastifyInstance) {
 	app.decorate("authenticate", async function (request: FastifyRequest, reply: FastifyReply) {
 
-	const authHeader = request.headers.authorization;
-
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-		return reply.status(401).send({ message: "Missing or invalid Authorization header" });
+	const header = request.headers['cookie'];
+	if (!header) {
+		return reply.status(401).send({ message: 'Missing cookies' });
 	}
-	const token = authHeader.split(" ")[1];
+
+	const cookies = cookie.parse(header);
+	const token = cookies['access_token'];
+	if (!token) {
+		return reply.status(401).send({ message: 'Missing authentication token' });
+	}
 	try {
-		const decoded = app.jwt.verify<FastifyJWT['user']>(token);
-		request.user = decoded;
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 	} catch (err) {
 		console.error("JWT verification error:", err);
 		return reply.status(401).send({ message: "Invalid token" });
