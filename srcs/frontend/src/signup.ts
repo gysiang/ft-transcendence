@@ -1,5 +1,5 @@
 import { createHeader } from "./components/header";
-import { signupHandler } from "./handlers/signupHandler";
+import { signupHandler, googleHandler } from "./handlers/signupHandler";
 
 export function renderSignUpPage(container: HTMLElement) {
 
@@ -38,9 +38,10 @@ export function renderSignUpPage(container: HTMLElement) {
 		<button type="submit" class="w-2xs bg-sky-500 text-white p-2 rounded-md">Sign Up</button>
 		<div id="error" class="text-red-500 mt-2"></div>
 	</form>
+		<button id="google-login-btn" class="w-2xs border-black border-solid p-2">Sign in with Google</button>
   </div>
   `
 	container.appendChild(signUpForm);
 	signupHandler("signup-form");
-
+	googleHandler("google-login-btn");
 }

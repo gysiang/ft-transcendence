@@ -5,31 +5,34 @@ import { initializeDatabase } from "./database"
 import { authRoutes } from './routes/user.routes';
 import { fpSqlitePlugin } from "fastify-sqlite-typed";
 import authPlugin from './plugins/auth';
-import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
-//import cookie from '@fastify/cookie'
+import fastifyPassport from '@fastify/passport'
+import fastifySecureSession from '@fastify/secure-session'
+import { VerifyCallback } from 'passport-google-oauth2'
+var GoogleStrategy = require('passport-google-oauth2').Strategy;
 
 const app = Fastify({ logger: true })
 
 const registerPlugins = async (app : FastifyInstance) =>
 {
-		await app.register(fpSqlitePlugin, {
+		app.register(fpSqlitePlugin, {
 			dbFilename: "./pong.db",
 		})
-		/** *
-		await app.register(cookie, {
-				secret: process.env.COOKE_SECRET,
-				hook: 'preHandler'
-			}); **/
-
-		await app.register(jwt, {
-			secret: process.env.JWT_SECRET!,
-			sign: {
-				expiresIn: '1 day'
-			}
+		app.register(fastifySecureSession, {
+			key: Buffer.from(process.env.SECURESESSION_SECRET!, 'hex'),
+			cookie: { path: '/'},
 		})
-		await app.register(authPlugin);
-		await app.register(fastifyCors, {
+		app.register(fastifyPassport.initialize());
+		app.register(fastifyPassport.secureSession());
+		fastifyPassport.registerUserDeserializer(async (user, res) => {
+			return (user);
+		})
+		fastifyPassport.registerUserSerializer(async (user, res) => {
+			return (user);
+		})
+
+		app.register(authPlugin);
+		app.register(fastifyCors, {
 			origin: 'http://localhost:5173',
 			credentials: true
 		});
@@ -41,8 +44,28 @@ const startServer = async () => {
 
 		await initializeDatabase();
 		await registerPlugins(app);
-		console.log("Authenticate exists:", typeof app.authenticate);
 		await app.register(authRoutes);
+
+		fastifyPassport.use('google', new GoogleStrategy({
+			clientID:     process.env.GOOGLE_CLIENT_ID,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+			callbackURL: "http://localhost:3000/auth/google/callback",
+			passReqToCallback   : true
+		}, async function (
+				request: Request,
+				accessToken: string,
+				refreshToken: string,
+				profile: any,
+				done: VerifyCallback
+			) {
+				try {
+				//console.log("Google Profile:", profile);
+				done(undefined, profile);
+			} catch (err) {
+				done(err as Error);
+			};
+			}
+		));
 		await app.listen({ port: 3000, host: '0.0.0.0' });
 
 		console.log('Server running at http://localhost:3000')

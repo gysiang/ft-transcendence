@@ -1,6 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { createUser, findUserByEmail } from '../models/user.model';
 import bcrypt from 'bcryptjs';
+const jwt = require('jsonwebtoken');
+const cookie = require("cookie");
+
 
 export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 
@@ -16,6 +19,9 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 	if (!user) {
 		return reply.status(401).send({ message: "Invalid email" });
 	}
+	if (!user.hash_password) {
+		return reply.status(401).send({ message: 'Password not set for this user' });
+	}
 	const verifyPassword = bcrypt.compare(password, user.hash_password);
 	if (!verifyPassword) {
 		reply.status(401).send({ message: 'Invalid password' });
@@ -27,12 +33,16 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 		email : user.email,
 	}
 
-	const token = req.server.jwt.sign(payload);
-
-	return (reply.status(200)
+	const token = jwt.sign(payload, process.env.JWT_SECRET);
+	const cookieStr = cookie.serialize('access_token', token, {
+		httpOnly: true,
+		maxAge: 60 * 60 * 24,
+		path: '/'
+	});
+	return (reply.header('Set-Cookie', cookieStr)
+				.status(200)
 				.send({
 					message: 'success',
-					access_token: token
 				}))
 	} catch (err: any) {
 	req.log.error(err);
@@ -62,16 +72,67 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 		name: user.name,
 		email : user.email,
 	}
-	const token = req.server.jwt.sign(payload);
-	if (!token) {
-		reply.status(500).send({ message: 'JWT Error' });
-	}
+	const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+	const cookieStr = cookie.serialize('access_token', token, {
+		httpOnly: true,
+		maxAge: 60 * 60 * 24,
+		path: '/'
+	});
 	return (reply
+			.header('Set-Cookie', cookieStr)
 			.status(201)
 			.send({
 				message: 'success',
-				access_token: token
 			}));
+	} catch (err : any) {
+	req.log.error(err);
+	return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
+
+	try {
+		const db = req.server.db;
+		const frontend = process.env.FRONTEND_URL;
+		const password = null;
+		const user = req.user as any;
+		const name = user._json?.name;
+		const email = user._json?.email;
+		//console.log('Authenticated user:', user)
+		if (!name || !email) {
+			return reply.status(400).send({ message: 'Missing name or email from Google profile' });
+		}
+
+		console.log('Google Name:', name);
+		console.log('Google Email:', email);
+
+		const existing = await db.get(`SELECT * FROM users WHERE email = ?`, [email]);
+		let profile;
+
+		if (!existing) {
+			profile = await createUser(db, { name, email, password });
+		} else {
+			 profile = existing;
+		}
+
+		const payload = {
+			id: profile.id,
+			name: profile.name,
+			email : profile.email,
+		}
+		const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+		const cookieStr = cookie.serialize('access_token', token, {
+			httpOnly: true,
+			maxAge: 60 * 60 * 24,
+			path: '/'
+		});
+
+		return (reply
+				.header('Set-Cookie', cookieStr)
+				.redirect(frontend + '/'));
 	} catch (err : any) {
 	req.log.error(err);
 	return reply.status(500).send({ message: 'Internal Server Error' });
