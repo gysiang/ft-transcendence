@@ -23,9 +23,12 @@ export async function initializeDatabase() {
 
 				CREATE TABLE IF NOT EXISTS tournaments (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				player_1_alias STRING NOT NULL,
+				player_2_alias STRING,
+				player_3_alias STRING,
+				player_4_alias STRING,
 				created_by INTEGER NOT NULL,
-				created_at TIMESTAMP NOT NULL,
-				FOREIGN KEY (created_by) REFERENCES users(id)
+				created_at TIMESTAMP NOT NULL
 				);
 
 				CREATE TABLE IF NOT EXISTS matches (
@@ -37,21 +40,7 @@ export async function initializeDatabase() {
 				winner_id INTEGER NOT NULL,
 				is_bot BOOLEAN NOT NULL,
 				tournament_id INTEGER NOT NULL,
-				created_at TIMESTAMP NOT NULL,
-				FOREIGN KEY (player1_id) REFERENCES users(id),
-				FOREIGN KEY (player2_id) REFERENCES users(id),
-				FOREIGN KEY (winner_id) REFERENCES users(id),
-				FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
-				);
-
-				CREATE TABLE IF NOT EXISTS tournament_entries (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				tournament_id INTEGER NOT NULL,
-				user_id INTEGER NOT NULL,
-				joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-				UNIQUE (tournament_id, user_id),
-				FOREIGN KEY (tournament_id) REFERENCES tournaments(id),
-				FOREIGN KEY (user_id) REFERENCES users(id)
+				created_at TIMESTAMP NOT NULL
 				);
 			`);
 

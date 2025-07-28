@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { createUser, findUserByEmail } from '../models/user.model';
+import { IUserParams, IUserBody, createUser, findUserByEmail, findUserById } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
 const cookie = require("cookie");
@@ -141,18 +141,17 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 	}
 }
 
-export async function getUser(req: FastifyRequest, reply: FastifyReply) {
+export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply: FastifyReply) {
 
 	try {
-		const { email } = req.query as {
-			email: string;
-		}
-		if (!email) {
-			return reply.status(400).send({ message: "Email is required" });
+		const { id } = req.params;
+
+		if (!id) {
+			return reply.status(400).send({ message: "id is required" });
 		}
 
 		const db = req.server.db;
-		const user = await findUserByEmail(db, email);
+		const user = await findUserById(db, id);
 		if (!user) {
 			return reply.status(401).send({ message: "Invalid email" });
 		}
@@ -186,3 +185,29 @@ export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
 		return reply.status(500).send({ message: 'Internal Server Error' });
 	}
 };
+
+
+export async function editUser(req: FastifyRequest<{
+    Params: IUserParams;
+    Body: IUserBody;
+}>, reply: FastifyReply) {
+
+	const { id } = req.params;
+	const { name, email } = req.body;
+
+	try {
+		const db = req.server.db;
+
+		await db.run(
+			`UPDATE users SET name = ?, email = ?, updated_at = ? WHERE id = ?`,
+			[name, email, new Date().toISOString(), id]
+		);
+		reply.status(200)
+			 .send({
+				message: 'User updated successfully',
+			  });
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}

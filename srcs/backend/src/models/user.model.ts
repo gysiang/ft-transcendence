@@ -3,11 +3,20 @@ import { getTimestamp } from "../utils/time";
 import bcrypt from 'bcryptjs';
 
 export interface User {
-	id?: number;
+	id?: string;
 	name: string;
 	email: string;
 	hash_password: string | null;
 	profile_picture: string;
+}
+
+export interface IUserParams {
+  id: string;
+}
+
+export interface IUserBody {
+  name: string;
+  email: string;
 }
 
 export async function createUser(db: Database, user: { name: string; email: string; password?: string | null; profile_picture: string }) {
@@ -28,6 +37,6 @@ export async function findUserByEmail(db: Database, email: string) {
 	return db.get<User>(`SELECT * FROM users WHERE email = ?`, [email]);
 }
 
-export async function findUserById(db: Database, id: number) {
+export async function findUserById(db: Database, id: string) {
 	return db.get<User>(`SELECT * FROM users WHERE id = ?`, [id]);
 }
