@@ -16,7 +16,7 @@ export async function initializeDatabase() {
 				name TEXT NOT NULL,
 				email TEXT NOT NULL UNIQUE,
 				hash_password TEXT NOT NULL,
-				alias TEXT,
+				profile_picture TEXT NOT NULL,
 				created_at TIMESTAMP NOT NULL,
 				updated_at TIMESTAMP NOT NULL
 				);

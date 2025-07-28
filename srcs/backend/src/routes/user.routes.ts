@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { signupUser, loginUser, getUser, googleSignIn } from '../controllers/users.controller';
+import { signupUser, loginUser, getUser, googleSignIn, logoutUser } from '../controllers/users.controller';
 import fastifyPassport from '@fastify/passport'
 
 export async function authRoutes(app: FastifyInstance) {
@@ -14,4 +14,5 @@ export async function authRoutes(app: FastifyInstance) {
 	app.get('/auth/google/callback', {preValidation: fastifyPassport.authenticate('google', { scope: [ 'email', 'profile' ] })},
 		googleSignIn
 	);
+	app.post('/api/logout', logoutUser)
 }

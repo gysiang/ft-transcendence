@@ -3,6 +3,7 @@ import { createUser, findUserByEmail } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
 const cookie = require("cookie");
+import { serialize } from 'cookie';
 
 
 export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
@@ -64,8 +65,8 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 	if (existing) {
 		return reply.status(400).send({ message: 'Email already exists' });
 	}
-
-	const user = await createUser(db, { name, email, password });
+	const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
+	const user = await createUser(db, { name, email, password, profile_picture });
 
 	const payload = {
 		id: user.id,
@@ -100,6 +101,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 		const user = req.user as any;
 		const name = user._json?.name;
 		const email = user._json?.email;
+		const profile_picture = user._json?.picture
 		//console.log('Authenticated user:', user)
 		if (!name || !email) {
 			return reply.status(400).send({ message: 'Missing name or email from Google profile' });
@@ -112,7 +114,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 		let profile;
 
 		if (!existing) {
-			profile = await createUser(db, { name, email, password });
+			profile = await createUser(db, { name, email, password, profile_picture });
 		} else {
 			 profile = existing;
 		}
@@ -160,10 +162,27 @@ export async function getUser(req: FastifyRequest, reply: FastifyReply) {
 					message: "Authentication success",
 					id: user.id,
 					name: user.name,
-					email: user.email
+					email: user.email,
+					profile_picture: user.profile_picture
 				}));
 		} catch (err: any) {
 		req.log.error(err);
 		return reply.status(500).send({ message: 'Internal Server Error' });
 		}
 }
+
+export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
+
+	try {
+		reply.header('Set-Cookie', serialize('access_token', '', {
+			path: '/',
+			expires: new Date(0),
+		}))
+			.send({
+				message: "Logout successful",
+			})
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+};
