@@ -44,6 +44,7 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 				.status(200)
 				.send({
 					message: 'success',
+					id: id,
 				}))
 	} catch (err: any) {
 	req.log.error(err);
@@ -85,6 +86,7 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 			.status(201)
 			.send({
 				message: 'success',
+				id: id,
 			}));
 	} catch (err : any) {
 	req.log.error(err);
@@ -134,7 +136,11 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 
 		return (reply
 				.header('Set-Cookie', cookieStr)
-				.redirect(frontend + '/'));
+				.redirect(frontend + '/')
+				.send({
+					id: id
+				})
+			);
 	} catch (err : any) {
 	req.log.error(err);
 	return reply.status(500).send({ message: 'Internal Server Error' });
