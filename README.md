@@ -7,6 +7,14 @@ FrontEnd
 - npm install
 - npm run dev
 
+Game
+- Go to http://localhost:5173/play
+- Fill Quickplay form and click Start to run
+- To change Paddle speed:
+    - Go to Paddle.ts and change speed value
+- To change ball speed:
+    - Go to Ball.ts and change velocity values in constructor
+
 Backend
 - docker build -t pong-backend .
 - docker run --name backend -p 3000:3000 pong-backend
