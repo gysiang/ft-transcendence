@@ -10,6 +10,7 @@ FrontEnd
 Game
 - Go to http://localhost:5173/play
 - Fill Quickplay form and click Start to run
+- Use w/s and up/down arrows to move paddles.
 - To change Paddle speed:
     - Go to Paddle.ts and change speed value
 - To change ball speed:
