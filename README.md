@@ -44,10 +44,11 @@ How to test backend
 
 3. Get User Info via Thunderclient
 - GET http://localhost:3000/api/profile
-- Copy the access_token into Auth Bearer
+- set cookie, access-token=JWT_TOKEN
 - return id, name and email
 - If remove the token, this route cannot be accessed
 
+4.
 <br>
 
 Google Sign in
@@ -57,4 +58,4 @@ Google Sign in
 - Check if cookie is set as access_token.
 - The access token allows access into protected routes.
 
-![Database Schema](pong.drawio.png)
+![Database Schema](pong1.jpg)
