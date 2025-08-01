@@ -44,7 +44,7 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 				.status(200)
 				.send({
 					message: 'success',
-					id: id,
+					id: user.id,
 				}))
 	} catch (err: any) {
 	req.log.error(err);
@@ -86,7 +86,7 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 			.status(201)
 			.send({
 				message: 'success',
-				id: id,
+				id: user.id,
 			}));
 	} catch (err : any) {
 	req.log.error(err);
@@ -105,7 +105,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 		const email = user._json?.email;
 		const profile_picture = user._json?.picture
 		//console.log('Authenticated user:', user)
-		if (!name || !email) {
+		if (!name || !email || !profile_picture) {
 			return reply.status(400).send({ message: 'Missing name or email from Google profile' });
 		}
 
@@ -138,7 +138,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 				.header('Set-Cookie', cookieStr)
 				.redirect(frontend + '/')
 				.send({
-					id: id
+					id: profile.id
 				})
 			);
 	} catch (err : any) {

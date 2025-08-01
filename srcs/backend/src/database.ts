@@ -23,24 +23,23 @@ export async function initializeDatabase() {
 
 				CREATE TABLE IF NOT EXISTS tournaments (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				player_1_alias STRING NOT NULL,
-				player_2_alias STRING,
-				player_3_alias STRING,
-				player_4_alias STRING,
-				created_by INTEGER NOT NULL,
-				created_at TIMESTAMP NOT NULL
+				player1_alias STRING NOT NULL,
+				player2_alias STRING NOT NULL,
+				created_by TEXT NOT NULL,
+				created_at TIMESTAMP NOT NULL,
+				FOREIGN KEY (created_by) REFERENCES users(id)
 				);
 
 				CREATE TABLE IF NOT EXISTS matches (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				player1_id INTEGER NOT NULL,
-				player2_id INTEGER,
+				player1_alias STRING NOT NULL,
+				player2_alias STRING,
 				player1_score INTEGER NOT NULL,
 				player2_score INTEGER NOT NULL,
-				winner_id INTEGER NOT NULL,
-				is_bot BOOLEAN NOT NULL,
+				winner STRING NOT NULL,
 				tournament_id INTEGER NOT NULL,
-				created_at TIMESTAMP NOT NULL
+				created_at TIMESTAMP NOT NULL,
+				FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
 				);
 			`);
 

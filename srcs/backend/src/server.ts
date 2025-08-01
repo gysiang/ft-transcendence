@@ -3,6 +3,7 @@ import fastifyCors from '@fastify/cors';
 import { FastifyInstance } from 'fastify/types/instance';
 import { initializeDatabase } from "./database"
 import { authRoutes } from './routes/user.routes';
+import { gameRoutes } from './routes/tournament.routes'
 import { fpSqlitePlugin } from "fastify-sqlite-typed";
 import authPlugin from './plugins/auth';
 import dotenv from 'dotenv';
@@ -45,6 +46,8 @@ const startServer = async () => {
 		await initializeDatabase();
 		await registerPlugins(app);
 		await app.register(authRoutes);
+		await app.register(gameRoutes);
+
 
 		fastifyPassport.use('google', new GoogleStrategy({
 			clientID:     process.env.GOOGLE_CLIENT_ID,
