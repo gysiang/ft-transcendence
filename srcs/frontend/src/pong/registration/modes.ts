@@ -17,12 +17,12 @@ export function renderModes(app: HTMLElement): void {
   `;
   setTimeout(() => {
     document.getElementById("quickplayBtn")?.addEventListener("click", () => {
-        quickplayForm(app);
+      quickplayForm(app);
     });
-  setTimeout(()=> {
+
     document.getElementById("TournamentBtn")?.addEventListener("click", () => {
       tournamentForm(app);
-    })
-  })
-  },0);
+    });
+  }, 0);
 }
+

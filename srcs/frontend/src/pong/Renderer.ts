@@ -51,24 +51,46 @@ export class Renderer {
     drawCountdown(text: string): void
     {
         this.clear();
-        this.ctx.fillStyle = "Black";
+        this.ctx.fillStyle = "black";
         this.ctx.font = "80px Arial";
         this.ctx.textAlign = "center";
         this.ctx.fillText(text, this.canvas.width / 2, this.canvas.height / 2);
     }
 }
+export function createGameCanvas(): {canvas: HTMLCanvasElement, container: HTMLElement} {
+	const container = document.createElement("div");
+	container.id = "game-container";
+	container.className = "relative w-full max-w-screen-md mx-auto";
 
-export function createGameCanvas(): HTMLCanvasElement 
-{
 	const canvas = document.createElement("canvas");
 	canvas.id = "game";
 	canvas.className = "block mx-auto mt-10 border border-white";
-    resizeCanvas(canvas);
-    window.addEventListener("resize", () => resizeCanvas(canvas));
-	return canvas;
+	resizeCanvas(canvas);
+	window.addEventListener("resize", () => resizeCanvas(canvas));
+
+	container.appendChild(canvas);
+
+	const popup = document.createElement("div");
+	popup.id = "match-announcement";
+    popup.className = `
+    fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40 backdrop-blur-sm
+    `;
+	popup.innerHTML = `
+    <div class="bg-white text-black p-6 rounded-md shadow-lg max-w-2xl w-full space-y-6">
+      <h2 id="match-heading" class="text-2xl mb-4 text-center"></h2>
+      <div id="bracket" class="space-y-4 text-sm"></div>
+      <div class="text-center">
+        <button id="start-match-btn" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded text-white">
+          Start Match
+        </button>
+      </div>
+    </div>
+  `;
+    container.appendChild(popup);
+	return {canvas, container};
 }
 
-function resizeCanvas(canvas: HTMLCanvasElement)
+export function resizeCanvas(canvas: HTMLCanvasElement)
 {
     const aspectRatio = 4 / 3;
 	const maxWidth = window.innerWidth * 0.95;

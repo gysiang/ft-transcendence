@@ -8,7 +8,7 @@ export class Ball{
     constructor(startPos: Vector2D)
     {
         this.position = { ...startPos};
-        this.velocity = {x: 4, y: 4};
+        this.velocity = {x: 6, y: 6};
         this.radius = 8;
     }
 
