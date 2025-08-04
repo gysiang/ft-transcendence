@@ -1,9 +1,7 @@
 import { renderLoginPage } from "./login.js";
 import { renderHomePage } from "./home.js";
 import { renderSignUpPage } from "./signup";
-import { startGame } from "./pong/launch.js"
-import { createGameCanvas } from "./pong/Renderer.js";
-import { renderModes } from "./registration/modes.js";
+import { renderModes } from "./pong/registration/modes.js";
 
 export function renderApp() {
 	const app = document.getElementById("app")!;
@@ -17,11 +15,6 @@ export function renderApp() {
 	}
 	else if (path === "/") {
 		renderHomePage(app);
-	}
-	else if  (path ==="/game") {
-		const canvas = createGameCanvas();
-		app.appendChild(canvas);
-		startGame(canvas);
 	}
 	else if (path ==="/play"){
 		renderModes(app);

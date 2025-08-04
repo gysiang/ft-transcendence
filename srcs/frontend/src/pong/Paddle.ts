@@ -1,32 +1,25 @@
-import type { Vector2D, PlayerSide } from "./types.js";
+import type { Vector2D } from "./types.js";
 
-export class Paddle{
+export class Paddle
+{
     position: Vector2D;
     height: number = 100;
     width: number = 10;
-    speed: number = 6;
-    side: PlayerSide;
-    name: string = "";
+    speed: number = 8;
 
-    constructor(y: number, canvasWidth: number, side: PlayerSide)
+    constructor(position: Vector2D, width: number, height:number, speed: number)
     {
-        this.side = side;
-        this.position = {
-            x: side == 'left' ? 10 :canvasWidth - 20,
-            y: y
-        };
-        if (this.side == 'left')
-            this.name = "Player 1";
-        else
-            this.name = "Player 2";
+        this.position = position;
+        this.width = width;
+        this.height = height;
+        this.speed = speed;
     }
 
     moveUp()
     {
         this.position.y -= this.speed;
-        if (this.position.y < 0) {
+        if (this.position.y < 0)
             this.position.y = 0;
-          }
 
     }
     moveDown(canvasHeight: number)
