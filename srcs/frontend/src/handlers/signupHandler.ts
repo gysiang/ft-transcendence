@@ -6,7 +6,7 @@ const errorDiv = document.getElementById("error");
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
 
-		const username = (document.getElementById("username") as HTMLInputElement).value;
+		const name = (document.getElementById("name") as HTMLInputElement).value;
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
 
@@ -16,13 +16,15 @@ const errorDiv = document.getElementById("error");
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ username, email, password }),
+				body: JSON.stringify({ name, email, password }),
 			});
 
 		if (!res.ok) {
 			const err = await res.json();
 			errorDiv!.textContent = err.message;
 		} else {
+			const data = await res.json();
+			localStorage.setItem("id", data.id);
 			window.location.href = "/";
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
