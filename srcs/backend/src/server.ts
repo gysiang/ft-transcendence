@@ -1,12 +1,13 @@
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors';
+import dotenv from 'dotenv';
 import { FastifyInstance } from 'fastify/types/instance';
 import { initializeDatabase } from "./database"
 import { authRoutes } from './routes/user.routes';
 import { gameRoutes } from './routes/tournament.routes'
 import { fpSqlitePlugin } from "fastify-sqlite-typed";
 import authPlugin from './plugins/auth';
-import dotenv from 'dotenv';
+import FastifyMultipart from '@fastify/multipart'
 import fastifyPassport from '@fastify/passport'
 import fastifySecureSession from '@fastify/secure-session'
 import { VerifyCallback } from 'passport-google-oauth2'
@@ -35,19 +36,32 @@ const registerPlugins = async (app : FastifyInstance) =>
 		app.register(authPlugin);
 		app.register(fastifyCors, {
 			origin: 'http://localhost:5173',
+			methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 			credentials: true
 		});
+
+		app.register(FastifyMultipart, {
+		limits: {
+			fields: 1,         // Max number of non-file fields
+			fileSize: 40000,  // For multipart forms, the max file size in bytes
+			files: 1,           // Max number of file fields
+			headerPairs: 1,  // Max number of header key=>value pairs
+		}})
+
 }
 
 const startServer = async () => {
 	try {
 		dotenv.config({ path: './secrets/.env' });
 
+		console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
+		console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY);
+		console.log('AWS_REGION:', process.env.AWS_REGION);
+
 		await initializeDatabase();
 		await registerPlugins(app);
 		await app.register(authRoutes);
 		await app.register(gameRoutes);
-
 
 		fastifyPassport.use('google', new GoogleStrategy({
 			clientID:     process.env.GOOGLE_CLIENT_ID,

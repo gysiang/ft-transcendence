@@ -43,14 +43,39 @@ export async function renderProfilePage(container: HTMLElement) {
 		uploadBtn.addEventListener("click", () => fileInput.click());
 
 		// Preview selected image
-		fileInput.addEventListener("change", () => {
+		fileInput.addEventListener("change", async () => {
 			const file = fileInput.files?.[0];
 			if (file) {
+
+				const maxSize = 40 * 1024;
+				if (file.size > maxSize) {
+					alert("File size exceeds 40 KB limit.");
+					fileInput.value = "";
+					return;
+				}
 				const reader = new FileReader();
 				reader.onload = (e) => {
 					img.src = e.target?.result as string;
 				};
 				reader.readAsDataURL(file);
+
+				const formData = new FormData();
+				formData.append("profile_picture", file);
+
+				try {
+				const res = await fetch(`http://localhost:3000/api/profile/${userId}/pic`, {
+					method: "PATCH",
+					body: formData,
+					credentials: "include",
+				});
+
+				if (!res.ok) throw new Error("Upload failed");
+				const data = await res.json();
+				console.log(data);
+				img.src = data.image;
+				} catch (err) {
+				console.error("Error uploading image:", err);
+				}
 			}
 		});
 
