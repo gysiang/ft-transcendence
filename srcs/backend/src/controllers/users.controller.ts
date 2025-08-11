@@ -1,9 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { IUserParams, IUserBody, createUser, findUserByEmail, findUserById } from '../models/user.model';
+import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
 const cookie = require("cookie");
 import { serialize } from 'cookie';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { createS3Client } from '../services/s3';
 
 
 export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
@@ -211,6 +213,44 @@ export async function editUser(req: FastifyRequest<{
 		reply.status(200)
 			 .send({
 				message: 'User updated successfully',
+			  });
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+export async function editPicture(req: FastifyRequest<{
+	Params: IUserParams;
+}>, reply: FastifyReply) {
+
+	const { id } = req.params;
+
+	try {
+	const db = req.server.db;
+	const s3 = createS3Client();
+	const data = await req.file();
+	if (!data) {
+		return reply.status(400).send({ message: 'No file uploaded' });
+	}
+
+	const putObjectCommand = new PutObjectCommand({
+		Bucket: process.env.AWS_BUCKET,
+		Key: `${id}/${data.filename}`,
+		Body: await data.toBuffer(),
+		ContentType: data.mimetype,
+		ACL: "public-read"
+	});
+
+	await s3.send(putObjectCommand);
+	const imageUrl = `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${id}/${data.filename}`;
+
+	await updateProfilePic(db, id, imageUrl);
+
+	reply.status(200)
+			 .send({
+				message: 'success',
+				image: imageUrl
 			  });
 	} catch (err: any) {
 		req.log.error(err);
