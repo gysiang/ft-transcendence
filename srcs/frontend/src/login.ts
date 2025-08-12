@@ -3,13 +3,12 @@ import { loginHandler } from "./handlers/loginHandler";
 
 export function renderLoginPage(container: HTMLElement) {
 
-	container.innerHTML = "";
+	container.innerHTML = ""; //empties container
 
 	const header = createHeader();
-	container.appendChild(header);
+	container.append(header);
 
 	const loginForm = document.createElement("div");
-
 	loginForm.innerHTML = `
 	<div class="h-screen flex items-center justify-center flex-col bg-gray-100">
 	<h1 class="text-2xl font-bold">Login</h1>
@@ -35,6 +34,7 @@ export function renderLoginPage(container: HTMLElement) {
 			class="text-sm text-neutral-900 text-center underline">Sign Up Here</a>
 	</div>
 	`
-	container.appendChild(loginForm);
+	container.append(loginForm);
+	console.log("heading to loginHandler--->");
 	loginHandler("login-form");
 }

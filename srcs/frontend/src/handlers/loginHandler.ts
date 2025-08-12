@@ -1,12 +1,11 @@
 export async function loginHandler(formId: string) {
 
-const form = document.getElementById(formId) as HTMLFormElement;
-const errorDiv = document.getElementById("error");
-
-if (!form) return;
+	const form = document.getElementById(formId) as HTMLFormElement;
+	const errorDiv = document.getElementById("error");
+	if (!form) return; // if no form, stop here
 
 	form.addEventListener("submit", async (e) => {
-		e.preventDefault();
+		e.preventDefault(); //prevent reload
 
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
@@ -25,6 +24,7 @@ if (!form) return;
 		} else {
 			const data = await res.json();
 			localStorage.setItem("id", data.id);
+			console.log("Logged in! Is your id in local storage?");
 			window.location.href = "/";
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";

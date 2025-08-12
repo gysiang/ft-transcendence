@@ -53,6 +53,7 @@ export function createHeader(showProfile: boolean = true): HTMLElement {
 
 
 	// Auto-check login
+    //get the user id
 	const isLoggedIn = !!localStorage.getItem("id");
 	if (isLoggedIn)
 	{

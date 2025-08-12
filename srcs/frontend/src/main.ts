@@ -4,9 +4,9 @@ window.addEventListener("DOMContentLoaded", renderApp);
 window.addEventListener("popstate", renderApp);
 
 //change the color of the box + text here
-window.addEventListener('mouseover', () => {
-	console.log("Changing colour!");
-});
+// window.addEventListener('mouseover', () => {
+// 	console.log("Changing colour!");
+// });
 
 //Also change the Box and text colour
 window.addEventListener('click', (e: Event) => {
@@ -23,6 +23,7 @@ window.addEventListener('click', (e: Event) => {
 		}
 	}
 	e.preventDefault();
-	console.log("Hey you did it!");
+	// console.log("Hey you did it!");
 });
 
+//updating npm: sudo npm install -g npm@11.5.2
