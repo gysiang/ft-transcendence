@@ -11,16 +11,13 @@ export function renderApp() {
 	const path = window.location.pathname;
 	if (path === "/login") {
 		renderLoginPage(app);
-	} else if (path == "/signup") {
+	} else if (path === "/signup") {
 		renderSignUpPage(app);
-	}
-	else if (path === "/") {
+	} else if (path === "/") {
 		renderHomePage(app);
-	}
-	else if (path == '/profile') {
+	} else if (path === '/profile') {
 		renderProfilePage(app);
-	}
-	else if (path ==="/play"){
+	} else if (path ==="/play"){
 		renderModes(app);
 	}
 }

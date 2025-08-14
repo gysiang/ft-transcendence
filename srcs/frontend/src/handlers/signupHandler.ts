@@ -25,6 +25,7 @@ const errorDiv = document.getElementById("error");
 		} else {
 			const data = await res.json();
 			localStorage.setItem("id", data.id);
+			console.log("Sign UP success! Check local Storage!");
 			window.location.href = "/";
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
