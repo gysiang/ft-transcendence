@@ -11,8 +11,8 @@ window.addEventListener("popstate", renderApp);
 //Also change the Box and text colour
 window.addEventListener('click', (e: Event) => {
 	const target = e.target as HTMLElement;
-
 	const anchor = target.closest('a');
+
 	if (anchor && anchor.href.startsWith(window.location.origin)) {
 		e.preventDefault();
 
@@ -22,7 +22,6 @@ window.addEventListener('click', (e: Event) => {
 			renderApp(); //renderpages
 		}
 	}
-	e.preventDefault();
 	// console.log("Hey you did it!");
 });
 
