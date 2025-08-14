@@ -113,6 +113,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 
 		console.log('Google Name:', name);
 		console.log('Google Email:', email);
+		console.log('Google profile:', profile_picture);
 
 		const existing = await db.get(`SELECT * FROM users WHERE email = ?`, [email]);
 		let profile;
