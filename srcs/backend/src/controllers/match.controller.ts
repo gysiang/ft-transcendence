@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { createMatch, findMatchById } from '../models/match.model';
+import { createMatch, findMatchById, getAllMatchData } from '../models/match.model';
 import { IMatchParams } from '../models/match.model';
 import { findTournamentById } from '../models/tournament.model';
 
@@ -61,6 +61,31 @@ export async function getMatch(req: FastifyRequest<{Params: IMatchParams}>, repl
 					player2_score: match.player2_score,
 					winner: match.winner,
 					tournament_id: match.tournament_id
+				}));
+	} catch (err : any) {
+	req.log.error(err);
+	return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+
+export async function getAllMatch(req: FastifyRequest<{Params: IMatchParams}>, reply: FastifyReply) {
+		try {
+		const { id } = req.params;
+		console.log("in getAllMatches")
+		if (!id) {
+			return reply.status(400).send({ message: "id is required" });
+		}
+		const db = req.server.db;
+		const matches = await getAllMatchData(db, id);
+		if (!matches) {
+			return reply.status(401).send({ message: "Invalid id" });
+		}
+		return (reply
+				.status(200)
+				.send({
+					message: "Authentication success",
+					data: matches
 				}));
 	} catch (err : any) {
 	req.log.error(err);

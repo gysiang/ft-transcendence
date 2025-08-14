@@ -42,6 +42,21 @@ export async function initializeDatabase() {
 				FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
 				);
 			`);
+			// sample seed data
+			await db.exec(`
+				INSERT INTO tournaments (player1_alias, player2_alias, created_by, created_at)
+				VALUES
+					('Alice', 'Bob', 1, CURRENT_TIMESTAMP),
+					('Charlie', 'Alice', 3, CURRENT_TIMESTAMP),
+					('Test1', 'Test2', 1, CURRENT_TIMESTAMP);
+
+				INSERT INTO matches (player1_alias, player2_alias, player1_score, player2_score, winner, tournament_id, created_at)
+				VALUES
+					('Alice', 'Bob', 10, 8, 'Alice', 1, CURRENT_TIMESTAMP),
+					('Bob', 'Alice', 7, 11, 'Alice', 1, CURRENT_TIMESTAMP),
+					('Charlie', 'Alice', 9, 12, 'Alice', 2, CURRENT_TIMESTAMP),
+					('Test1', 'Test2', 10, 11, 'Test2', 3, CURRENT_TIMESTAMP);
+				`);
 
 			console.log('SQLite database initialized and table created.');
 			return (db);
