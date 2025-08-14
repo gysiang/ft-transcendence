@@ -34,3 +34,17 @@ export async function createMatch(db: Database, match: Match)
 export async function findMatchById(db: Database, id: string) {
 	return db.get<Match>(`SELECT * FROM matches WHERE id = ?`, [id]);
 }
+
+export async function getAllMatchData(db: Database, id: string) {
+	const result = await db.all(
+		`SELECT *
+		 FROM matches
+		 WHERE tournament_id IN (
+			 SELECT id
+			 FROM tournaments
+			 WHERE created_by = ?
+		 )`,
+		[id]
+	);
+	return result;
+}
