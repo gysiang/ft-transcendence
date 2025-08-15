@@ -3,6 +3,9 @@ import { runTournament } from "../Tournament/singleElim";
 import { createGameCanvas } from "../Renderer";
 import { startGame } from "../launch";
 import { renderTournamentBracket } from "../matchUI";
+import { createTournament } from "../Tournament/backendutils";
+import { checkAuthentication } from "./auth";
+import { api } from "./apiWrapper";
 
 export function quickplayForm(app: HTMLElement): void
 {
@@ -130,21 +133,75 @@ export function tournamentForm(app: HTMLElement): void {
 		handleStartTournament(app, players, goalLimit);
 	});
 }
+type Profile = { id: number; name: string; email: string; profile_picture?: string };
 
-export function handleStartTournament(app: HTMLElement, players: Player[], goalLimit: number = 5) {
-	const rounds = runTournament(players);
-	localStorage.setItem("mode", "tournament");
-	localStorage.setItem("goalLimit", goalLimit.toString());
-	localStorage.setItem("tournamentData", JSON.stringify({
-		rounds,
-		currentRoundIndex: 0,
-		currentMatchIndex: 0,
-	}));
+export async function handleStartTournament(
+  app: HTMLElement,
+  players: Player[],
+  goalLimit: number = 5
+) {
+  const rounds = runTournament(players);
 
-	app.innerHTML = "";
+  localStorage.setItem('mode', 'tournament');
+  localStorage.setItem('goalLimit', String(goalLimit));
+  localStorage.setItem(
+    'tournamentData',
+    JSON.stringify({ rounds, currentRoundIndex: 0, currentMatchIndex: 0 })
+  );
 
-    const { canvas, container } = createGameCanvas();
-    app.appendChild(container);
-    renderTournamentBracket(rounds);
-    startGame(canvas);
+  const authed = await checkAuthentication();
+
+  let tournamentId: number | null = null;
+  let localOnly = true;
+  let createdBy = 'placeholder';
+
+  if (authed) {
+    const id = localStorage.getItem('currentUserId');
+    if (id) {
+      try {
+        const prof = await api<Profile>(`http://localhost:3000/api/profile/${id}`, { method: 'GET' });
+        if (prof?.name?.trim()) createdBy = prof.name.trim();
+      } catch (e) {
+        console.warn('Could not fetch profile for created_by:', e);
+      }
+    }
+
+    try {
+      const p1 = players[0]?.name ?? 'Player 1';
+      const p2 = players[1]?.name ?? 'Player 2';
+      tournamentId = await createTournament({
+        player1_alias: p1,
+        player2_alias: p2,
+        created_by: createdBy,
+      });
+      localOnly = false;
+    } catch (e) {
+      console.log('Backend tournament create failed;', e);
+    }
+  } else {
+    console.log('Not logged in. Local tournament only.');
+  }
+
+  localStorage.setItem(
+    'tournamentSnapshot',
+    JSON.stringify({
+      id: tournamentId,
+      localOnly,
+      name:
+        (document.getElementById('tournamentName') as HTMLInputElement)?.value?.trim() ||
+        'Untitled Tournament',
+      goalLimit,
+      players,
+      rounds,
+      results: [],
+      finished: false,
+      createdAt: new Date().toISOString(),
+    })
+  );
+
+  app.innerHTML = '';
+  const { canvas, container } = createGameCanvas();
+  app.appendChild(container);
+  renderTournamentBracket(rounds);
+  startGame(canvas);
 }
