@@ -5,7 +5,6 @@ import { startGame } from "../launch";
 import { renderTournamentBracket } from "../matchUI";
 import { createTournament } from "../Tournament/backendutils";
 import { checkAuthentication } from "./auth";
-import { api } from "./apiWrapper";
 
 export function quickplayForm(app: HTMLElement): void
 {
@@ -133,7 +132,6 @@ export function tournamentForm(app: HTMLElement): void {
 		handleStartTournament(app, players, goalLimit);
 	});
 }
-type Profile = { id: number; name: string; email: string; profile_picture?: string };
 
 export async function handleStartTournament(
   app: HTMLElement,
@@ -148,40 +146,36 @@ export async function handleStartTournament(
     'tournamentData',
     JSON.stringify({ rounds, currentRoundIndex: 0, currentMatchIndex: 0 })
   );
-
   const authed = await checkAuthentication();
 
   let tournamentId: number | null = null;
   let localOnly = true;
-  let createdBy = 'placeholder';
-
+  
   if (authed) {
-    const id = localStorage.getItem('currentUserId');
-    if (id) {
+    const Id = localStorage.getItem('id');
+    const createdById = Id ? Number(Id) : NaN;
+  
+    if (Number.isFinite(createdById)) {
       try {
-        const prof = await api<Profile>(`http://localhost:3000/api/profile/${id}`, { method: 'GET' });
-        if (prof?.name?.trim()) createdBy = prof.name.trim();
+        const p1 = players[0]?.name ?? 'Player 1';
+        const p2 = players[1]?.name ?? 'Player 2';
+  
+        tournamentId = await createTournament({
+          player1_alias: p1,
+          player2_alias: p2,
+          created_by: String(createdById),
+        });
+        localOnly = false;
       } catch (e) {
-        console.warn('Could not fetch profile for created_by:', e);
+        console.log('Backend tournament create failed;', e);
       }
-    }
-
-    try {
-      const p1 = players[0]?.name ?? 'Player 1';
-      const p2 = players[1]?.name ?? 'Player 2';
-      tournamentId = await createTournament({
-        player1_alias: p1,
-        player2_alias: p2,
-        created_by: createdBy,
-      });
-      localOnly = false;
-    } catch (e) {
-      console.log('Backend tournament create failed;', e);
+    } else {
+      console.log('No valid currentUserId;');
     }
   } else {
     console.log('Not logged in. Local tournament only.');
   }
-
+  
   localStorage.setItem(
     'tournamentSnapshot',
     JSON.stringify({
@@ -198,7 +192,7 @@ export async function handleStartTournament(
       createdAt: new Date().toISOString(),
     })
   );
-
+  
   app.innerHTML = '';
   const { canvas, container } = createGameCanvas();
   app.appendChild(container);
