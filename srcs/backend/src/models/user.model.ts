@@ -8,6 +8,8 @@ export interface User {
 	email: string;
 	hash_password: string | null;
 	profile_picture: string;
+	twofa_secret: string | null;
+	twofa_enabled: boolean
 }
 
 export interface IUserParams {
@@ -29,9 +31,9 @@ export async function createUser(db: Database, user: { name: string; email: stri
 	const date = getTimestamp();
 
 	const result = await db.run(
-		`INSERT INTO users (name, email, hash_password, profile_picture, created_at, updated_at)
+		`INSERT INTO users (name, email, hash_password, profile_picture, twofa_enabled, isLoggedIn, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?)`,
-		[user.name, user.email, hash, user.profile_picture, date, date]
+		[user.name, user.email, hash, user.profile_picture, false, true, date, date]
 	);
 
 	return { id: result.lastID, name: user.name, email: user.email, profile_picture: user.profile_picture };
@@ -53,5 +55,27 @@ export async function updateProfilePic(db: Database, id: string, profile: string
 	WHERE id = ?`,
 	[profile, date, id]
 	);
+	return (result);
+}
+
+export async function update2faSecret(db: Database, id: string, twofa_secret: string){
+	const date = getTimestamp();
+	const result = await db.run(
+		`UPDATE users
+		SET twofa_enabled = ?, twofa_secret = ?, updated_at = ?
+		WHERE id = ?`,
+		[true, twofa_secret, date, id]
+		);
+	return (result);
+}
+
+export async function updateUserStatus(db: Database, id: string, isLoggedIn : boolean){
+	const date = getTimestamp();
+	const result = await db.run(
+		`UPDATE users
+		SET isLoggedIn = ?, updated_at = ?
+		WHERE id = ?`,
+		[true, date, id]
+		);
 	return (result);
 }
