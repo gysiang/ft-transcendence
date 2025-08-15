@@ -32,7 +32,7 @@ export async function createUser(db: Database, user: { name: string; email: stri
 
 	const result = await db.run(
 		`INSERT INTO users (name, email, hash_password, profile_picture, twofa_enabled, isLoggedIn, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?)`,
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		[user.name, user.email, hash, user.profile_picture, false, true, date, date]
 	);
 

@@ -17,6 +17,9 @@ export async function initializeDatabase() {
 				email TEXT NOT NULL UNIQUE,
 				hash_password TEXT,
 				profile_picture TEXT NOT NULL,
+				twofa_secret TEXT,
+				twofa_enabled BOOLEAN NOT NULL,
+				isLoggedIn BOOLEAN NOT NULL,
 				created_at TIMESTAMP NOT NULL,
 				updated_at TIMESTAMP NOT NULL
 				);
