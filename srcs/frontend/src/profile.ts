@@ -17,7 +17,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		}
 
 		const user = await response.json();
-
+		console.log(user);
 		// Main wrapper for centering everything
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen flex flex-col items-center justify-center bg-gray-100 space-y-6";

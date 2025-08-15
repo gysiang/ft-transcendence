@@ -15,7 +15,7 @@ export async function initializeDatabase() {
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				name TEXT NOT NULL,
 				email TEXT NOT NULL UNIQUE,
-				hash_password TEXT NOT NULL,
+				hash_password TEXT,
 				profile_picture TEXT NOT NULL,
 				created_at TIMESTAMP NOT NULL,
 				updated_at TIMESTAMP NOT NULL
