@@ -1,11 +1,8 @@
-import { createHeader } from "./components/header";
+import { renderHeader } from "./components/header";
 import { profileHandler } from "./handlers/profileHandler";
 
 export async function renderProfilePage(container: HTMLElement) {
-	container.innerHTML = "";
-
-	const header = createHeader();
-	container.appendChild(header);
+	renderHeader(container);
 
 	try {
 		const userId = localStorage.getItem("id");
