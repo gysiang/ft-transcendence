@@ -1,12 +1,9 @@
-import { createHeader } from "./components/header";
+import { renderHeader } from "./components/header";
 import { loginHandler } from "./handlers/loginHandler";
 
 export function renderLoginPage(container: HTMLElement) {
 
-	container.innerHTML = ""; //empties container
-
-	const header = createHeader();
-	container.append(header);
+	renderHeader(container);
 
 	const loginForm = document.createElement("div");
 	loginForm.innerHTML = `

@@ -1,6 +1,6 @@
+import { logoutHandler } from "../handlers/logoutHandler";
 
-//export function createHeader(showProfile: boolean = true): HTMLElement {
-export function createHeader(showProfile: boolean = true): HTMLElement {
+export function createHeader(): HTMLElement {
     const header = document.createElement("header");
     header.className = "w-full bg-gray-800 text-white p-4 flex justify-between items-center";
 
@@ -29,68 +29,63 @@ export function createHeader(showProfile: boolean = true): HTMLElement {
         link.className = "hover:underline w-2xs bg-sky-500 text-white p-2 rounded-md";
         link.textContent = text; // For textbox name
 
-        const tooltipDiv = document.createElement("div");
+        const tooltipDiv = document.createElement("div");//second div
         tooltipDiv.className =
-            "absolute left-0 mt-1 w-max text-sm text-gray-800 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none transition-all duration-1000";
+            "tooltip absolute left-0 mt-1 w-max text-sm text-gray-800 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none transition-all duration-1000";
         tooltipDiv.textContent = tooltip; //prints out the string u wanna write
 
         wrapper.append(link, tooltipDiv);
-
         return wrapper;
     };
 
     // Home
 	nav.append(createMenuItem("Home", "/", "Return Home~"));
 
-
-
-
-
-
-
-	
-
-
-
 	// Auto-check login
-    //get the user id
-	const isLoggedIn = !!localStorage.getItem("id");
+	const isLoggedIn = !!localStorage.getItem("id");//get the user id
 	if (isLoggedIn)
 	{
+        // profile
 		const profileItem = createMenuItem("Profile", "/profile", "Check your profile");
-		profileItem.querySelector("div:nth-child(2)")?.classList.remove("left-0");
-		profileItem.querySelector("div:nth-child(2)")?.classList.add("-left-20");
+		profileItem.querySelector(".tooltip")?.classList.remove("left-0");
+		profileItem.querySelector(".tooltip")?.classList.add("-left-20");
 		nav.append(profileItem);
-	}
 
-    // // Profile (conditionally rendered)
-    // if (showProfile)
-	// {
-    //      const profileItem = createMenuItem("Profile", "/profile", "For those who haven't signed up for the game");
-    //      profileItem.querySelector("div:nth-child(2)")?.classList.remove("left-0");
-	//      profileItem.querySelector("div:nth-child(2)")?.classList.add("-left-20");
-    //      nav.append(profileItem);
-    // }
+        //logout
+        const logoutbutton = createMenuItem("Log Out", "/", "Log Out");
+        logoutbutton.addEventListener("click", (e: Event) => {
+			e.preventDefault(); // prevents navigation to "#"
+			logoutHandler();
+		});
+		nav.append(logoutbutton);
+	} else {
+        // Sign In
+        nav.appendChild(createMenuItem("Sign In", "/login", "Sign in!"));
 
-
-
-
-
-
-
-
-
-    // Sign In
-    nav.appendChild(createMenuItem("Sign In", "/login", "Sign in!"));
-
-    // Sign Up
-    const signUpItem = createMenuItem("Sign Up", "/signup", "Check your stats here!");
-    signUpItem.querySelector("div")!.classList.remove("left-0");
-    signUpItem.querySelector("div")!.classList.add("right-0");
-    nav.append(signUpItem);
-
+        // Sign Up
+        const signUpItem = createMenuItem("Sign Up", "/signup", "Check your stats here!");
+        signUpItem.querySelector("div")!.classList.remove("left-0");
+        signUpItem.querySelector("div")!.classList.add("right-0");
+        nav.append(signUpItem);
+    }
     return header;
 }
+
+export function	renderHeader(container: HTMLElement) {
+	container.innerHTML = ""; // clear old header, empties it.
+	const header = createHeader(); // automatically reads localStorage
+	container.append(header);
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
