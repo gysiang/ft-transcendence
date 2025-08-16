@@ -32,8 +32,8 @@ export function generateRound(players: Player[]): Match[] {
 	const matches: Match[] = [];
 
 	for (let i = 0; i < players.length - 1; i += 2) {
-		const left: Player = { ...players[i], side: "left" as "left" };
-		const right: Player = { ...players[i + 1], side: "right" as "right" };
+		const left: Player = { ...players[i], side: "left"};
+		const right: Player = { ...players[i + 1], side: "right"};
 		matches.push({
 			contestant1: left,
 			contestant2: right,

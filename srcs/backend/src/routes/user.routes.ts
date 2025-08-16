@@ -18,4 +18,7 @@ export async function authRoutes(app: FastifyInstance) {
 		googleSignIn
 	);
 	app.post('/api/logout', logoutUser)
+	app.get('/api/ping', {preHandler: [app.authenticate]}, async (request, reply) => {
+		return reply.send({ ok: true });
+	});
 }

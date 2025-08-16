@@ -20,8 +20,7 @@ export class Game {
     rightScore: number = 0;
 
     constructor(canvas: HTMLCanvasElement,ctx: CanvasRenderingContext2D,players: Player[],
-      goalLimit: number,private onFinish?: (winner: Player) => void
-    )
+      goalLimit: number,private onFinish?: (winner: Player, score: [number, number]) => void)
     {
       this.canvas = canvas;
       this.goalLimit = goalLimit;
@@ -66,7 +65,9 @@ export class Game {
       const winner = side === "left" ? this.leftPlayer : this.rightPlayer;
       alert(`${winner.name} wins!`);
       this.gameFinished = true;
-      if (this.onFinish) this.onFinish(winner);
+      if (this.onFinish) {
+        this.onFinish(winner, [this.leftScore, this.rightScore]);
+      }
 
     }
 
