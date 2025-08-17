@@ -1,3 +1,5 @@
+import { renderApp } from "../router.js";
+
 export async function loginHandler(formId: string) {
 
 	const form = document.getElementById(formId) as HTMLFormElement;
@@ -25,8 +27,9 @@ export async function loginHandler(formId: string) {
 		} else {
 			const data = await res.json();
 			localStorage.setItem("id", data.id);
-			console.log("Logged in! Is your id in local storage?");
-			window.location.href = "/";
+			console.log("Logged in! Your Id should b in local storage?");
+			history.pushState({}, '', "/");
+			renderApp(); //renderpages
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
