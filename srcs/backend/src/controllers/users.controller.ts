@@ -9,7 +9,6 @@ import { createS3Client } from '../services/s3';
 
 
 export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
-
 	try {
 			const { email , password } = req.body as
 			{
@@ -25,9 +24,9 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 	if (!user.hash_password) {
 		return reply.status(401).send({ message: 'Password not set for this user' });
 	}
-	const verifyPassword = bcrypt.compare(password, user.hash_password);
+	const verifyPassword = await bcrypt.compare(password, user.hash_password);
 	if (!verifyPassword) {
-		reply.status(401).send({ message: 'Invalid password' });
+		return reply.status(401).send({ message: 'Invalid password' });
 	}
 
 	const payload = {
@@ -49,8 +48,8 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 					id: user.id,
 				}))
 	} catch (err: any) {
-	req.log.error(err);
-	return reply.status(500).send({ message: 'Internal Server Error' });
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
 	}
 }
 
