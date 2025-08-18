@@ -1,12 +1,9 @@
-import { createHeader } from "./components/header";
+import { renderHeader } from "./components/header";
 import { signupHandler, googleHandler } from "./handlers/signupHandler";
 
 export function renderSignUpPage(container: HTMLElement) {
 
-	container.innerHTML = "";
-
-	const header = createHeader();
-	container.appendChild(header);
+	renderHeader(container);
 
 	const signUpForm = document.createElement("div");
 

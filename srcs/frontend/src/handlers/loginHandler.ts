@@ -10,6 +10,7 @@ export async function loginHandler(formId: string) {
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
 
+		//JSON is used as a language to send to backend
 		try {
 			const res = await fetch("http://localhost:3000/api/login", {
 			method: "POST",

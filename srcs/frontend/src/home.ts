@@ -1,10 +1,8 @@
-import { createHeader } from "./components/header";
+import { renderHeader } from "./components/header";
 
 export function renderHomePage(container: HTMLElement) {
 
-	container.innerHTML = "";
-	const header = createHeader();
-	container.appendChild(header);
+	renderHeader(container);
 
 	const homeButtons = document.createElement("div");
 	homeButtons.innerHTML = `

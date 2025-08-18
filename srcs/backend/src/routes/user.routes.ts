@@ -21,4 +21,7 @@ export async function authRoutes(app: FastifyInstance) {
 	app.post('/2fa/disable', turnOff2FA);
 	app.post('/2fa/verify', verify2fa);
 	app.post('/api/logout', logoutUser);
+	app.get('/api/ping', {preHandler: [app.authenticate]}, async (request, reply) => {
+		return reply.send({ ok: true });
+	});
 }

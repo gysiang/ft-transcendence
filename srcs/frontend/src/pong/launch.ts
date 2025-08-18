@@ -3,22 +3,23 @@ import type { Player } from "./types";
 import { advanceToNextMatchOrRound } from "./Tournament/TournamentUtils";
 import type { Match } from "./Tournament/singleElim";
 import { matchUI} from "./matchUI";
+import { createMatch } from "./Tournament/backendutils";
+import { checkAuthentication } from "./registration/auth";
 
-async function launchGame(  canvas: HTMLCanvasElement,
+async function launchGame(
+	canvas: HTMLCanvasElement,
 	ctx: CanvasRenderingContext2D,
 	players: Player[],
 	goalLimit: number,
-	onFinish: (winner: Player) => void, rounds?: Match[][]):Promise<void>
-{
+	onFinish: (winner: Player, score: [number, number]) => void,
+	rounds?: Match[][]
+  ): Promise<void> {
 	await matchUI(players, rounds);
-	const game = new Game(canvas, ctx, players, goalLimit, (winner) => {
-		onFinish(winner);
-	  });
-	
-	  game.startCountdown();
-
-	
-}
+	const game = new Game(canvas, ctx, players, goalLimit, (winner, score) => {
+	  onFinish(winner, score); 
+	});
+	game.startCountdown();
+  }
 
 export async function startGame(canvas: HTMLCanvasElement) {
 	const ctx = canvas.getContext("2d");
@@ -55,14 +56,50 @@ export async function startGame(canvas: HTMLCanvasElement) {
 		}
 
 		const players: Player[] = [
-			{ ...match.contestant1, side: "left" as "left" },
-			{ ...match.contestant2, side: "right" as "right" },
+			{ ...match.contestant1, side: "left" },
+			{ ...match.contestant2, side: "right"},
 		];
-		await launchGame(canvas, ctx, players, goalLimit, (winner) => {
-			match.winner = winner;
-			const result = advanceToNextMatchOrRound(match, rounds, currentRoundIndex, currentMatchIndex, goalLimit);
-			if (!result.done)
-				startGame(canvas);
-		}, rounds);
+		await launchGame(canvas, ctx, players, goalLimit,
+			async (winner, score) => {
+			if (await checkAuthentication()) {
+					try {
+			 
+				const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
+				const tournamentId = snapshot?.id;
+		  
+				if (tournamentId != null) {
+				  await createMatch({
+					player1_alias: players[0].name,      
+					player2_alias: players[1].name,
+					player1_score: score[0],
+					player2_score: score[1],
+					winner: winner.name,                 
+					tournament_id: tournamentId,
+				  });
+				} else {
+				  console.warn('Tournament id missing');
+				}
+			  } catch (e) {
+				console.error('Failed to save match result:', e);
+			  }
+		  
+			  match.winner = winner;
+			  const result = advanceToNextMatchOrRound(
+				match, rounds, currentRoundIndex, currentMatchIndex, goalLimit
+			  );
+		  
+			  if (!result.done) {
+				startGame(canvas); 
+			  } else {
+				const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
+				if (snapshot) {
+				  snapshot.finished = true;
+				  localStorage.setItem('tournamentSnapshot', JSON.stringify(snapshot));
+				}
+			  }
+			}
+			},
+			rounds
+		  );
 	}
 }
