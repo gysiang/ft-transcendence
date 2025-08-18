@@ -8,22 +8,16 @@ export async function loginHandler(formId: string) {
 
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault(); //prevent reload
-
-		// errorDiv!.textContent = ""; // ← clear old errors here
-
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
 
-		// if (!email || !password) {
-		// 	errorDiv!.textContent = "Please fill out both fields";
-		// 	return;
-    	// }
-
+		//this kinda doesn't work since it's meant for same kind of browser.
 		if (localStorage.getItem("id")) {
 			console.log("Already logged in, skipping login request");
 			renderApp(); // just re-render homepage or dashboard
 			return;
 		}
+
 		//JSON is used as a language to send to backend
 		try {
 			const res = await fetch("http://localhost:3000/api/login", {
