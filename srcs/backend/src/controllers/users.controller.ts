@@ -201,8 +201,9 @@ export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
 		await updateUserStatus(db, id, false);
 
 		reply.header('Set-Cookie', serialize('access_token', '', {
-			path: '/',
-			expires: new Date(0),
+			httpOnly: true,
+			maxAge: 0,
+			path: '/'
 		}))
 			.send({
 				message: "Logout successful",
