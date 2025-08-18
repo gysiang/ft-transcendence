@@ -1,5 +1,6 @@
 import { renderHeader } from "./components/header";
 import { profileHandler } from "./handlers/profileHandler";
+import { initTwoFAToggle, verify2faHandler } from './handlers/2faHandler'
 
 export async function renderProfilePage(container: HTMLElement) {
 	renderHeader(container);
@@ -16,8 +17,39 @@ export async function renderProfilePage(container: HTMLElement) {
 		const user = await response.json();
 		console.log(user);
 		// Main wrapper for centering everything
+		const toggleWrapper = document.createElement("div");
+		toggleWrapper.innerHTML=`
+			<label class="relative flex justify-between items-center p-2 text-xl">
+			Activate 2FA
+			<input id="toggle-2fa" type="checkbox" class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md" />
+			<span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6"></span>
+			</label>
+		`
+
+		const qrSection = document.createElement("div");
+		qrSection.id = "twofa-section";
+		qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
+
+		qrSection.innerHTML = `
+		<div id="qrcode"></div>
+		<input
+			type="text"
+			id="twofa-token"
+			placeholder="Enter 6-digit code"
+			class="border p-2 rounded w-40 text-center"
+		/>
+		<button
+			id="verify-2fa"
+			class="bg-blue-500 text-white px-4 py-2 rounded"
+		>
+			Verify
+		</button>
+		`;
+		toggleWrapper.appendChild(qrSection);
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen flex flex-col items-center justify-center bg-gray-100 space-y-6";
+
+		profileWrapper.appendChild(toggleWrapper);
 
 		// Profile image
 		const img = document.createElement("img");
@@ -95,9 +127,9 @@ export async function renderProfilePage(container: HTMLElement) {
 		// Fill in form values
 		(document.getElementById("name") as HTMLInputElement).value = user.name;
 		(document.getElementById("email") as HTMLInputElement).value = user.email;
-
 		profileHandler("profile-form");
-
+		initTwoFAToggle("toggle-2fa");
+		verify2faHandler("verify-2fa", "twofa-token");
 	} catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");

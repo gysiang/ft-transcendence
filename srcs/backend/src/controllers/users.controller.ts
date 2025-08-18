@@ -1,11 +1,12 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic } from '../models/user.model';
+import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic, update2faSecret, updateUserStatus, disable2FA } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
 const cookie = require("cookie");
 import { serialize } from 'cookie';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client } from '../services/s3';
+import speakeasy from 'speakeasy';
 
 
 export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
@@ -28,6 +29,10 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 	if (!verifyPassword) {
 		return reply.status(401).send({ message: 'Invalid password' });
 	}
+	if (!user.id) {
+		return reply.status(401).send({ message: "User not found" });
+	}
+	await updateUserStatus(db, user.id, true);
 
 	const payload = {
 		id: user.id,
@@ -63,7 +68,7 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 			};
 
 	const db = req.server.db;
-	const existing = await db.get(`SELECT * FROM users WHERE email = ?`, [email]);
+	const existing = await findUserByEmail(db, email);
 	if (existing) {
 		return reply.status(400).send({ message: 'Email already exists' });
 	}
@@ -179,11 +184,25 @@ export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply:
 }
 
 export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
-
 	try {
+		const { id } = req.body as
+		{
+			id: string;
+		}
+		if (!id)
+			return reply.status(401).send({ message: "id is required" });
+		//check if the id is valid
+		const db = req.server.db;
+		const user = await findUserById(db, id);
+		if (!user) {
+			return reply.status(400).send({ error: 'User not found' });
+		}
+		await updateUserStatus(db, id, false);
+
 		reply.header('Set-Cookie', serialize('access_token', '', {
-			path: '/',
-			expires: new Date(0),
+			httpOnly: true,
+			maxAge: 0,
+			path: '/'
 		}))
 			.send({
 				message: "Logout successful",
@@ -252,6 +271,102 @@ export async function editPicture(req: FastifyRequest<{
 				message: 'success',
 				image: imageUrl
 			  });
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
+	const { id } = req.body as
+	{
+		id: string;
+	}
+	if (!id)
+		return reply.status(401).send({ message: "id is required" });
+
+	try {
+	const db = req.server.db;
+	const user = await findUserById(db, id);
+	if (!user)
+		return reply.status(401).send({ message: "User does not exist" });
+	let secret = speakeasy.generateSecret({
+		 name: "Pong42",
+	});
+	console.log(secret);
+	const tmp_base32_secret = secret.base32;
+
+	await update2faSecret(db, id, tmp_base32_secret);
+
+	reply.status(200).send({
+		message: "2fa setup success",
+		otpauth_url: secret.otpauth_url,
+		base32: secret.base32,
+	})
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+
+export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
+
+	const { id, token } = req.body as
+	{
+		id: string;
+		token: string;
+	};
+	if (!id)
+		return reply.status(401).send({ message: "id is required" });
+	if (!token)
+		return reply.status(401).send({ message: "token is required" });
+
+	try {
+	const db = req.server.db;
+	const user = await findUserById(db, id);
+	if (!user) {
+		return reply.status(400).send({ error: 'User not found' });
+	}
+	if (!user?.twofa_secret) {
+		return reply.status(400).send({ error: '2FA not set up for this user' });
+	}
+	const verified = speakeasy.totp.verify({
+		secret: user.twofa_secret,
+		encoding: 'base32',
+		token,
+		window: 1, // allows +/- 30 sec
+	})
+
+	if (!verified)
+		return reply.status(401).send({ message: 'Invalid 2FA token' });
+	reply.status(200).send({
+		message: "2fa verified success",
+	})
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+export async function turnOff2FA(req: FastifyRequest, reply: FastifyReply) {
+
+	try {
+	const { id } = req.body as
+	{
+		id: string;
+	};
+	if (!id)
+		return reply.status(401).send({ message: "id is required" });
+	const db = req.server.db;
+	const user = await findUserById(db, id);
+	if (!user) {
+		return reply.status(400).send({ error: 'User not found' });
+	}
+	await disable2FA(db, id);
+	reply.status(200).send({
+		message: "2fa disabled",
+	})
 	} catch (err: any) {
 		req.log.error(err);
 		return reply.status(500).send({ message: 'Internal Server Error' });

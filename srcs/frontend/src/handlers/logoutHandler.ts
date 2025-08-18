@@ -1,15 +1,19 @@
 import { renderHeader } from "../components/header";
 
 export async function logoutHandler() {
-	// 1️⃣ remove localStorage ID
-	localStorage.removeItem("id");
 
-	// 2️⃣ optional: tell backend
-	await fetch("http://localhost:3000/api/logout", { method: "POST", credentials: "include", });
+	const id = localStorage.getItem("id");
+	const data = await fetch("http://localhost:3000/api/logout", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+		body: JSON.stringify({ id }),
+	});
+	console.log(data);
+	if (data.ok)
+		localStorage.removeItem("id");
 
-	// 3️⃣ optional: update header or page
 	console.log("Yey you logged out!");
-	//show small window you have left
 	loggedOutNotify("✅ You have logged out");
 }
 
