@@ -1,7 +1,9 @@
-export async function signupHandler(formId: string) {
+import { renderApp } from "../router.js";
 
-const form = document.getElementById(formId) as HTMLFormElement;
-const errorDiv = document.getElementById("error");
+export async function signupHandler(formId: string) {
+	const form = document.getElementById(formId) as HTMLFormElement;
+	const errorDiv = document.getElementById("error");
+	if (!form) return; // if no form, stop here
 
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
@@ -26,7 +28,8 @@ const errorDiv = document.getElementById("error");
 			const data = await res.json();
 			localStorage.setItem("id", data.id);
 			console.log("Sign UP success! Check local Storage!");
-			window.location.href = "/";
+			history.pushState({}, '', "/");
+			renderApp(); //renderpages
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
