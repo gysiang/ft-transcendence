@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { signupUser, loginUser, getUser, googleSignIn, logoutUser, editUser, editPicture, setUp2fa, verify2fa } from '../controllers/users.controller';
+import { signupUser, loginUser, getUser, googleSignIn, logoutUser, editUser, editPicture, setUp2fa, verify2fa, turnOff2FA } from '../controllers/users.controller';
 import { IUserParams, IUserBody, IProfileBody } from '../models/user.model';
 import fastifyPassport from '@fastify/passport'
 
@@ -18,6 +18,7 @@ export async function authRoutes(app: FastifyInstance) {
 		googleSignIn
 	);
 	app.post('/2fa/setup', setUp2fa);
+	app.post('/2fa/disable', turnOff2FA);
 	app.post('/2fa/verify', verify2fa);
-	app.post('/api/logout', logoutUser)
+	app.post('/api/logout', logoutUser);
 }

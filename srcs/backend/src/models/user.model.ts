@@ -69,13 +69,24 @@ export async function update2faSecret(db: Database, id: string, twofa_secret: st
 	return (result);
 }
 
+export async function disable2FA(db: Database, id: string){
+	const date = getTimestamp();
+	const result = await db.run(
+		`UPDATE users
+		SET twofa_enabled = ?, twofa_secret = ?, updated_at = ?
+		WHERE id = ?`,
+		[false, '', date, id]
+		);
+	return (result);
+}
+
 export async function updateUserStatus(db: Database, id: string, isLoggedIn : boolean){
 	const date = getTimestamp();
 	const result = await db.run(
 		`UPDATE users
 		SET isLoggedIn = ?, updated_at = ?
 		WHERE id = ?`,
-		[true, date, id]
+		[isLoggedIn, date, id]
 		);
 	return (result);
 }
