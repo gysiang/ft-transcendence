@@ -12,11 +12,12 @@ if (!form) return;
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 
 		try {
-			const res = await fetch("http://localhost:3000/api/profile:id", {
-			method: "PATCH",
-			headers: { "Content-Type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ name, email }),
+			const userId = localStorage.getItem("id"); // same as in profile.ts
+			const res = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ name, email }),
 			});
 
 		if (!res.ok) {
