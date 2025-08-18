@@ -17,6 +17,15 @@ export async function logoutHandler() {
 	loggedOutNotify("✅ You have logged out");
 }
 
+/*
+export async function logoutHandler() {
+	localStorage.removeItem("id");
+	await fetch("http://localhost:3000/api/logout", { method: "POST", credentials: "include", });
+	console.log("Yey you logged out!");
+	loggedOutNotify("✅ You have logged out");
+}
+*/
+
 export function	loggedOutNotify(logoutMsg: string, duration = 3000) {
 	const smallbox = document.createElement("div");
 	smallbox.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 \
