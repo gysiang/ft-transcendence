@@ -1,3 +1,5 @@
+import { renderApp } from "../router.js";
+
 export async function loginHandler(formId: string) {
 
 	const form = document.getElementById(formId) as HTMLFormElement;
@@ -6,9 +8,15 @@ export async function loginHandler(formId: string) {
 
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault(); //prevent reload
-
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
+
+		//this kinda doesn't work since it's meant for same kind of browser.
+		if (localStorage.getItem("id")) {
+			console.log("Already logged in, skipping login request");
+			renderApp(); // just re-render homepage or dashboard
+			return;
+		}
 
 		//JSON is used as a language to send to backend
 		try {
@@ -19,14 +27,15 @@ export async function loginHandler(formId: string) {
 			body: JSON.stringify({ email, password }),
 			});
 
-		if (!res.ok) {
-			const err = await res.json();
-			errorDiv!.textContent = err.message;
-		} else {
-			const data = await res.json();
-			localStorage.setItem("id", data.id);
-			console.log("Logged in! Is your id in local storage?");
-			window.location.href = "/";
+			if (!res.ok) {
+				const err = await res.json();
+				errorDiv!.textContent = err.message;
+			} else {
+				const data = await res.json();
+				localStorage.setItem("id", data.id);
+				console.log("Logged in! Your Id should b in local storage?");
+				history.pushState({}, '', "/");
+				renderApp(); //renderpages
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}

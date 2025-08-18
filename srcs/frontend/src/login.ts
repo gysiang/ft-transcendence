@@ -16,7 +16,7 @@ export function renderLoginPage(container: HTMLElement) {
 			placeholder="email"
 			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
 			required />
-			<br>
+		<br>
 		<input
 			id="password"
 			type="password"

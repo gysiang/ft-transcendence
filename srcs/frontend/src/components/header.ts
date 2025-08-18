@@ -1,4 +1,4 @@
-import { logoutHandler } from "../handlers/logoutHandler";
+import { logoutHandler } from "../handlers/logoutHandler.js";
 
 export function createHeader(): HTMLElement {
     const header = document.createElement("header");

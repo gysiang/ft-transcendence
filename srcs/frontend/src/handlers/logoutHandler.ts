@@ -1,7 +1,6 @@
-import { renderHeader } from "../components/header";
+import { renderApp } from "../router.js";
 
 export async function logoutHandler() {
-
 	const id = localStorage.getItem("id");
 	const data = await fetch("http://localhost:3000/api/logout", {
 		method: "POST",
@@ -15,6 +14,8 @@ export async function logoutHandler() {
 
 	console.log("Yey you logged out!");
 	loggedOutNotify("✅ You have logged out");
+	history.pushState({}, '', "/");
+	renderApp();
 }
 
 export function	loggedOutNotify(logoutMsg: string, duration = 3000) {
