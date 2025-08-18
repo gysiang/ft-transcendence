@@ -5,7 +5,24 @@ import { startGame } from "../launch";
 import { renderTournamentBracket } from "../matchUI";
 import { createTournament } from "../Tournament/backendutils";
 import { checkAuthentication } from "./auth";
+import { api } from "./apiWrapper";
 
+async function getLoggedInUserName(): Promise<string | null> {
+  const id = localStorage.getItem('id'); 
+  if (!id)
+    return null;
+
+  try {
+    const user = await api<{ name: string }>(`http://localhost:3000/api/profile/${id}`, {
+      method: 'GET',
+      skipAuthRedirect: true,                
+    });
+    const name = (user?.name ?? '').trim();
+    return name || null;
+  } catch {
+    return null;
+  }
+}
 export function quickplayForm(app: HTMLElement): void
 {
     app.innerHTML = `
@@ -36,12 +53,27 @@ export function quickplayForm(app: HTMLElement): void
             </button>
         </div>
             `;
+            let userAlias: string | null = null;
+            (async () => {
+              userAlias = await getLoggedInUserName();
+              if (userAlias)
+                {
+                const p1 = document.getElementById("player1") as HTMLInputElement | null;
+                if (p1)
+                  {
+                    p1.value = userAlias;
+                    p1.readOnly = true;
+                    p1.classList.add('bg-gray-100', 'cursor-not-allowed');
+                  }
+              }})();
+            
             setTimeout(() => {
                 const button = document.getElementById("quickplayStart");
                 button?.addEventListener("click", () => {
                     const sideToggle = document.querySelector("input[type='checkbox'].peer") as HTMLInputElement;
                     const players: { name: string; side: "left" | "right" }[] = [];
-                    const name1 = (document.getElementById("player1") as HTMLInputElement).value || "Player 1";
+                    const name1_Input = (document.getElementById("player1") as HTMLInputElement).value || "Player 1";
+                    const name1 = userAlias ?? name1_Input;
                     const name2 = (document.getElementById("player2") as HTMLInputElement).value || "Player 2";
                     const side1: "left" | "right" = sideToggle?.checked ? "right" : "left";
                     const side2: "left" | "right" = side1 === "left" ? "right" : "left";
@@ -92,7 +124,8 @@ export function tournamentForm(app: HTMLElement): void {
 	const aliasContainer = document.getElementById("playerInputs")!;
 	const startButton = document.getElementById("startTournament")!;
 
-    function updateAliasFields() {
+  let userAlias: string | null = null;
+    function updateAliasFields(userAlias?: string | null) {
         const count = parseInt(playerCountInput.value, 10);
         const alert = document.getElementById("playerCountAlert")!;
     
@@ -112,13 +145,24 @@ export function tournamentForm(app: HTMLElement): void {
             input.placeholder = `Player ${i + 1}`;
             input.className = "w-full p-2 border border-gray-300 rounded text-black";
             input.dataset.index = i.toString();
+            
+            if (i === 0 && userAlias)
+              {
+                input.value = userAlias;
+                input.readOnly = true;
+                input.classList.add('bg-gray-100', 'cursor-not-allowed');
+              }
             aliasContainer.appendChild(input);
         }
     }
     
 	updateAliasFields();
-	playerCountInput.addEventListener("input", updateAliasFields);
-
+  (async () => {
+    userAlias = await getLoggedInUserName();
+    updateAliasFields(userAlias);
+    playerCountInput.addEventListener("input", () => updateAliasFields(userAlias));
+  })();
+  
 	startButton.addEventListener("click", () => {
 		const aliasInputs = aliasContainer.querySelectorAll("input");
 		const players: Player[] = [];
