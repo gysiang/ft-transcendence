@@ -154,6 +154,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 	}
 }
 
+//reply -> res(converstional)
 export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply: FastifyReply) {
 
 	try {
@@ -180,7 +181,7 @@ export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply:
 		} catch (err: any) {
 		req.log.error(err);
 		return reply.status(500).send({ message: 'Internal Server Error' });
-		}
+	}
 }
 
 export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
