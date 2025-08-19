@@ -44,8 +44,18 @@ export async function initializeDatabase() {
 				created_at TIMESTAMP NOT NULL,
 				FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
 				);
+
+				CREATE TABLE IF NOT EXISTS friends (
+				user_id INTEGER NOT NULL,
+				friend_id INTEGER NOT NULL,
+				created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+				FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE,
+				UNIQUE(user_id, friend_id)
+				);
 			`);
 			// sample seed data
+			/** *
 			await db.exec(`
 				INSERT INTO tournaments (player1_alias, player2_alias, created_by, created_at)
 				VALUES
@@ -60,7 +70,7 @@ export async function initializeDatabase() {
 					('Charlie', 'Alice', 9, 12, 'Alice', 2, CURRENT_TIMESTAMP),
 					('Test1', 'Test2', 10, 11, 'Test2', 3, CURRENT_TIMESTAMP);
 				`);
-
+			**/
 			console.log('SQLite database initialized and table created.');
 			return (db);
 			} catch (error) {
