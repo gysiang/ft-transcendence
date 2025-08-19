@@ -5,6 +5,7 @@ import { FastifyInstance } from 'fastify/types/instance';
 import { initializeDatabase } from "./database"
 import { authRoutes } from './routes/user.routes';
 import { gameRoutes } from './routes/tournament.routes'
+import { friendRoutes } from './routes/friends.routes';
 import { fpSqlitePlugin } from "fastify-sqlite-typed";
 import authPlugin from './plugins/auth';
 import FastifyMultipart from '@fastify/multipart'
@@ -35,7 +36,7 @@ const registerPlugins = async (app : FastifyInstance) =>
 
 		app.register(authPlugin);
 		app.register(fastifyCors, {
-			origin: 'http://localhost:5173',
+			origin: process.env.FRONTEND_URL,
 			methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 			credentials: true
 		});
@@ -58,6 +59,7 @@ const startServer = async () => {
 		await registerPlugins(app);
 		await app.register(authRoutes);
 		await app.register(gameRoutes);
+		await app.register(friendRoutes);
 
 		fastifyPassport.use('google', new GoogleStrategy({
 			clientID:     process.env.GOOGLE_CLIENT_ID,
@@ -72,7 +74,6 @@ const startServer = async () => {
 				done: VerifyCallback
 			) {
 				try {
-				//console.log("Google Profile:", profile);
 				done(undefined, profile);
 			} catch (err) {
 				done(err as Error);

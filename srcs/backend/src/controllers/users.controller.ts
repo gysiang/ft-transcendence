@@ -87,6 +87,9 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 		maxAge: 60 * 60 * 24,
 		path: '/'
 	});
+
+	await updateUserStatus(db, String(user.id), true);
+
 	return (reply
 			.header('Set-Cookie', cookieStr)
 			.status(201)
@@ -119,7 +122,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 		console.log('Google Email:', email);
 		console.log('Google profile:', profile_picture);
 
-		const existing = await db.get(`SELECT * FROM users WHERE email = ?`, [email]);
+		const existing = await findUserByEmail(db, email);
 		let profile;
 
 		if (!existing) {
@@ -140,6 +143,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 			maxAge: 60 * 60 * 24,
 			path: '/'
 		});
+		await updateUserStatus(db, String(profile.id), true);
 
 		return (reply
 				.header('Set-Cookie', cookieStr)
