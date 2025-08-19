@@ -25,7 +25,6 @@ export function createHeader(): HTMLElement {
 
         const link = document.createElement("a");
         link.href = href; //the "/location"
-        link.dataset.link = "true";
         link.className = "hover:underline w-2xs bg-sky-500 text-white p-2 rounded-md";
         link.textContent = text; // For textbox name
 
