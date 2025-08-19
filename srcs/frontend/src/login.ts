@@ -14,14 +14,14 @@ export function renderLoginPage(container: HTMLElement) {
 			id="email"
 			type="email"
 			placeholder="email"
-			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
+			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1 focus-within:text-red-600"
 			required />
 		<br>
 		<input
 			id="password"
 			type="password"
 			placeholder="Password"
-			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1"
+			class="w-2xs text-center border-grey-500 border-1 border-solid rounded p-1 focus-within:text-red-600"
 			required />
 		<br>
 		<button type="submit" class="w-2xs bg-sky-500 text-white p-2 rounded-md">Login</button>
