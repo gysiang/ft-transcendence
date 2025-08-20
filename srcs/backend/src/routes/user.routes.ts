@@ -17,9 +17,9 @@ export async function authRoutes(app: FastifyInstance) {
 	app.get('/auth/google/callback', {preValidation: fastifyPassport.authenticate('google', { scope: [ 'email', 'profile' ] })},
 		googleSignIn
 	);
-	app.post('/2fa/setup', setUp2fa);
-	app.post('/2fa/disable', turnOff2FA);
-	app.post('/2fa/verify', verify2fa);
+	app.post('/2fa/setup',{preHandler: [app.authenticate]}, setUp2fa);
+	app.post('/2fa/disable',{preHandler: [app.authenticate]}, turnOff2FA);
+	app.post('/2fa/verify',{preHandler: [app.authenticate]}, verify2fa);
 	app.post('/api/logout', logoutUser);
 	app.get('/api/ping', {preHandler: [app.authenticate]}, async (request, reply) => {
 		return reply.send({ ok: true });
