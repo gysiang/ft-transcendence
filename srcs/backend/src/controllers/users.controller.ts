@@ -168,6 +168,9 @@ export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply:
 			return reply.status(400).send({ message: "id is required" });
 		}
 
+		if (req.userData?.id != id) {
+			return reply.status(400).send({ message: "Forbidden" });
+		}
 		const db = req.server.db;
 		const user = await findUserById(db, id);
 		if (!user) {
@@ -196,7 +199,6 @@ export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
 		}
 		if (!id)
 			return reply.status(401).send({ message: "id is required" });
-		//check if the id is valid
 		const db = req.server.db;
 		const user = await findUserById(db, id);
 		if (!user) {
@@ -223,13 +225,14 @@ export async function editUser(req: FastifyRequest<{
     Params: IUserParams;
     Body: IUserBody;
 }>, reply: FastifyReply) {
-
-	const { id } = req.params;
-	const { name, email } = req.body;
-
 	try {
+		const { id } = req.params;
+		const { name, email } = req.body;
 		const db = req.server.db;
 
+		if (req.userData?.id != id) {
+			return reply.status(400).send({ message: "Forbidden" });
+		}
 		await db.run(
 			`UPDATE users SET name = ?, email = ?, updated_at = ? WHERE id = ?`,
 			[name, email, new Date().toISOString(), id]
@@ -251,6 +254,9 @@ export async function editPicture(req: FastifyRequest<{
 	const { id } = req.params;
 
 	try {
+	if (req.userData?.id != id) {
+		return reply.status(400).send({ message: "Forbidden" });
+	}
 	const db = req.server.db;
 	const s3 = createS3Client();
 	const data = await req.file();
@@ -289,7 +295,9 @@ export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
 	}
 	if (!id)
 		return reply.status(401).send({ message: "id is required" });
-
+	if (req.userData?.id != id) {
+		return reply.status(400).send({ message: "Forbidden" });
+	}
 	try {
 	const db = req.server.db;
 	const user = await findUserById(db, id);
@@ -326,7 +334,9 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 		return reply.status(401).send({ message: "id is required" });
 	if (!token)
 		return reply.status(401).send({ message: "token is required" });
-
+	if (req.userData?.id != id) {
+		return reply.status(400).send({ message: "Forbidden" });
+	}
 	try {
 	const db = req.server.db;
 	const user = await findUserById(db, id);
@@ -363,6 +373,9 @@ export async function turnOff2FA(req: FastifyRequest, reply: FastifyReply) {
 	};
 	if (!id)
 		return reply.status(401).send({ message: "id is required" });
+	if (req.userData?.id != id) {
+		return reply.status(400).send({ message: "Forbidden" });
+	}
 	const db = req.server.db;
 	const user = await findUserById(db, id);
 	if (!user) {

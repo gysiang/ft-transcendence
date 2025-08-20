@@ -15,7 +15,6 @@ export async function renderProfilePage(container: HTMLElement) {
 		}
 
 		const user = await response.json();
-		console.log(user);
 		// Main wrapper for centering everything
 		const toggleWrapper = document.createElement("div");
 		toggleWrapper.innerHTML=`

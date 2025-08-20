@@ -47,6 +47,14 @@ export async function findUserById(db: Database, id: string) {
 	return db.get<User>(`SELECT * FROM users WHERE id = ?`, [id]);
 }
 
+export async function updateProfileInfo(db: Database, name: string, email: string, id: string) {
+	const result = await db.run(
+			`UPDATE users SET name = ?, email = ?, updated_at = ? WHERE id = ?`,
+			[name, email, getTimestamp(), id]
+		);
+	return (result);
+}
+
 export async function updateProfilePic(db: Database, id: string, profile: string){
 	const date = getTimestamp();
 	const result = await db.run(

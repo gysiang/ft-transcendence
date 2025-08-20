@@ -19,6 +19,8 @@ export default fp(async function authentication(app: FastifyInstance) {
 	}
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		request.userData = decoded;
+		//console.log("request.user id: ", request.user);
 	} catch (err) {
 		console.error("JWT verification error:", err);
 		return reply.status(401).send({ message: "Invalid token" });
