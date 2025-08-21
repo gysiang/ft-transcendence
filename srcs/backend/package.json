@@ -26,6 +26,7 @@
     "fastify": "^5.4.0",
     "fastify-sqlite-typed": "^5.0.2",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.5",
     "passport-google-oauth2": "^0.2.0",
     "speakeasy": "^2.0.0",
     "sqlite": "^5.1.1",

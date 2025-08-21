@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic, update2faSecret, updateUserStatus, disable2FA } from '../models/user.model';
+import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic, update2faSecret, updateUserStatus, disable2FA, disableEmail2FA, updateEmail2FA } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
 const cookie = require("cookie");
@@ -364,6 +364,61 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 	}
 }
 
+async function sendEmailCode(userEmail: string, code: string) {
+	const transporter = nodemailer.createTransport({
+	service: "Gmail",
+	auth: {
+		user: process.env.EMAIL_USER,
+		pass: process.env.EMAIL_PASS,
+	},
+	});
+
+	await transporter.sendMail({
+	from: `"Pong 42" <${process.env.EMAIL_USER}>`,
+	to: userEmail,
+	subject: "Your 2FA Code",
+	text: `Your login verification code is: ${code}`,
+	});
+}
+
+export async function setUpEmail2FA(req: FastifyRequest, reply: FastifyReply) {
+	const { id } = req.body as
+	{
+		id: string;
+	}
+	if (!id)
+		return reply.status(401).send({ message: "id is required" });
+	if (req.userData?.id != id) {
+		return reply.status(400).send({ message: "Forbidden" });
+	}
+	try {
+	const db = req.server.db;
+	const user = await findUserById(db, id);
+	if (!user)
+		return reply.status(401).send({ message: "User does not exist" });
+
+	let secret = speakeasy.generateSecret({
+		 name: "Pong42",
+	});
+	let code = speakeasy.totp({
+		secret: secret.base32,
+		encoding: 'base32'
+	});
+
+	await updateEmail2FA(db, id, secret.base32);
+	sendEmailCode(user.email, code);
+
+	reply.status(200).send({
+		message: "2fa via Email setup success, please check email",
+	})
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+
+
 export async function turnOff2FA(req: FastifyRequest, reply: FastifyReply) {
 
 	try {
@@ -381,7 +436,13 @@ export async function turnOff2FA(req: FastifyRequest, reply: FastifyReply) {
 	if (!user) {
 		return reply.status(400).send({ error: 'User not found' });
 	}
-	await disable2FA(db, id);
+	if (user.twofa_method == 'totp')
+		await disable2FA(db, id);
+	else if (user.twofa_method == 'email')
+		await disableEmail2FA(db, id);
+	else
+		return reply.status(400).send({ error: '2FA not enabled' });
+
 	reply.status(200).send({
 		message: "2fa disabled",
 	})
