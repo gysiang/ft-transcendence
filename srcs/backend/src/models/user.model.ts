@@ -9,7 +9,9 @@ export interface User {
 	hash_password: string | null;
 	profile_picture: string;
 	twofa_secret: string | null;
-	twofa_enabled: boolean
+	twofa_enabled: boolean;
+	twofa_method: string | null;
+	isLoggedIn: boolean;
 }
 
 export interface IUserParams {
@@ -66,13 +68,13 @@ export async function updateProfilePic(db: Database, id: string, profile: string
 	return (result);
 }
 
-export async function update2faSecret(db: Database, id: string, twofa_secret: string){
+export async function update2faSecret(db: Database, id: string, twofa_method: string, twofa_secret: string){
 	const date = getTimestamp();
 	const result = await db.run(
 		`UPDATE users
 		SET twofa_method = ?, twofa_enabled = ?, twofa_secret = ?, updated_at = ?
 		WHERE id = ?`,
-		['totp', true, twofa_secret, date, id]
+		[twofa_method, true, twofa_secret, date, id]
 		);
 	return (result);
 }
@@ -85,28 +87,6 @@ export async function disable2FA(db: Database, id: string){
 		SET twofa_method = ?, twofa_enabled = ?, twofa_secret = ?, updated_at = ?
 		WHERE id = ?`,
 		['', false, '', date, id]
-		);
-	return (result);
-}
-
-export async function updateEmail2FA(db: Database, id: string, twofa_email_code: string) {
-
-	let expiryTime = new Date(Date.now() + (5 * 60 * 1000));
-	const result = await db.run(
-		`UPDATE users
-		SET twofa_method = ?, twofa_enabled = ?, twofa_email_code = ?, twofa_email_code_expires = ?, updated_at = ?
-		WHERE id = ?`,
-		['email', true, twofa_email_code, expiryTime, getTimestamp(), id]
-		);
-	return (result);
-}
-
-export async function disableEmail2FA(db: Database, id: string){
-	const result = await db.run(
-		`UPDATE users
-		SET twofa_method = ?, twofa_enabled = ?, twofa_email_code = ?, twofa_email_code_expires = ?, updated_at = ?
-		WHERE id = ?`,
-		['', false, '','', getTimestamp(), id]
 		);
 	return (result);
 }

@@ -19,6 +19,7 @@
     "@fastify/multipart": "^9.0.3",
     "@fastify/passport": "^3.0.2",
     "@fastify/secure-session": "^8.2.0",
+    "@types/nodemailer": "^7.0.1",
     "@types/speakeasy": "^2.0.10",
     "bcryptjs": "^3.0.2",
     "cookie": "^1.0.2",
