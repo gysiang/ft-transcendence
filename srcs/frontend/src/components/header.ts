@@ -44,6 +44,10 @@ export function createHeader(): HTMLElement {
 	const isLoggedIn = !!localStorage.getItem("id");//get the user id
 	if (isLoggedIn)
 	{
+        // marcustest_profile
+		const marcus_profileItem = createMenuItem("Marcus_Profile", "/marcus_profile", "testing");
+		nav.append(marcus_profileItem);
+
         // profile
 		const profileItem = createMenuItem("Profile", "/profile", "Check your profile");
 		profileItem.querySelector(".tooltip")?.classList.remove("left-0");

@@ -20,7 +20,7 @@ export async function renderHomePage(container: HTMLElement) {
 
 	const isLoggedIn = localStorage.getItem("id");//get the user id
 	if (isLoggedIn) {
-		title.append(document.createTextNode("Welcome\""));
+		title.append(document.createTextNode("Welcome \""));
 		title.append(user_name);//insert name here (test atm)
 		title.append(document.createTextNode("\"!"));
 		title.append(document.createElement("br"));
