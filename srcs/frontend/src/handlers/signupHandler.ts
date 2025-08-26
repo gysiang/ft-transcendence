@@ -20,16 +20,14 @@ export async function signupHandler(formId: string) {
 				credentials: "include",
 				body: JSON.stringify({ name, email, password }),
 			});
-
+		const data = await res.json();
 		if (!res.ok) {
-			const err = await res.json();
-			errorDiv!.textContent = err.message;
+			errorDiv!.textContent = data.message;
 		} else {
-			const data = await res.json();
 			localStorage.setItem("id", data.id);
 			console.log("Sign UP success! Check local Storage!");
 			history.pushState({}, '', "/");
-			renderApp(); //renderpages
+			renderApp();
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
