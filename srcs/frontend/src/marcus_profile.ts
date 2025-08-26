@@ -1,6 +1,7 @@
 import { renderHeader } from "./components/header";
 import { profileHandler } from "./handlers/profileHandler";
 import { initTwoFAToggle, verify2faHandler } from './handlers/2faHandler'
+import { createLogger } from "vite";
 
 //https://tailwind.build/classes
 export async function marcus_renderProfilePage(container: HTMLElement) {
@@ -37,12 +38,38 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		p_email.textContent = user.email;
 
 		const profileWrapper = document.createElement("div");
-		profileWrapper.className = "h-screen w-full mx-auto flex items-center justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
-		
+		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
+
+
+
+
+		// 2fa
+		// const fa2 = document.createElement("div");
+		// fa2.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
+		// fa2.textContent = "2FA coming soon!";
+
+		//2fa -- for buttons
+		// const switchWrapper = document.createElement("div");
+		// switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
+
+		// const switchLabel = document.createElement("label");// label that holds both text + switch
+		// switchLabel.className = "flex items-center justify-between w-full cursor-pointer";
+		// switchWrapper.appendChild(switchLabel);
+
+		// const switchText = document.createElement("span");// left side text
+		// switchText.className = "text-gray-700 dark:text-gray-300";
+		// switchText.textContent = "Activate 2FA";
+		// switchLabel.appendChild(switchText);
+
+
+
+
+
 		textdiv.append(p_name, p_email);
 		profilediv.append(p_img, textdiv);
-		profileWrapper.append(profilediv);
-		container.appendChild(profileWrapper);
+		container.appendChild(profilediv);
+		// profileWrapper.append(profilediv, fa2);
+		// container.appendChild(profileWrapper);
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");
