@@ -10,8 +10,9 @@ export async function loginHandler(formId: string) {
 		e.preventDefault(); //prevent reload
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
+		//const loginForm = document.getElementById("login-form") as HTMLFormElement;
+		//const email2fa = document.getElementById("email2fa-input") as HTMLElement;
 
-		//this kinda doesn't work since it's meant for same kind of browser.
 		if (localStorage.getItem("id")) {
 			console.log("Already logged in, skipping login request");
 			renderApp(); // just re-render homepage or dashboard
@@ -26,12 +27,19 @@ export async function loginHandler(formId: string) {
 			credentials: "include",
 			body: JSON.stringify({ email, password }),
 			});
-
-			if (!res.ok) {
+			const data = await res.json();
+			console.log("login handler", data);
+			if (data.message == 'stage-2fa') {
+				const loginForm = document.getElementById("login-form") as HTMLFormElement;
+				const email2fa = document.getElementById("email2fa-input") as HTMLElement;
+				localStorage.setItem("id", data.id);
+				loginForm.classList.add("hidden");
+				email2fa.classList.remove("hidden");
+			}
+			else if (!res.ok) {
 				const err = await res.json();
 				errorDiv!.textContent = err.message;
 			} else {
-				const data = await res.json();
 				localStorage.setItem("id", data.id);
 				console.log("Logged in! Your Id should b in local storage?");
 				history.pushState({}, '', "/");
