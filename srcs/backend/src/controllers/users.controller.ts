@@ -25,13 +25,11 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 	if (!user.hash_password) {
 		return reply.status(401).send({ message: 'Password not set for this user' });
 	}
-	console.log("user id: ", user.id);
 	const verifyPassword = await bcrypt.compare(password, user.hash_password);
 	if (!verifyPassword) {
 		return reply.status(401).send({ message: 'Invalid password' });
 	}
-	/** *
-	if (user.twofa_enabled) {
+	if (user.twofa_enabled == true) {
 		if (user.twofa_secret && user.twofa_method == "email") {
 			let code = speakeasy.totp({
 				secret: user.twofa_secret,
@@ -39,20 +37,13 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 			});
 			sendEmailCode(user.email, code);
 		}
-		// sign and set a temp token
-		let tempTokenPayload = { id: user.id, stage: "2fa" };
-		const tempToken = jwt.sign(tempTokenPayload, process.env.JWT_SECRET, { expiresIn: "5m" });
-		const tmpCookieStr = cookie.serialize('access_token', tempToken, {
-			httpOnly: true,
-			maxAge: 60 * 60 * 1,
-			path: '/'
-		});
+		console.log(user.id);
 		return reply
-			.header('Set-Cookie', tmpCookieStr)
 			.status(200)
-			.send({ message: 'stage 2fa login success' });
+			.send({ message: 'stage-2fa',
+					id: user.id,
+			 });
 	}
-	**/
 
 	if (!user.id) {
 		return reply.status(401).send({ message: "User not found" });
