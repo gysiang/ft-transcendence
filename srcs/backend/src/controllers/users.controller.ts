@@ -6,8 +6,8 @@ const cookie = require("cookie");
 import { serialize } from 'cookie';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client } from '../services/s3';
+import nodemailer from 'nodemailer'
 import speakeasy from 'speakeasy';
-
 
 export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 	try {
@@ -29,6 +29,22 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 	if (!verifyPassword) {
 		return reply.status(401).send({ message: 'Invalid password' });
 	}
+	if (user.twofa_enabled == true) {
+		if (user.twofa_secret && user.twofa_method == "email") {
+			let code = speakeasy.totp({
+				secret: user.twofa_secret,
+				encoding: 'base32'
+			});
+			sendEmailCode(user.email, code);
+		}
+		console.log(user.id);
+		return reply
+			.status(200)
+			.send({ message: 'stage-2fa',
+					id: user.id,
+			 });
+	}
+
 	if (!user.id) {
 		return reply.status(401).send({ message: "User not found" });
 	}
@@ -39,11 +55,10 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 		name: user.name,
 		email : user.email,
 	}
-
 	const token = jwt.sign(payload, process.env.JWT_SECRET);
 	const cookieStr = cookie.serialize('access_token', token, {
 		httpOnly: true,
-		maxAge: 60 * 60 * 24,
+		maxAge: 60 * 60 * 1,
 		path: '/'
 	});
 	return (reply.header('Set-Cookie', cookieStr)
@@ -158,7 +173,6 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 	}
 }
 
-//reply -> res(converstional)
 export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply: FastifyReply) {
 
 	try {
@@ -183,7 +197,8 @@ export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply:
 					id: user.id,
 					name: user.name,
 					email: user.email,
-					profile_picture: user.profile_picture
+					profile_picture: user.profile_picture,
+					twofa_method: user.twofa_method,
 				}));
 		} catch (err: any) {
 		req.log.error(err);
@@ -306,10 +321,8 @@ export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
 	let secret = speakeasy.generateSecret({
 		 name: "Pong42",
 	});
-	console.log(secret);
-	const tmp_base32_secret = secret.base32;
 
-	await update2faSecret(db, id, tmp_base32_secret);
+	await update2faSecret(db, id, 'totp', secret.base32);
 
 	reply.status(200).send({
 		message: "2fa setup success",
@@ -334,9 +347,7 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 		return reply.status(401).send({ message: "id is required" });
 	if (!token)
 		return reply.status(401).send({ message: "token is required" });
-	if (req.userData?.id != id) {
-		return reply.status(400).send({ message: "Forbidden" });
-	}
+
 	try {
 	const db = req.server.db;
 	const user = await findUserById(db, id);
@@ -355,14 +366,86 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 
 	if (!verified)
 		return reply.status(401).send({ message: 'Invalid 2FA token' });
+	if (!user.isLoggedIn && user.id)
+		await updateUserStatus(db, user.id, true);
+
+	const payload = {
+		id: user.id,
+		name: user.name,
+		email : user.email,
+	}
+	const fulltoken = jwt.sign(payload, process.env.JWT_SECRET);
+	const cookieStr = cookie.serialize('access_token', fulltoken, {
+		httpOnly: true,
+		maxAge: 60 * 60 * 1,
+		path: '/'
+	});
+
+	return (reply.status(200)
+	.header('Set-Cookie', cookieStr)
+	.send({
+		message: "2fa verified login success",
+		id: user.id
+	}));
+	} catch (err: any) {
+		req.log.error(err);
+		return reply.status(500).send({ message: 'Internal Server Error' });
+	}
+}
+
+async function sendEmailCode(userEmail: string, code: string) {
+
+	const transporter = nodemailer.createTransport({
+	service: 'gmail',
+	auth: {
+		user: process.env.GMAIL_USER,
+		pass: process.env.GMAIL_PASS,
+	},
+	});
+	await transporter.sendMail({
+	from: `"Pong 42" <${process.env.GMAIL_USER}>`,
+	to: userEmail,
+	subject: "Your 2FA Code",
+	text: `Your login verification code is: ${code}`,
+	});
+}
+
+export async function setUpEmail2FA(req: FastifyRequest, reply: FastifyReply) {
+	const { id } = req.body as
+	{
+		id: string;
+	}
+	if (!id)
+		return reply.status(401).send({ message: "id is required" });
+	if (req.userData?.id != id) {
+		return reply.status(400).send({ message: "Forbidden" });
+	}
+	try {
+	const db = req.server.db;
+	const user = await findUserById(db, id);
+	if (!user)
+		return reply.status(401).send({ message: "User does not exist" });
+
+	let secret = speakeasy.generateSecret({
+		 name: "Pong42",
+	});
+	let code = speakeasy.totp({
+		secret: secret.base32,
+		encoding: 'base32'
+	});
+
+	await update2faSecret(db, id, 'email', secret.base32);
+	sendEmailCode(user.email, code);
+
 	reply.status(200).send({
-		message: "2fa verified success",
+		message: "2fa via Email setup success, please check email",
 	})
 	} catch (err: any) {
 		req.log.error(err);
 		return reply.status(500).send({ message: 'Internal Server Error' });
 	}
 }
+
 
 export async function turnOff2FA(req: FastifyRequest, reply: FastifyReply) {
 
