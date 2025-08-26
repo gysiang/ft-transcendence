@@ -1,7 +1,7 @@
 import { renderHeader } from "./components/header";
-import { profileHandler } from "./handlers/profileHandler";
-import { initTwoFAToggle, verify2faHandler } from './handlers/2faHandler'
-import { createLogger } from "vite";
+// import { profileHandler } from "./handlers/profileHandler";
+// import { initTwoFAToggle, verify2faHandler } from './handlers/2faHandler'
+// import { createLogger } from "vite";
 
 //https://tailwind.build/classes
 export async function marcus_renderProfilePage(container: HTMLElement) {
@@ -43,33 +43,42 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 
 
-		// 2fa
-		// const fa2 = document.createElement("div");
-		// fa2.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
-		// fa2.textContent = "2FA coming soon!";
+		// *2fa
+		const fa2 = document.createElement("div");
+		fa2.className = "p-6 bg-white rounded-xl text-center m-2 w-64 shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
+		fa2.textContent = "Activate your 2FA via email";
 
-		//2fa -- for buttons
-		// const switchWrapper = document.createElement("div");
-		// switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
+		// *2fa -- for buttons
+		const switchWrapper = document.createElement("div");
+		switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
 
-		// const switchLabel = document.createElement("label");// label that holds both text + switch
-		// switchLabel.className = "flex items-center justify-between w-full cursor-pointer";
-		// switchWrapper.appendChild(switchLabel);
+		const switchLabel = document.createElement("label");// label that holds both text + switch
+		switchLabel.className = "flex items-center justify-between w-full cursor-pointer";
+		switchWrapper.appendChild(switchLabel);
 
-		// const switchText = document.createElement("span");// left side text
-		// switchText.className = "text-gray-700 dark:text-gray-300";
-		// switchText.textContent = "Activate 2FA";
-		// switchLabel.appendChild(switchText);
+		const switchText = document.createElement("span");// left side text
+		switchText.className = "text-center text-gray-700 dark:text-gray-300";//***Why is this not centered
+		switchText.textContent = "Activate 2FA";
+		switchLabel.appendChild(switchText);
 
+		// add the hidden checkbox for tailwind
+		const hiddenSwitchInput = document.createElement("input");
+		hiddenSwitchInput.type = "checkbox";
+		hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
+		switchLabel.appendChild(hiddenSwitchInput);
 
+		fa2.appendChild(switchWrapper);
 
+		//function to slide left or right
+		// function buttonStyleHandler() : void {
+		// 	if
+		// }
 
 
 		textdiv.append(p_name, p_email);
 		profilediv.append(p_img, textdiv);
-		container.appendChild(profilediv);
-		// profileWrapper.append(profilediv, fa2);
-		// container.appendChild(profileWrapper);
+		profileWrapper.append(profilediv, fa2);
+		container.appendChild(profileWrapper);
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");
