@@ -29,10 +29,10 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		const p_img = document.createElement("img");//add an image class here
 		p_img.src = user.profile_picture;
 		p_img.alt = `${user.name}'s profile picture`;
-		p_img.className = "w-24 h-24 rounded-full object-cover shadow-md";
+		p_img.className = "w-24 h-24 rounded-full object-cover shadow-lg/40";
 
 		const p_name = document.createElement("p");
-		p_name.className = "text-lg font-bold text-gray-900 dark:text-white";
+		p_name.className = "text-lg font-bold text-gray-900 dark:text-white text-shadow-lg/15";
 		p_name.textContent = user.name// Put user's name inside the <p>
 
 		const p_email = document.createElement("p");
@@ -41,12 +41,12 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 		const link = document.createElement("a");
         link.href = "/profile"; //the "/location"
-        link.className = "rounded-xl px-2 py-0.5 text-center text-white font-bold bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
+        link.className = "rounded-xl shadow-lg/40 px-2 py-0.5 text-center text-white font-bold bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
         link.textContent = "Update Profile"; // For textbox name
 
         const tooltipDiv = document.createElement("div");//second div
         tooltipDiv.className =
-            "tooltip absolute -left-10 mt-1 w-max text-sm text-gray-800 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none transition-all duration-1000";
+            "tooltip absolute -left-5 mt-1 w-max text-sm text-gray-800 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none transition-all duration-1000";
         tooltipDiv.textContent = "Change your details here"; //prints out the string u wanna write
 		
 		const update_profile = document.createElement("div");
@@ -88,10 +88,6 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		switchText.textContent = "Activate 2FA via email";
 		switchLabel.appendChild(switchText);
 
-
-
-
-		
 		// add the hidden checkbox for tailwind
 		const hiddenSwitchInput = document.createElement("input");
 		hiddenSwitchInput.type = "checkbox";
@@ -100,7 +96,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 		const track = document.createElement("div");
 		//peer-checked:bg-green-500 → turns track green when checked.
-		track.className = "relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600";
+		track.className = "relative w-13 h-8 bg-gray-200 peer-focus:outline-none border-4 border-gray-500 peer-checked:border-green-800 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600";
 		switchLabel.appendChild(track);
 
 		const thumb = document.createElement("span");
@@ -108,21 +104,54 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";
 		track.appendChild(thumb);
 
-
-
-
-		fa2.appendChild(switchWrapper);
-
-		//function to slide left or right
-		// function buttonStyleHandler() : void {
-		// 	if
-		// }
-
-
 		textdiv.append(p_name, p_email, update_profile);
 		profilediv.append(p_img, textdiv);
+		fa2.appendChild(switchWrapper);
 		profileWrapper.append(profilediv, fa2);
 		container.appendChild(profileWrapper);
+
+
+
+
+
+		// const toggleWrapper = document.createElement("div");
+		// toggleWrapper.className = ;
+
+		// const qrSection = document.createElement("div");
+		// qrSection.id = "twofa-section";
+		// qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
+
+
+
+		hiddenSwitchInput.addEventListener("change", () => {
+		if (hiddenSwitchInput.checked) {
+				// send a fetch to backend
+				//details
+
+				// ✅ Switch is ON
+				console.log("Checkedbox status:", hiddenSwitchInput.checked);
+				protect2faNotify("✅ 2FA Activated!");
+			} else {
+				// ❌ Switch is OFF
+				console.log("Checkedbox status:", hiddenSwitchInput.checked);
+				protect2faNotify("❌ 2FA Disabled!");
+			}
+		});
+
+		// to indicate secured account, use backend info instead of change event
+		// hiddenSwitchInput.addEventListener("change", () => {
+		// if (hiddenSwitchInput.checked) {
+		// 		// ✅ Switch is ON
+		// 		fa2span.className = "relative absolute -inset-1 block -skew-y-3 bg-green-300";
+		// 		fa2spantext.textContent = "Account secured! 👍";
+		// 		fa2spantext.className = "relative text-black dark:text-gray-950 font-bold";
+		// 	} else {
+		// 		// ❌ Switch is OFF
+		// 		fa2span.className = "relative absolute -inset-1 block -skew-y-3 bg-blue-300";
+		// 		fa2spantext.textContent = "Keep your account secure!";
+		// 		fa2spantext.className = "relative text-black dark:text-gray-950";
+		//	}
+		// });
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");
@@ -130,3 +159,26 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		container.appendChild(errorMsg);
 	}
 }
+
+export function protect2faNotify(Msg: string, duration = 3000) {
+	const smallbox = document.createElement("div");
+	smallbox.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 \
+		bg-gray-800 text-white px-4 py-2 rounded shadow-lg \
+        opacity-0 transition-all duration-500";
+	smallbox.textContent = Msg;
+	document.body.append(smallbox);
+
+	// Animate in
+    setTimeout(() => {
+        smallbox.classList.add("opacity-100");
+    }, 50);
+
+    // Animate out and remove after duration
+    setTimeout(() => {
+        smallbox.classList.remove("opacity-100");
+        setTimeout(() => smallbox.remove(), 500);
+    }, duration);
+}
+
+
+
