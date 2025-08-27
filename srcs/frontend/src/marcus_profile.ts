@@ -55,6 +55,8 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
+		textdiv.append(p_name, p_email, update_profile);
+		profilediv.append(p_img, textdiv);
 
 
 
@@ -62,12 +64,12 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 
 		//------2fa section------
-		// *2fa
+		// *2fa **top banner
 		const fa2 = document.createElement("div");
-		fa2.className = "p-6 bg-white rounded-xl text-center m-2 w-80 shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
+		fa2.className = "p-6 bg-white rounded-xl text-center m-2 w-170 shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
 
 		const fa2span = document.createElement("span");
-		fa2span.className = "relative absolute -inset-1 block -skew-y-3 bg-blue-300";
+		fa2span.className = "inline-block px-3 py-1 -skew-y-3 bg-blue-300";
 		fa2.appendChild(fa2span);
 
 		const fa2spantext = document.createElement("span");
@@ -75,83 +77,40 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		fa2spantext.textContent = "Keep your account secure!";
 		fa2span.appendChild(fa2spantext);
 
-		// *2fa -- for buttons
-		const switchWrapper = document.createElement("div");
-		switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
+		const fa2spantext2 = document.createElement("div");
+		fa2spantext2.className = "mt-1 text-black dark:text-gray-950";
+		fa2spantext2.textContent = "Activate 2FA:";
+		fa2.appendChild(fa2spantext2);
 
-		const switchLabel = document.createElement("label");// label that holds both text + switch
-		switchLabel.className = "flex inline-flex items-center justify-between w-full cursor-pointer";
-		switchWrapper.appendChild(switchLabel);
+		// *2fa -- for switches
+		const switchContainer = document.createElement("div");
+		switchContainer.className = "flex flex-row gap-4 justify-center mt-4"; 
+		// `gap-4` gives spacing, `justify-center` keeps them centered
+		fa2.appendChild(switchContainer);
 
-		const switchText = document.createElement("span");// left side text
-		switchText.className = "text-center text-gray-700 dark:text-gray-300";//***Why is this not centered
-		switchText.textContent = "Activate 2FA via email";
-		switchLabel.appendChild(switchText);
-
-		// add the hidden checkbox for tailwind
-		const hiddenSwitchInput = document.createElement("input");
-		hiddenSwitchInput.type = "checkbox";
-		hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
-		switchLabel.appendChild(hiddenSwitchInput);
-
-		const track = document.createElement("div");
-		//peer-checked:bg-green-500 → turns track green when checked.
-		track.className = "relative w-13 h-8 bg-gray-200 peer-focus:outline-none border-4 border-gray-500 peer-checked:border-green-800 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600";
-		switchLabel.appendChild(track);
-
-		const thumb = document.createElement("span");
-		//peer-checked:translate-x-5 → moves the thumb right when checked.
-		thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";
-		track.appendChild(thumb);
-
-		textdiv.append(p_name, p_email, update_profile);
-		profilediv.append(p_img, textdiv);
-		fa2.appendChild(switchWrapper);
-		profileWrapper.append(profilediv, fa2);
-		container.appendChild(profileWrapper);
-
-
-
-
-
-		// const toggleWrapper = document.createElement("div");
-		// toggleWrapper.className = ;
-
-		// const qrSection = document.createElement("div");
-		// qrSection.id = "twofa-section";
-		// qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
-
-
-
-		hiddenSwitchInput.addEventListener("change", () => {
-		if (hiddenSwitchInput.checked) {
-				// send a fetch to backend
-				//details
-
-				// ✅ Switch is ON
-				console.log("Checkedbox status:", hiddenSwitchInput.checked);
-				protect2faNotify("✅ 2FA Activated!");
+		const email2faSwitch = create_2faSwitch("Activate 2FA via Email", (checked) => {
+			if (checked) {
+				console.log("Email 2FA ON");
+				protect2faNotify("✅ Email 2FA Activated!");
 			} else {
-				// ❌ Switch is OFF
-				console.log("Checkedbox status:", hiddenSwitchInput.checked);
-				protect2faNotify("❌ 2FA Disabled!");
+				console.log("Email 2FA OFF");
+				protect2faNotify("❌ Email 2FA Disabled!");
 			}
 		});
 
-		// to indicate secured account, use backend info instead of change event
-		// hiddenSwitchInput.addEventListener("change", () => {
-		// if (hiddenSwitchInput.checked) {
-		// 		// ✅ Switch is ON
-		// 		fa2span.className = "relative absolute -inset-1 block -skew-y-3 bg-green-300";
-		// 		fa2spantext.textContent = "Account secured! 👍";
-		// 		fa2spantext.className = "relative text-black dark:text-gray-950 font-bold";
-		// 	} else {
-		// 		// ❌ Switch is OFF
-		// 		fa2span.className = "relative absolute -inset-1 block -skew-y-3 bg-blue-300";
-		// 		fa2spantext.textContent = "Keep your account secure!";
-		// 		fa2spantext.className = "relative text-black dark:text-gray-950";
-		//	}
-		// });
+		const app2faSwitch = create_2faSwitch("Activate 2FA via Google Auth ", (checked) => {
+			if (checked) {
+				console.log("App 2FA ON");
+				protect2faNotify("✅ App 2FA Activated!");
+			} else {
+				console.log("App 2FA OFF");
+				protect2faNotify("❌ App 2FA Disabled!");
+			}
+		});
+
+		switchContainer.append(email2faSwitch, app2faSwitch);
+		profileWrapper.append(profilediv, fa2);
+		container.appendChild(profileWrapper);
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");
@@ -180,5 +139,46 @@ export function protect2faNotify(Msg: string, duration = 3000) {
     }, duration);
 }
 
+export function create_2faSwitch(labeltext: string, onToggle: (checked: boolean) => void) {
+	// *2fa -- for buttons
+	const switchWrapper = document.createElement("div");
+	switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
 
+	const switchLabel = document.createElement("label");// label that holds both text + switch
+	switchLabel.className = "flex inline-flex items-center justify-between w-full cursor-pointer gap-x-4";
+	switchWrapper.appendChild(switchLabel);
 
+	const switchText = document.createElement("span");// left side text
+	switchText.className = "text-center text-gray-700 dark:text-gray-300";//***Why is this not centered
+	switchText.textContent = labeltext;
+	switchLabel.appendChild(switchText);
+
+	// add the hidden checkbox for tailwind
+	const hiddenSwitchInput = document.createElement("input");
+	hiddenSwitchInput.type = "checkbox";
+	hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
+	switchLabel.appendChild(hiddenSwitchInput);
+
+	const track = document.createElement("div");
+	//peer-checked:bg-green-500 → turns track green when checked.
+	track.className = "relative w-13 h-8 bg-gray-200 peer-focus:outline-none border-4 border-gray-500 \
+						peer-checked:border-green-800 peer-focus:ring-4 peer-focus:ring-blue-300 \
+						dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 \
+						peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full \
+						peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] \
+						after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full \
+						after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 \
+						dark:peer-checked:bg-green-600";
+	switchLabel.appendChild(track);
+
+	const thumb = document.createElement("span");
+	thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";//peer-checked:translate-x-5 → moves the thumb right when checked.
+	track.appendChild(thumb);
+
+	// ✅ Hook up toggle event
+	hiddenSwitchInput.addEventListener("change", () => {
+		onToggle(hiddenSwitchInput.checked);
+	});
+
+	return switchWrapper;
+}
