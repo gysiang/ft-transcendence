@@ -4,6 +4,8 @@ import { renderHeader } from "./components/header";
 // import { createLogger } from "vite";
 
 //https://tailwind.build/classes
+//https://tailwindcss.com/docs/hover-focus-and-other-states
+//https://szasz-attila.medium.com/vue3-radio-button-with-tailwind-css-a-step-by-step-guide-4a9c756b7b2a
 export async function marcus_renderProfilePage(container: HTMLElement) {
     renderHeader(container);
 
@@ -37,35 +39,77 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		p_email.className = "text-sm text-gray-500 dark:text-gray-400";
 		p_email.textContent = user.email;
 
+		const link = document.createElement("a");
+        link.href = "/profile"; //the "/location"
+        link.className = "rounded-xl px-2 py-0.5 text-center text-white font-bold bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
+        link.textContent = "Update Profile"; // For textbox name
+
+        const tooltipDiv = document.createElement("div");//second div
+        tooltipDiv.className =
+            "tooltip absolute -left-10 mt-1 w-max text-sm text-gray-800 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none transition-all duration-1000";
+        tooltipDiv.textContent = "Change your details here"; //prints out the string u wanna write
+		
+		const update_profile = document.createElement("div");
+		update_profile.className = "relative group inline-block";
+		update_profile.append(link, tooltipDiv);
+
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
 
 
 
 
+
+
+		//------2fa section------
 		// *2fa
 		const fa2 = document.createElement("div");
-		fa2.className = "p-6 bg-white rounded-xl text-center m-2 w-64 shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
-		fa2.textContent = "Activate your 2FA via email";
+		fa2.className = "p-6 bg-white rounded-xl text-center m-2 w-80 shadow-md dark:bg-slate-800 text-gray-700 dark:text-gray-300";
+
+		const fa2span = document.createElement("span");
+		fa2span.className = "relative absolute -inset-1 block -skew-y-3 bg-blue-300";
+		fa2.appendChild(fa2span);
+
+		const fa2spantext = document.createElement("span");
+		fa2spantext.className = "relative text-black dark:text-gray-950";
+		fa2spantext.textContent = "Keep your account secure!";
+		fa2span.appendChild(fa2spantext);
 
 		// *2fa -- for buttons
 		const switchWrapper = document.createElement("div");
 		switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
 
 		const switchLabel = document.createElement("label");// label that holds both text + switch
-		switchLabel.className = "flex items-center justify-between w-full cursor-pointer";
+		switchLabel.className = "flex inline-flex items-center justify-between w-full cursor-pointer";
 		switchWrapper.appendChild(switchLabel);
 
 		const switchText = document.createElement("span");// left side text
 		switchText.className = "text-center text-gray-700 dark:text-gray-300";//***Why is this not centered
-		switchText.textContent = "Activate 2FA";
+		switchText.textContent = "Activate 2FA via email";
 		switchLabel.appendChild(switchText);
 
+
+
+
+		
 		// add the hidden checkbox for tailwind
 		const hiddenSwitchInput = document.createElement("input");
 		hiddenSwitchInput.type = "checkbox";
 		hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
 		switchLabel.appendChild(hiddenSwitchInput);
+
+		const track = document.createElement("div");
+		//peer-checked:bg-green-500 → turns track green when checked.
+		track.className = "relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600";
+		switchLabel.appendChild(track);
+
+		const thumb = document.createElement("span");
+		//peer-checked:translate-x-5 → moves the thumb right when checked.
+		thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";
+		track.appendChild(thumb);
+
+
+
 
 		fa2.appendChild(switchWrapper);
 
@@ -75,7 +119,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		// }
 
 
-		textdiv.append(p_name, p_email);
+		textdiv.append(p_name, p_email, update_profile);
 		profilediv.append(p_img, textdiv);
 		profileWrapper.append(profilediv, fa2);
 		container.appendChild(profileWrapper);

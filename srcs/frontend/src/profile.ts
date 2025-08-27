@@ -2,6 +2,8 @@ import { renderHeader } from "./components/header";
 import { profileHandler } from "./handlers/profileHandler";
 import { initTwoFAToggle, initTwoFAToggleEmail, verify2faHandler, initTwoFAMutualExclusion } from './handlers/2faHandler'
 
+//for colour change for buttons
+//https://tailwindcss.com/docs/hover-focus-and-other-states
 export async function renderProfilePage(container: HTMLElement) {
 	renderHeader(container);
 
