@@ -41,4 +41,15 @@ export async function googleHandler(buttonId: string) {
 	googleButton.addEventListener('click', () => {
 		window.location.href = 'http://localhost:3000/auth/google';
 	});
+	window.addEventListener("DOMContentLoaded", () => {
+	const params = new URLSearchParams(window.location.search);
+	const userId = params.get("userId");
+
+	if (userId) {
+		console.log("Logged in user:", userId);
+		localStorage.setItem("userId", userId);
+
+		window.history.replaceState({}, document.title, "/");
+  }
+});
 }

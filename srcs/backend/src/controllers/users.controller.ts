@@ -127,19 +127,19 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 		const user = req.user as any;
 		const name = user._json?.name;
 		const email = user._json?.email;
-		const profile_picture = user._json?.picture
+		//const profile_picture = user._json?.picture
 		//console.log('Authenticated user:', user)
-		if (!name || !email || !profile_picture) {
+		if (!name || !email) {
 			return reply.status(400).send({ message: 'Missing name or email from Google profile' });
 		}
 
 		console.log('Google Name:', name);
 		console.log('Google Email:', email);
-		console.log('Google profile:', profile_picture);
+		//console.log('Google profile:', profile_picture);
+		const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
 
 		const existing = await findUserByEmail(db, email);
 		let profile;
-
 		if (!existing) {
 			profile = await createUser(db, { name, email, password, profile_picture });
 		} else {
@@ -162,10 +162,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 
 		return (reply
 				.header('Set-Cookie', cookieStr)
-				.redirect(frontend + '/')
-				.send({
-					id: profile.id
-				})
+				.redirect(frontend + '/?userId=' + profile.id)
 			);
 	} catch (err : any) {
 	req.log.error(err);
@@ -289,7 +286,7 @@ export async function editPicture(req: FastifyRequest<{
 
 	await s3.send(putObjectCommand);
 	const imageUrl = `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${id}/${data.filename}`;
-
+	console.log("profile img:", imageUrl);
 	await updateProfilePic(db, id, imageUrl);
 
 	reply.status(200)

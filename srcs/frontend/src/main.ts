@@ -25,4 +25,13 @@ window.addEventListener('click', (e: Event) => {
 	// console.log("Hey you did it!");
 });
 
-//updating npm: sudo npm install -g npm@11.5.2
+window.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get("userId");
+
+  if (userId) {
+    localStorage.setItem("id", userId);
+    window.history.replaceState({}, document.title, "/");
+	renderApp();
+  }
+});
