@@ -32,7 +32,7 @@ export function initTwoFAToggle(checkboxId: string) {
 			if (err) console.error(err);
 			else console.log("QR code generated!");
 		});
-		}
+	}
 
     } else {
       qrSection?.classList.add("hidden");
@@ -60,21 +60,20 @@ export function initTwoFAToggleEmail(checkboxId: string) {
 	if ((event.target as HTMLInputElement).checked) {
 	email2FAContainer?.classList.remove("hidden");
 
-	const res = await fetch("http://localhost:3000/2fa/setup/email", {
+	//const res = await fetch("http://localhost:3000/2fa/setup/email", {
+	await fetch("http://localhost:3000/2fa/setup/email", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		credentials: "include",
 		body: JSON.stringify({ id }),
-		});
-	}
-
-	else {
-	email2FAContainer?.classList.add("hidden");
-	await fetch("http://localhost:3000/2fa/disable", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		credentials: "include",
-		body: JSON.stringify({ id }),
+	});
+} else {
+		email2FAContainer?.classList.add("hidden");
+		await fetch("http://localhost:3000/2fa/disable", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ id }),
 		});
 	}})
 }
@@ -173,7 +172,7 @@ export function verify2faLoginHandler(buttonId: string, inputId: string) {
 
 export function initTwoFAMutualExclusion(twofa_method: string) {
 	console.log("here", twofa_method);
-	const googleToggle = document.getElementById("toggle-2fa") as HTMLInputElement;
+	const googleToggle = document.getElementById("toggle-2fa-google") as HTMLInputElement;
 	const emailToggle = document.getElementById("toggle-2fa-email") as HTMLInputElement;
 
 	if (!googleToggle || !emailToggle) return;

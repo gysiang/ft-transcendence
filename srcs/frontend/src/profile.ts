@@ -30,7 +30,6 @@ export async function renderProfilePage(container: HTMLElement) {
 		const qrSection = document.createElement("div");
 		qrSection.id = "twofa-section";
 		qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
-
 		qrSection.innerHTML = `
 		<div id="qrcode"></div>
 		<input
@@ -78,7 +77,7 @@ export async function renderProfilePage(container: HTMLElement) {
 			Verify
 		</button>
 		`
-		emailToggleWrapper.append(inputBox);
+		emailToggleWrapper.appendChild(inputBox);
 		profileWrapper.appendChild(emailToggleWrapper);
 
 		// Profile image
@@ -158,7 +157,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		(document.getElementById("name") as HTMLInputElement).value = user.name;
 		(document.getElementById("email") as HTMLInputElement).value = user.email;
 		profileHandler("profile-form");
-		initTwoFAToggle("toggle-2fa");
+		initTwoFAToggle("toggle-2fa-google");
 		initTwoFAToggleEmail("toggle-2fa-email");
 		verify2faHandler("verify-2fa-app", "twofa-token-app");
 		verify2faHandler("verify-2fa-email", "twofa-token-email");

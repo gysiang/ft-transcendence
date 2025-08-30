@@ -88,27 +88,89 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		// `gap-4` gives spacing, `justify-center` keeps them centered
 		fa2.appendChild(switchContainer);
 
-		const email2faSwitch = create_2faSwitch("Activate 2FA via Email", (checked) => {
+
+					// const inputBox = document.createElement("div");
+					// inputBox.id = "email2fa-input";
+					// inputBox.className = "mt-4 hidden flex flex-col items-center space-y-4";
+					// inputBox.innerHTML = `
+					// <input
+					// 	type="text"
+					// 	id="twofa-token-email"
+					// 	placeholder="Enter 6-digit code"
+					// 	class="border p-2 rounded w-40 text-center"
+					// />
+					// <button
+					// 	id="verify-2fa-email"
+					// 	class="bg-blue-500 text-white px-4 py-2 rounded"
+					// >
+					// 	Verify
+					// </button>
+					// `
+					// Create the container div
+					const inputBox: HTMLDivElement = document.createElement("div");
+					inputBox.id = "email2fa-input";
+					inputBox.className = "mt-4 hidden flex flex-col items-center space-y-4";
+
+					// Create the input element
+					const emailInput: HTMLInputElement = document.createElement("input");
+					emailInput.type = "text";
+					emailInput.id = "twofa-token-email";
+					emailInput.placeholder = "Enter 6-digit code";
+					emailInput.className = "border p-2 rounded w-40 text-center";
+
+					// Create the verify button
+					const verifyBtn: HTMLButtonElement = document.createElement("button");
+					verifyBtn.id = "verify-2fa-email";
+					verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded";
+					verifyBtn.textContent = "Verify";
+
+					// Append input and button to the container
+					inputBox.append(emailInput, verifyBtn);
+
+
+
+		const email2faSwitch = create_2faSwitch("Activate 2FA via Email", "toggle-2fa-email", async (checked) => {
+			const email2FAContainer = document.getElementById("email2fa-input");
+			const id = localStorage.getItem("id");
+
 			if (checked) {
+				email2FAContainer?.classList.remove("hidden");
+
+				await fetch("http://localhost:3000/2fa/setup/email", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify({ id }),
+				});
+
 				console.log("Email 2FA ON");
 				protect2faNotify("✅ Email 2FA Activated!");
 			} else {
+				email2FAContainer?.classList.add("hidden");
+
+				await fetch("http://localhost:3000/2fa/disable", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify({ id }),
+				});
 				console.log("Email 2FA OFF");
 				protect2faNotify("❌ Email 2FA Disabled!");
 			}
 		});
-
-		const app2faSwitch = create_2faSwitch("Activate 2FA via Google Auth ", (checked) => {
-			if (checked) {
-				console.log("App 2FA ON");
-				protect2faNotify("✅ App 2FA Activated!");
-			} else {
-				console.log("App 2FA OFF");
-				protect2faNotify("❌ App 2FA Disabled!");
+		const google2faSwitch = create_2faSwitch("Activate 2FA via Google Auth", "toggle-2fa-google", async (checked) => {
+				if (checked) {
+					console.log("Email 2FA ON");
+					protect2faNotify("✅ Email 2FA Activated!");
+				} else {
+					console.log("Email 2FA OFF");
+					protect2faNotify("❌ Email 2FA Disabled!");
+				}
 			}
-		});
+		);
 
-		switchContainer.append(email2faSwitch, app2faSwitch);
+		email2faSwitch.appendChild(inputBox);
+		switchContainer.append(email2faSwitch, google2faSwitch);
 		profileWrapper.append(profilediv, fa2);
 		container.appendChild(profileWrapper);
     } catch (error) {
@@ -119,27 +181,42 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 	}
 }
 
-export function protect2faNotify(Msg: string, duration = 3000) {
-	const smallbox = document.createElement("div");
-	smallbox.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 \
-		bg-gray-800 text-white px-4 py-2 rounded shadow-lg \
-        opacity-0 transition-all duration-500";
-	smallbox.textContent = Msg;
-	document.body.append(smallbox);
+export function marcus_initTwoFAToggleEmail(checkboxId: string) {
+	const toggle = document.getElementById(checkboxId) as HTMLInputElement;
+	if (!toggle) {
+		console.warn("2FA Email toggle element not found");
+	return;
+	}
+	const email2FAContainer= document.getElementById("email2fa-input");
+	const id = localStorage.getItem("id");
 
-	// Animate in
-    setTimeout(() => {
-        smallbox.classList.add("opacity-100");
-    }, 50);
+	toggle.addEventListener("change", async (event) => {
+	if ((event.target as HTMLInputElement).checked) {
+	email2FAContainer?.classList.remove("hidden");
 
-    // Animate out and remove after duration
-    setTimeout(() => {
-        smallbox.classList.remove("opacity-100");
-        setTimeout(() => smallbox.remove(), 500);
-    }, duration);
+	//const res = await fetch("http://localhost:3000/2fa/setup/email", {
+	await fetch("http://localhost:3000/2fa/setup/email", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+		body: JSON.stringify({ id }),
+	});
+} else {
+		email2FAContainer?.classList.add("hidden");
+		await fetch("http://localhost:3000/2fa/disable", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ id }),
+		});
+	}})
 }
 
-export function create_2faSwitch(labeltext: string, onToggle: (checked: boolean) => void) {
+
+// the => void is meant to tell TS that its just a callback function.
+// callback -> a function that you pass as an argument to another function, so it can be “called back” later.
+//export function create_2faSwitch(labeltext: string, id: string, onToggle: (checked: boolean, id: string) => void) {
+export function create_2faSwitch(labeltext: string, id: string, onToggle: (checked: boolean) => void) {
 	// *2fa -- for buttons
 	const switchWrapper = document.createElement("div");
 	switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
@@ -157,6 +234,7 @@ export function create_2faSwitch(labeltext: string, onToggle: (checked: boolean)
 	const hiddenSwitchInput = document.createElement("input");
 	hiddenSwitchInput.type = "checkbox";
 	hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
+	hiddenSwitchInput.id = id;
 	switchLabel.appendChild(hiddenSwitchInput);
 
 	const track = document.createElement("div");
@@ -179,6 +257,25 @@ export function create_2faSwitch(labeltext: string, onToggle: (checked: boolean)
 	hiddenSwitchInput.addEventListener("change", () => {
 		onToggle(hiddenSwitchInput.checked);
 	});
-
 	return switchWrapper;
+}
+
+export function protect2faNotify(Msg: string, duration = 3000) {
+	const smallbox = document.createElement("div");
+	smallbox.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 \
+		bg-gray-800 text-white px-4 py-2 rounded shadow-lg \
+        opacity-0 transition-all duration-500";
+	smallbox.textContent = Msg;
+	document.body.append(smallbox);
+
+	// Animate in
+    setTimeout(() => {
+        smallbox.classList.add("opacity-100");
+    }, 50);
+
+    // Animate out and remove after duration
+    setTimeout(() => {
+        smallbox.classList.remove("opacity-100");
+        setTimeout(() => smallbox.remove(), 500);
+    }, duration);
 }
