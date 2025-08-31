@@ -154,10 +154,10 @@ export async function renderProfilePage(container: HTMLElement) {
 		container.appendChild(profileWrapper);
 
 		// Fill in form values
-		(document.getElementById("name") as HTMLInputElement).value = user.name;
-		(document.getElementById("email") as HTMLInputElement).value = user.email;
+		(document.getElementById("name") as HTMLInputElement).value = user.name;// show the original names in profile first
+		(document.getElementById("email") as HTMLInputElement).value = user.email;// show the original email in profile first
 		profileHandler("profile-form");
-		initTwoFAToggle("toggle-2fa-google");
+		initTwoFAToggle("toggle-2fa");
 		initTwoFAToggleEmail("toggle-2fa-email");
 		verify2faHandler("verify-2fa-app", "twofa-token-app");
 		verify2faHandler("verify-2fa-email", "twofa-token-email");

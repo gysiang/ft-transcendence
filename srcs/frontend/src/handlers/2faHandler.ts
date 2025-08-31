@@ -15,10 +15,10 @@ export function initTwoFAToggle(checkboxId: string) {
       qrSection?.classList.remove("hidden");
 
       const res = await fetch("http://localhost:3000/2fa/setup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ id }),
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+		body: JSON.stringify({ id }),
       });
 
       const data = await res.json();
