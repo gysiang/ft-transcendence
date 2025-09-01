@@ -5,6 +5,7 @@ import type { Match } from "./Tournament/singleElim";
 import { matchUI} from "./matchUI";
 import { createMatch } from "./Tournament/backendutils";
 import { checkAuthentication } from "./registration/auth";
+import { clearGameStorage } from "./Tournament/TournamentUtils";
 
 async function launchGame(
 	canvas: HTMLCanvasElement,
@@ -33,7 +34,7 @@ export async function startGame(canvas: HTMLCanvasElement) {
 	if (mode === "quickplay") {
 		const players = JSON.parse(localStorage.getItem("players") || "[]");
 		await launchGame(canvas, ctx, players, goalLimit, () => {
-			localStorage.clear();
+			clearGameStorage();
 			setTimeout(() => {
 				window.location.href = "/play";
 			}, 2000);
@@ -50,6 +51,8 @@ export async function startGame(canvas: HTMLCanvasElement) {
 			match.winner = match.contestant1 || match.contestant2 || null;
 			const result = advanceToNextMatchOrRound(match, rounds, currentRoundIndex, currentMatchIndex, goalLimit);
 			if (!result.done && result.updatedData) {
+				localStorage.setItem("tournamentData", JSON.stringify(result.updatedData));
+				({ rounds, currentRoundIndex, currentMatchIndex } = result.updatedData as any);
 				startGame(canvas); 
 			}
 			return;
@@ -59,47 +62,58 @@ export async function startGame(canvas: HTMLCanvasElement) {
 			{ ...match.contestant1, side: "left" },
 			{ ...match.contestant2, side: "right"},
 		];
-		await launchGame(canvas, ctx, players, goalLimit,
-			async (winner, score) => {
-			if (await checkAuthentication()) {
-					try {
-			 
+		await launchGame(canvas, ctx, players, goalLimit, async (winner, score) => {
+			match.winner = winner;
+			const finalMatch =
+			  currentRoundIndex === rounds.length - 1 &&
+			  currentMatchIndex === rounds[currentRoundIndex].length - 1;
+		  
+			const persist = (async () => {
+			  try {
+				const authed = await checkAuthentication();
+				if (!authed) return; // local-only tournament
+		  
 				const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
 				const tournamentId = snapshot?.id;
+				if (tournamentId == null) return;
 		  
-				if (tournamentId != null) {
-				  await createMatch({
-					player1_alias: players[0].name,      
-					player2_alias: players[1].name,
-					player1_score: score[0],
-					player2_score: score[1],
-					winner: winner.name,                 
-					tournament_id: tournamentId,
-				  });
-				} else {
-				  console.warn('Tournament id missing');
-				}
+				await createMatch({
+				  player1_alias: players[0].name,
+				  player2_alias: players[1].name,
+				  player1_score: score[0],
+				  player2_score: score[1],
+				  winner: winner.name,
+				  tournament_id: tournamentId,
+				});
 			  } catch (e) {
 				console.error('Failed to save match result:', e);
 			  }
+			})();
 		  
-			  match.winner = winner;
-			  const result = advanceToNextMatchOrRound(
-				match, rounds, currentRoundIndex, currentMatchIndex, goalLimit
-			  );
-		  
-			  if (!result.done) {
-				startGame(canvas); 
-			  } else {
-				const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
-				if (snapshot) {
-				  snapshot.finished = true;
-				  localStorage.setItem('tournamentSnapshot', JSON.stringify(snapshot));
-				}
-			  }
+			if (finalMatch) {
+			  await persist;
 			}
-			},
-			rounds
-		  );
+			const result = advanceToNextMatchOrRound(
+			  match, rounds, currentRoundIndex, currentMatchIndex, goalLimit
+			);
+		  
+			if (!result.done && result.updatedData) {
+			  localStorage.setItem("tournamentData", JSON.stringify(result.updatedData));
+			  startGame(canvas);
+			} else {
+			  if (result.tournamentWinner) {
+				alert(`${result.tournamentWinner.name} wins the tournament!`);
+			  }
+			  const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
+			  if (snapshot) {
+				snapshot.finished = true;
+				localStorage.setItem('tournamentSnapshot', JSON.stringify(snapshot));
+			  }
+			   clearGameStorage();
+			  
+			  setTimeout(() => { window.location.href = "/play"; }, 2000);
+			}
+		  }, rounds);
+		
 	}
 }
