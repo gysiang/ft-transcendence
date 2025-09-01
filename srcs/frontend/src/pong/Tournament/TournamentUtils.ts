@@ -11,42 +11,49 @@ export function sanitizeRounds(rounds: Match[][]): Match[][] {
     }))
   );
 }
+export function advanceToNextMatchOrRound(match: Match,rounds: Match[][],
+  currentRoundIndex: number,currentMatchIndex: number, goalLimit: number
+): { done: boolean; updatedData?: {
+      rounds: Match[][],
+      goalLimit: number,
+      currentRoundIndex: number,
+      currentMatchIndex: number
+    },
+    tournamentWinner?: Player}
+    {
 
-export function advanceToNextMatchOrRound(match: Match, rounds: Match[][], currentRoundIndex: number, currentMatchIndex: number, goalLimit: number
-): { done: boolean; updatedData?: object }
-{
-	const winners = rounds[currentRoundIndex]
-		.map((m: Match) => m.winner)
-		.filter((p: Player | null | undefined): p is Player => !!p);
+  const isLastMatchOfRound =
+    currentMatchIndex + 1 >= rounds[currentRoundIndex].length;
 
-    const isLastMatchOfRound = currentMatchIndex + 1 >= rounds[currentRoundIndex].length;
+  if (isLastMatchOfRound) {
+    const roundWinners = rounds[currentRoundIndex]
+      .map((m) => m.winner)
+      .filter((p: Player | null | undefined): p is Player => !!p);
 
-    if (isLastMatchOfRound)
-      {
-      const winners = rounds[currentRoundIndex]
-        .map((m) => m.winner)
-        .filter((p: Player | null | undefined): p is Player => !!p);
-    
-      if (winners.length === 1) {
-        alert(`${winners[0].name} wins the tournament!`);
-        localStorage.clear();
-        setTimeout(() => {window.location.href = "/play";}, 2000);
-        return { done: true };
-      }
-    
-      const newRound = generateRound(winners);
-      rounds.push(newRound);
-      currentRoundIndex++;
-      currentMatchIndex = 0;
+    if (roundWinners.length === 1) {
+      return { done: true, tournamentWinner: roundWinners[0] };
     }
-    else {
-      currentMatchIndex++;
-    }
-	const updatedData = {rounds: sanitizeRounds(rounds),goalLimit,currentRoundIndex,currentMatchIndex};
-	localStorage.setItem("tournamentData", JSON.stringify(updatedData));
-	return { done: false, updatedData };
+
+    const newRound = generateRound(roundWinners);
+    const newRounds = [...rounds, newRound];
+
+    const updatedData = {
+      rounds: sanitizeRounds(newRounds),
+      goalLimit,
+      currentRoundIndex: currentRoundIndex + 1,
+      currentMatchIndex: 0
+    };
+    return { done: false, updatedData };
+  } else {
+    const updatedData = {
+      rounds: sanitizeRounds(rounds),
+      goalLimit,
+      currentRoundIndex,
+      currentMatchIndex: currentMatchIndex + 1
+    };
+    return { done: false, updatedData };
+  }
 }
-
 
 export function shuffle<T>(array: T[]): T[] {
   let currentIndex = array.length, randomIndex;
@@ -59,3 +66,17 @@ export function shuffle<T>(array: T[]): T[] {
 
   return array;
 };
+
+export function clearGameStorage() {
+  const gameKeys = [
+    "mode",
+    "goalLimit",
+    "players",
+    "tournamentData",
+    "tournamentSnapshot"
+  ];
+
+  for (const key of gameKeys) {
+    localStorage.removeItem(key);
+  }
+}

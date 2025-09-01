@@ -1,4 +1,6 @@
 import Fastify from 'fastify'
+import addFormats from 'ajv-formats';
+import ajvErrors from 'ajv-errors';
 import fastifyCors from '@fastify/cors';
 import dotenv from 'dotenv';
 import { FastifyInstance } from 'fastify/types/instance';
@@ -12,9 +14,20 @@ import FastifyMultipart from '@fastify/multipart'
 import fastifyPassport from '@fastify/passport'
 import fastifySecureSession from '@fastify/secure-session'
 import { VerifyCallback } from 'passport-google-oauth2'
+import { registerSchemas } from './schemas/list';
+
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
 
-const app = Fastify({ logger: true })
+const app = Fastify({ logger: true,ajv: {
+    customOptions: { allErrors: true },
+    plugins: [addFormats, ajvErrors],}, })
+  app.setSchemaErrorFormatter((errors, _dataVar) => {
+	const e = errors[0];
+	const msg = e?.message || 'Invalid request';
+	const err: any = new Error(msg); // no "body/name" prefix
+	err.statusCode = 400;
+	return err;
+  });
 
 const registerPlugins = async (app : FastifyInstance) =>
 {
@@ -54,9 +67,10 @@ const registerPlugins = async (app : FastifyInstance) =>
 const startServer = async () => {
 	try {
 		dotenv.config({ path: './secrets/.env' });
-
+		
 		await initializeDatabase();
 		await registerPlugins(app);
+		registerSchemas(app);
 		await app.register(authRoutes);
 		await app.register(gameRoutes);
 		await app.register(friendRoutes);
