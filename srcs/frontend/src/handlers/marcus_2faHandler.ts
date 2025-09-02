@@ -1,62 +1,4 @@
-
 import QRCode from "qrcode";
-
-
-//async is used only for event, so here no need
-export function marcus_2faEmail(method: string, checkboxid: string) {
-	// Create the container div
-	const inputBox: HTMLDivElement = document.createElement("div");
-	inputBox.id = "email2fa-input";
-	inputBox.className = "mt-4 hidden flex flex-col items-center space-y-4";
-
-	// Create the input element
-	const emailInput: HTMLInputElement = document.createElement("input");
-	emailInput.type = "text";
-	emailInput.id = "twofa-token-email";
-	emailInput.placeholder = "Enter 6-digit code";
-	emailInput.className = "border p-2 rounded w-40 text-center";
-
-	// Create the verify button
-	const verifyBtn: HTMLButtonElement = document.createElement("button");
-	verifyBtn.id = "verify-2fa-email";
-	verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded";
-	verifyBtn.textContent = "Verify";
-
-	// Append input and button to the container
-	inputBox.append(emailInput, verifyBtn);
-
-
-	const email2faSwitch = create_2faSwitch(method, checkboxid, async (checked) => {
-		const id = localStorage.getItem("id");
-
-		if (checked) {
-			inputBox.classList.remove("hidden");
-
-			await fetch("http://localhost:3000/2fa/setup/email", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ id }),
-			});
-			console.log("Email 2FA ON");
-			protect2faNotify("✅ Email 2FA Activated!");
-		} else {
-			inputBox.classList.add("hidden");
-
-			await fetch("http://localhost:3000/2fa/disable", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ id }),
-			});
-			console.log("Email 2FA OFF");
-			protect2faNotify("❌ Email 2FA Disabled!");
-		}
-	});
-	email2faSwitch.appendChild(inputBox);
-	return email2faSwitch;
-};
-
 
 //double check whats the checkboxid for again?
 export function marcus_2faGoogle(method: string, checkboxid: string) {
@@ -129,6 +71,62 @@ export function marcus_2faGoogle(method: string, checkboxid: string) {
 	});
 	google2faSwitch.appendChild(qrSection);
 	return google2faSwitch;
+};
+
+
+//async is used only for event, so here no need
+export function marcus_2faEmail(method: string, checkboxid: string) {
+	// Create the container div
+	const inputBox: HTMLDivElement = document.createElement("div");
+	inputBox.id = "email2fa-input";
+	inputBox.className = "mt-4 hidden flex flex-col items-center space-y-4";
+
+	// Create the input element
+	const emailInput: HTMLInputElement = document.createElement("input");
+	emailInput.type = "text";
+	emailInput.id = "twofa-token-email";
+	emailInput.placeholder = "Enter 6-digit code";
+	emailInput.className = "border p-2 rounded w-40 text-center";
+
+	// Create the verify button
+	const verifyBtn: HTMLButtonElement = document.createElement("button");
+	verifyBtn.id = "verify-2fa-email";
+	verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded";
+	verifyBtn.textContent = "Verify";
+
+	// Append input and button to the container
+	inputBox.append(emailInput, verifyBtn);
+
+
+	const email2faSwitch = create_2faSwitch(method, checkboxid, async (checked) => {
+		const id = localStorage.getItem("id");
+
+		if (checked) {
+			inputBox.classList.remove("hidden");
+
+			await fetch("http://localhost:3000/2fa/setup/email", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ id }),
+			});
+			console.log("Email 2FA ON");
+			protect2faNotify("✅ Email 2FA Activated!");
+		} else {
+			inputBox.classList.add("hidden");
+
+			await fetch("http://localhost:3000/2fa/disable", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ id }),
+			});
+			console.log("Email 2FA OFF");
+			protect2faNotify("❌ Email 2FA Disabled!");
+		}
+	});
+	email2faSwitch.appendChild(inputBox);
+	return email2faSwitch;
 };
 
 // the => void is meant to tell TS that its just a callback function.
