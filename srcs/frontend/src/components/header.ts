@@ -44,15 +44,17 @@ export function createHeader(): HTMLElement {
 	const isLoggedIn = !!localStorage.getItem("id");//get the user id
 	if (isLoggedIn)
 	{
-        // marcustest_profile
-		const marcus_profileItem = createMenuItem("Marcus_Profile", "/marcus_profile", "testing");
+        // marcus_profile_version
+		const marcus_profileItem = createMenuItem("Newer_Profile", "/newer_replacement_profile", "testing");
+        marcus_profileItem.querySelector(".tooltip")?.classList.remove("left-0");
+		marcus_profileItem.querySelector(".tooltip")?.classList.add("-left-20");
 		nav.append(marcus_profileItem);
 
-        // profile
-		const profileItem = createMenuItem("Profile", "/profile", "Check your profile");
-		profileItem.querySelector(".tooltip")?.classList.remove("left-0");
-		profileItem.querySelector(".tooltip")?.classList.add("-left-20");
-		nav.append(profileItem);
+        // ivan_profile version
+		// const profileItem = createMenuItem("Profile", "/profile", "Check your profile");
+		// profileItem.querySelector(".tooltip")?.classList.remove("left-0");
+		// profileItem.querySelector(".tooltip")?.classList.add("-left-20");
+		// nav.append(profileItem);
 
         //logout
         const logoutbutton = createMenuItem("Log Out", "/", "Log Out");

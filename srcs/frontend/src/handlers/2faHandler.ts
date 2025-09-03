@@ -129,7 +129,7 @@ export function verify2faHandler(buttonId: string, inputId: string) {
 export function verify2faLoginHandler(buttonId: string, inputId: string) {
   const button = document.getElementById(buttonId) as HTMLButtonElement;
   const input = document.getElementById(inputId) as HTMLInputElement;
-  const email2faSection = document.getElementById("email2fa-input") as HTMLElement;
+  // const email2faSection = document.getElementById("email2fa-input") as HTMLElement;
   if (!button || !input) {
     console.warn("Verify button or input not found");
     return;

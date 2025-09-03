@@ -22,7 +22,7 @@ export function renderApp() {
 		renderHomePage(app);
 	} else if (path === '/profile') {
 		renderProfilePage(app);
-	} else if (path === '/marcus_profile') {
+	} else if (path === '/newer_replacement_profile') {
 		marcus_renderProfilePage(app);
 	} else if (path === '/play'){
 		renderModes(app);
