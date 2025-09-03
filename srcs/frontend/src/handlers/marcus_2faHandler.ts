@@ -35,51 +35,51 @@ export function marcus_2faGoogle(method: string, checkboxid: string) {
 
 		//const hiddenSwitchInput = document.getElementById(checkboxid) as HTMLInputElement | null;//yes u get info from checkbox for hiddenswich with getElementbyId
 		console.log(hiddenSwitchInput);
-		if (hiddenSwitchInput) {
+		if (hiddenSwitchInput && hiddenSwitchInput.checked) {
 			hiddenSwitchInput.checked = false;
 			qrSection.classList.remove("hidden");
 			console.log("HAHAHAHAHAHAHAHAHAHA Value of checked:", hiddenSwitchInput.checked);
-			const qrContainer = qrBox;
-			if (qrContainer) {
-				console.log("Inside qrContainer");
-				const res = await fetch("http://localhost:3000/2fa/setup", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ id }),
-				});
-				const data = await res.json();
-				console.log("qrContainer:", qrContainer);
-				console.log("going inside if condition!");
-				if (qrContainer) {
-					console.log("i am inside the if qrContainer!");
-					qrContainer.innerHTML = "";
-					const canvas = document.createElement("canvas");
-					qrContainer.appendChild(canvas);
-			
-					QRCode.toCanvas(canvas, data.otpauth_url, { width: 200 }, (err) => {
-						if (err) 
-							console.error(err);
-						else 
-							console.log("QR code generated!");
-					});
-				}
-			}
-			console.log("Google 2FA ON");
-			protect2faNotify("✅ Google 2FA Activated!");
-		} else {
-			qrSection.classList.add("hidden");
-				
 			await fetch("http://localhost:3000/2fa/disable", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
 				body: JSON.stringify({ id }),
 			});
-			console.log("Google 2FA OFF");
-			protect2faNotify("❌ Google 2FA Disabled!");
-		}
-	}
+			console.log("Google 2FA ON");
+			protect2faNotify("✅ Google 2FA Activated!");
+		} else {
+			// hiddenSwitchInput.checked = true;
+			//qrSection.classList.add("hidden");
+		// 	qrSection.classList.remove("hidden");
+		// 	const qrContainer = qrBox;
+		// 	if (qrContainer) {
+		// 		console.log("Inside qrContainer");
+		// 		const res = await fetch("http://localhost:3000/2fa/setup", {
+		// 			method: "POST",
+		// 			headers: { "Content-Type": "application/json" },
+		// 			credentials: "include",
+		// 			body: JSON.stringify({ id }),
+		// 		});
+		// 		const data = await res.json();
+		// 		console.log("qrContainer:", qrContainer);
+		// 		console.log("going inside if condition!");
+		// 		if (data) {
+		// 			console.log("i am inside the if qrContainer!");
+		// 			qrContainer.innerHTML = "";
+		// 			const canvas = document.createElement("canvas");
+		// 			qrContainer.appendChild(canvas);
+			
+		// 			QRCode.toCanvas(canvas, data.otpauth_url, { width: 200 }, (err) => {
+		// 				if (err) 
+		// 					console.error(err);
+		// 				else 
+		// 					console.log("QR code generated!");
+		// 			});
+		// 		}
+		// 	console.log("Google 2FA OFF");
+		// 	protect2faNotify("❌ Google 2FA Disabled!");
+		// }
+	}}
 	google2faSwitch.appendChild(qrSection);
 	update_hiddenSwitch();
 	return google2faSwitch;
