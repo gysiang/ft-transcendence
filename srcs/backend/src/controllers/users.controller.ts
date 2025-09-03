@@ -37,7 +37,6 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 			});
 			sendEmailCode(user.email, code);
 		}
-		console.log(user.id);
 		return reply
 			.status(200)
 			.send({ message: 'stage-2fa',

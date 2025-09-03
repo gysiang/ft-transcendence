@@ -56,6 +56,11 @@ export function createHeader(): HTMLElement {
 		// profileItem.querySelector(".tooltip")?.classList.add("-left-20");
 		// nav.append(profileItem);
 
+		// friends
+		const friendsItem = createMenuItem("Friends", "/friends", "Friends");
+		friendsItem.querySelector(".tooltip")?.classList.remove("left-0");
+		friendsItem.querySelector(".tooltip")?.classList.add("-left-20");
+		nav.append(friendsItem);
         //logout
         const logoutbutton = createMenuItem("Log Out", "/", "Log Out");
         logoutbutton.addEventListener("click", (e: Event) => {
