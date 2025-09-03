@@ -34,6 +34,22 @@ export async function removeFriend(db: Database, friend: Friend)
 	);
 }
 
+export async function isFriendAdded(db: Database, user_id: string, friend_email: string) {
+	const row = await db.get(
+		`SELECT 1
+		 FROM friends f
+		 JOIN users u ON f.friend_id = u.id
+		 WHERE f.user_id = ? AND u.email = ?
+		 LIMIT 1`,
+		[user_id, friend_email]
+	);
+	if (row) {
+		return (true);
+	} else {
+		return (false);
+	}
+}
+
 export async function getFriends(db: Database, user_id: string)
 {
 	const result = await db.all(

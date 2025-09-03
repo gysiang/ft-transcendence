@@ -1,10 +1,9 @@
 import { renderHeader } from "./components/header";
-import { profileHandler } from "./handlers/profileHandler";
+import { profileHandler, profilepicHandler } from "./handlers/profileHandler";
 import { initTwoFAToggle, initTwoFAToggleEmail, verify2faHandler, initTwoFAMutualExclusion } from './handlers/2faHandler'
 
 export async function renderProfilePage(container: HTMLElement) {
 	renderHeader(container);
-
 	try {
 		const userId = localStorage.getItem("id");
 		const response = await fetch(`http://localhost:3000/api/profile/${userId}`, {
@@ -15,7 +14,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		}
 
 		const user = await response.json();
-		console.log(user);
+		//console.log(user);
 		// Main wrapper for centering everything
 		const toggleWrapper = document.createElement("div");
 		toggleWrapper.innerHTML=`
@@ -81,12 +80,14 @@ export async function renderProfilePage(container: HTMLElement) {
 
 		// Profile image
 		const img = document.createElement("img");
+		img.id = "profile-pic";
 		img.src = user.profile_picture;
 		img.alt = `${user.name}'s profile picture`;
 		img.className = "w-24 h-24 rounded-full object-cover shadow-md";
 
 		// File input (hidden)
 		const fileInput = document.createElement("input");
+		fileInput.id = "file-input";
 		fileInput.type = "file";
 		fileInput.accept = "image/*";
 		fileInput.style.display = "none";
@@ -98,44 +99,6 @@ export async function renderProfilePage(container: HTMLElement) {
 		uploadBtn.className =
 			"text-sm text-gray-700 bg-gray-200 px-3 py-1 rounded-full hover:bg-gray-300 transition";
 		uploadBtn.addEventListener("click", () => fileInput.click());
-
-		// Preview selected image
-		fileInput.addEventListener("change", async() => {
-			const file = fileInput.files?.[0];
-			if (file) {
-
-				const maxSize = 40 * 1024;
-				if (file.size > maxSize) {
-					alert("File size exceeds 40 KB limit.");
-					fileInput.value = "";
-					return;
-				}
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					img.src = e.target?.result as string;
-				};
-				reader.readAsDataURL(file);
-
-				const formData = new FormData();
-				formData.append("profile_picture", file);
-
-				try {
-				const res = await fetch(`http://localhost:3000/api/profile/${userId}/pic`, {
-					method: "PATCH",
-					body: formData,
-					credentials: "include",
-				});
-
-				if (!res.ok) throw new Error("Upload failed");
-				const data = await res.json();
-				//console.log(data);
-				img.src = data.image;
-				} catch (err) {
-				console.error("Error uploading image:", err);
-				}
-			}
-		});
-
 		// Profile form
 		const profileContainer = document.createElement("div");
 		profileContainer.innerHTML = `
@@ -181,6 +144,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		(document.getElementById("name") as HTMLInputElement).value = user.name;
 		(document.getElementById("email") as HTMLInputElement).value = user.email;
 		profileHandler("profile-form");
+		profilepicHandler("file-input");
 		initTwoFAToggle("toggle-2fa");
 		initTwoFAToggleEmail("toggle-2fa-email");
 		verify2faHandler("verify-2fa-app", "twofa-token-app");
