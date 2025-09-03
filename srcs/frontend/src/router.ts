@@ -2,6 +2,7 @@ import { renderLoginPage } from "./login.js";
 import { renderHomePage } from "./home.js";
 import { renderSignUpPage } from "./signup";
 import { renderProfilePage } from "./profile.js";
+import { renderFriendsPage } from "./friends.js";
 import { renderModes } from "./pong/registration/modes.js";
 
 export function renderApp() {
@@ -19,5 +20,7 @@ export function renderApp() {
 		renderProfilePage(app);
 	} else if (path ==="/play"){
 		renderModes(app);
+	} else if (path == '/friends') {
+		renderFriendsPage(app);
 	}
 }
