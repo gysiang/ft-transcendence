@@ -85,15 +85,24 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 			//determine which files and which to fetch
 			//app.get<{Params: IMatchParams}>('/api/game/data/:id', {preHandler: [app.authenticate]}, getAllMatch);
-			// const res = await fetch('http://localhost:3000/api/game/data/${userId}');
-			// if (!res.ok) {
-			// 	throw new Error(`HTTP error! Status: ${res.status}`);
-			// }
+			const res = await fetch('http://localhost:3000/api/game/data/${userId}', {
+				method: "GET",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ userId }),
+			});
+			if (!res.ok) {
+			 	throw new Error(`HTTP error! Status: ${res.status}`);
+			}
+			const user_matches = await res.json();
+			//user_matches
 			// const obtainstats = await response.json();
 			// console.log("user:", user, " | And their stats:", obtainstats);
 
 
 			//determine also what they can present and print out here
+				//notes
+				//instead of “all tournaments created by this user,” you wanted “all tournaments this user participated in (as player1 or player2)”?
 			//fetch data from backend and print out the stats
 
 			//append
