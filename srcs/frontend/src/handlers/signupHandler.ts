@@ -20,16 +20,14 @@ export async function signupHandler(formId: string) {
 				credentials: "include",
 				body: JSON.stringify({ name, email, password }),
 			});
-
+		const data = await res.json();
 		if (!res.ok) {
-			const err = await res.json();
-			errorDiv!.textContent = err.message;
+			errorDiv!.textContent = data.message;
 		} else {
-			const data = await res.json();
 			localStorage.setItem("id", data.id);
 			console.log("Sign UP success! Check local Storage!");
 			history.pushState({}, '', "/");
-			renderApp(); //renderpages
+			renderApp();
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
@@ -43,4 +41,15 @@ export async function googleHandler(buttonId: string) {
 	googleButton.addEventListener('click', () => {
 		window.location.href = 'http://localhost:3000/auth/google';
 	});
+	window.addEventListener("DOMContentLoaded", () => {
+	const params = new URLSearchParams(window.location.search);
+	const userId = params.get("userId");
+
+	if (userId) {
+		console.log("Logged in user:", userId);
+		localStorage.setItem("userId", userId);
+
+		window.history.replaceState({}, document.title, "/");
+  }
+});
 }

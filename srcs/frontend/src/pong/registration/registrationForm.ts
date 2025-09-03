@@ -6,6 +6,7 @@ import { renderTournamentBracket } from "../matchUI";
 import { createTournament } from "../Tournament/backendutils";
 import { checkAuthentication } from "./auth";
 import { api } from "./apiWrapper";
+import { validAlias,validGoal,setFieldError } from "./InputValidation";
 
 async function getLoggedInUserName(): Promise<string | null> {
   const id = localStorage.getItem('id'); 
@@ -103,7 +104,7 @@ export function tournamentForm(app: HTMLElement): void {
 			<div>
 				<label class="block mb-2">Number of Players (2–8)</label>
 				<input id="numPlayers" type="number" min="2" max="8" value="4" class="w-full px-4 py-2 text-black rounded-md" />
-                <div id="playerCountAlert" class="text-red-600 text-sm mt-1 hidden">Number of players must be between 2 and 8.</div>
+        <div id="playerCountAlert" class="text-red-600 text-sm mt-1 hidden">Number of players must be between 2 and 8.</div>
 
 			</div>
 
@@ -111,8 +112,10 @@ export function tournamentForm(app: HTMLElement): void {
 
 			<div>
 				<label class="block mb-2">Goals to Win</label>
-				<input id="goalLimit" type="number" min="1" max="20" value="5" class="w-full px-4 py-2 text-black rounded-md" />
+				<input id="goalLimit" type="number" min="1" max="10" value="5" class="w-full px-4 py-2 text-black rounded-md" />
+        <div id="goalError" class="text-red-600 text-sm mt-1"></div>
 			</div>
+      <div id="formError" class="text-red-700 text-sm"></div>
 
 			<button id="startTournament" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md text-xl">
 				Start Tournament
@@ -123,6 +126,9 @@ export function tournamentForm(app: HTMLElement): void {
 	const playerCountInput = document.getElementById("numPlayers") as HTMLInputElement;
 	const aliasContainer = document.getElementById("playerInputs")!;
 	const startButton = document.getElementById("startTournament")!;
+  const formError = document.getElementById("formError")!;
+  const goalInput = document.getElementById("goalLimit") as HTMLInputElement;
+  const goalError = document.getElementById("goalError")!;
 
   let userAlias: string | null = null;
     function updateAliasFields(userAlias?: string | null) {
@@ -145,6 +151,8 @@ export function tournamentForm(app: HTMLElement): void {
             input.placeholder = `Player ${i + 1}`;
             input.className = "w-full p-2 border border-gray-300 rounded text-black";
             input.dataset.index = i.toString();
+            input.maxLength = 32;
+            input.required = true;
             
             if (i === 0 && userAlias)
               {
@@ -152,7 +160,13 @@ export function tournamentForm(app: HTMLElement): void {
                 input.readOnly = true;
                 input.classList.add('bg-gray-100', 'cursor-not-allowed');
               }
-            aliasContainer.appendChild(input);
+              input.addEventListener('input', () => {
+                const msg = validAlias(input.value || '');
+                setFieldError(input, msg);});
+        
+              aliasContainer.appendChild(input);
+              setFieldError(input, null);
+            
         }
     }
     
@@ -162,21 +176,52 @@ export function tournamentForm(app: HTMLElement): void {
     updateAliasFields(userAlias);
     playerCountInput.addEventListener("input", () => updateAliasFields(userAlias));
   })();
-  
-	startButton.addEventListener("click", () => {
-		const aliasInputs = aliasContainer.querySelectorAll("input");
-		const players: Player[] = [];
+  goalInput.addEventListener('input', () => {
+    const n = parseInt(goalInput.value, 10);
+    const err = validGoal(Number.isNaN(n) ? 0 : n);
+    goalError.textContent = err || '';
+    goalInput.classList.toggle('border-red-500', !!err);
+  });
 
-		aliasInputs.forEach((input, i) => {
-			const name = input.value.trim() || `Player ${i + 1}`;
-			players.push({ name, side: "left" }); 
-		});
+  startButton.addEventListener("click", () => {
+    formError.textContent = '';
 
-		const goalLimit = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
-		handleStartTournament(app, players, goalLimit);
-	});
+    const aliasInputs = Array.from(aliasContainer.querySelectorAll("input")) as HTMLInputElement[];
+    const players: Player[] = [];
+
+    let firstInvalid: HTMLInputElement | null = null;
+    for (const input of aliasInputs) {
+      const msg = validAlias(input.value || '');
+      setFieldError(input, msg);
+      if (msg && !firstInvalid) firstInvalid = input;
+    }
+
+    const names = aliasInputs.map(i => i.value.trim().toLowerCase());
+    const dupMap = new Map<string, number>();
+    names.forEach(n => dupMap.set(n, (dupMap.get(n) || 0) + 1));
+    const duplicates = names.filter(n => dupMap.get(n)! > 1);
+    if (duplicates.length) {
+      formError.textContent = 'Aliases must be unique.';
+      if (!firstInvalid)
+        firstInvalid = aliasInputs[names.indexOf(duplicates[0])];
+    }
+
+    const goal = parseInt(goalInput.value, 10);
+    const goalMsg = validGoal(Number.isNaN(goal) ? 0 : goal);
+    goalError.textContent = goalMsg || '';
+    if (goalMsg && !firstInvalid) firstInvalid = goalInput as any;
+
+    if (firstInvalid) {
+      firstInvalid.focus();
+      return;
+    }
+    aliasInputs.forEach((input, i) => { const name = input.value.trim() || `Player ${i + 1}`;
+      players.push({ name, side: "left" });
+    });
+
+    handleStartTournament(app, players, goal);
+  });
 }
-
 export async function handleStartTournament(
   app: HTMLElement,
   players: Player[],

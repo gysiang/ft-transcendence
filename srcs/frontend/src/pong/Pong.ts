@@ -154,9 +154,7 @@ export class Game {
           const mode = localStorage.getItem("mode");
       
           if (mode === "quickplay") {
-            localStorage.clear();
-            setTimeout(() => {
-              window.location.href = "/play";}, 2000);
+            //localStorage.clear();
           }
           return;
         }

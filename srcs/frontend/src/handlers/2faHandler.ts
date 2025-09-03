@@ -171,8 +171,7 @@ export function verify2faLoginHandler(buttonId: string, inputId: string) {
 }
 
 export function initTwoFAMutualExclusion(twofa_method: string) {
-	console.log("here", twofa_method);
-	const googleToggle = document.getElementById("toggle-2fa-google") as HTMLInputElement;
+	const googleToggle = document.getElementById("toggle-2fa") as HTMLInputElement;
 	const emailToggle = document.getElementById("toggle-2fa-email") as HTMLInputElement;
 
 	if (!googleToggle || !emailToggle) return;

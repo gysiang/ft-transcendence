@@ -37,13 +37,12 @@ export async function loginHandler(formId: string) {
 				email2fa.classList.remove("hidden");
 			}
 			else if (!res.ok) {
-				const err = await res.json();
-				errorDiv!.textContent = err.message;
+				errorDiv!.textContent = data.message;
 			} else {
 				localStorage.setItem("id", data.id);
 				console.log("Logged in! Your Id should b in local storage?");
 				history.pushState({}, '', "/");
-				renderApp(); //renderpages
+				renderApp();
 		}} catch (err) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
