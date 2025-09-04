@@ -6,6 +6,7 @@ import { verify2faHandler } from './handlers/2faHandler'
 // import { createLogger } from "vite";
 
 //https://tailwind.build/classes
+//https://tailwindcss.com/docs/vertical-align
 //https://tailwindcss.com/docs/hover-focus-and-other-states
 //https://szasz-attila.medium.com/vue3-radio-button-with-tailwind-css-a-step-by-step-guide-4a9c756b7b2a
 export async function marcus_renderProfilePage(container: HTMLElement) {
@@ -71,33 +72,73 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			//(1e)--------------------------Profile Section--------------------------
 
 			//(2)--------------------------game stats Section--------------------------
-			const statsdiv = document.createElement("div");
-			statsdiv.id = "statsdata";
-			statsdiv.className = "mx-auto flex max-w-sm items-center gap-x-4 rounded-xl \
+			const statsHeaderWrapper = document.createElement("div");
+			statsHeaderWrapper.id = "statsboxWrapper";
+			statsHeaderWrapper.className = "flex mx-auto max-w-sm gap-x-4 rounded-xl \
 									bg-black p-6 shadow-lg outline outline-black/5 \
 									dark:bg-slate-800 dark:shadow-none \
 									dark:-outline-offset-1 dark:outline-white/10";
+			const statsdiv = document.createElement("div");
+			statsdiv.className = "w-fit";
 
-			//create text as header
-			const statsheader = document.createElement("p");
-			statsheader.className = "text-lg font-bold text-yellow-900 dark:text-white text-shadow-lg/15";
+			//create text as header (Add a box to surrond this as a header ltr)
+			const statsheader = document.createElement("h1");
+			statsheader.className = "inline-block align-top border bg-sky-500 \
+                       					bg-gradient-to-r bg-clip-padding p-2 text-lg font-bold \
+                        				text-yellow-300 dark:text-white shadow-lg m-0";
 			statsheader.textContent = "Stats";
 
 			//determine which files and which to fetch
-			//app.get<{Params: IMatchParams}>('/api/game/data/:id', {preHandler: [app.authenticate]}, getAllMatch);
-			const res = await fetch('http://localhost:3000/api/game/data/${userId}', {
+			const res = await fetch(`http://localhost:3000/api/game/data/${userId}`, {
 				method: "GET",
-				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ userId }),
 			});
 			if (!res.ok) {
 			 	throw new Error(`HTTP error! Status: ${res.status}`);
 			}
-			const user_matches = await res.json();
-			//user_matches
-			// const obtainstats = await response.json();
-			// console.log("user:", user, " | And their stats:", obtainstats);
+			const matches = await res.json();
+			console.log("user:", user.name, " | userId:", userId, " | And their stats:", matches);
+			//user_matches--------
+				//Print total matches and put on statsboard
+				const totalMatches = document.createElement("p");
+				totalMatches.className = "text-center text-l font-bold \
+											text-yellow-300 dark:text-white";
+				totalMatches.textContent = "Total Matches played: " + matches.data.length;
+				console.log("[Total_Score]User:", user.name, totalMatches.textContent);
+
+				//print Win/loses and put on statsboard as words for now
+				const win_lose_result = document.createElement("p");
+				win_lose_result.className = "text-center text-mid font-bold \
+											text-yellow-700 dark:text-white text-shadow-lg/15 \
+											flex justify-center gap-1";
+				win_lose_result.textContent = "Win/Lose Ratio: ";
+				const wins = matches.data.filter(m => m.winner === user.name).length;
+				const win_ratio = document.createElement("p");
+				win_ratio.className = "text-center text-mid font-bold \
+											text-green-700 dark:text-white text-shadow-lg/15";
+				win_ratio.textContent = `${wins}`;
+				console.log("[Score(win)]User:", user.name, win_ratio.textContent);
+				const slash_win_lose = document.createElement("p");
+				slash_win_lose.className = "text-center text-mid font-bold \
+											text-yellow-300 dark:text-white text-shadow-lg/15";
+				slash_win_lose.textContent = "/";
+				const lose_ratio = document.createElement("p");
+				lose_ratio.className = "text-center text-mid font-bold \
+										text-red-700 dark:text-white text-shadow-lg/15";
+				const losses = matches.data.length - wins;
+				lose_ratio.textContent = `${losses}`;
+				console.log("[Score(lose)]User:", user.name, lose_ratio.textContent);
+
+
+				//create a second page for more details copy and paste the total matches + win/lose
+					//const totalMatches = document.createElement("a");-->/stats
+				//the wins and loses improve it by using a circle chart to show the stats
+					//https://flowbite.com/docs/plugins/charts/
+				//create a second box to contain the latest tournament data of wins/loses
+				win_lose_result.append(win_ratio, slash_win_lose, lose_ratio)
+			//user_matches--------
+
+			
 
 
 			//determine also what they can present and print out here
@@ -106,8 +147,9 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			//fetch data from backend and print out the stats
 
 			//append
-			statsdiv.append(statsheader);
-			profile_stats_div.append(profilediv, statsdiv)
+			statsdiv.append(statsheader, totalMatches, win_lose_result);
+			statsHeaderWrapper.append(statsdiv);
+			profile_stats_div.append(profilediv, statsHeaderWrapper)
 			//(2e)--------------------------game stats Section--------------------------
 		//--------------------------Wrapper(profile/stats) Section--------------------------
 

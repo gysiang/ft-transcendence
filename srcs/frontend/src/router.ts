@@ -29,5 +29,8 @@ export function renderApp() {
 		renderModes(app);
 	} else if (path == '/friends') {
 		renderFriendsPage(app);
-	}
+	} 
+	//  else if (path == '/stats') {
+	// 	renderFriendsPage(app);
+	// }
 }
