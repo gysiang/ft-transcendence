@@ -3,6 +3,7 @@ import { addFriend, removeFriend, getFriends, Friend, isFriendAdded } from '../m
 import { IFriendParams } from '../models/friend.model';
 import { findUserByEmail, findUserById, User } from '../models/user.model';
 import { IUserParams } from '../models/user.model';
+import { processEmailInput } from '../utils/helper'
 
 export async function newFriend(req: FastifyRequest, reply: FastifyReply) {
 
@@ -15,14 +16,15 @@ export async function newFriend(req: FastifyRequest, reply: FastifyReply) {
 		if (req.userData?.id != user_id) {
 			return reply.status(400).send({ message: "Forbidden" });
 		}
+		let sanemail = processEmailInput(friend_email);
 		const db = req.server.db;
-		const newFriend = await findUserByEmail(db, friend_email);
+		const newFriend = await findUserByEmail(db, sanemail);
 		if (!newFriend)
 			return reply.status(401).send({ message: "Invalid email" });
 		if (!newFriend.id)
 			return reply.status(401).send({ message: "Friend id not found" });
 		// check if friend is already added
-		if (await isFriendAdded(db, user_id, friend_email)) {
+		if (await isFriendAdded(db, user_id, sanemail)) {
 			return reply.status(400).send({ message: "Friend already added" });
 		}
 		await addFriend(db, {user_id, friend_id: newFriend.id});

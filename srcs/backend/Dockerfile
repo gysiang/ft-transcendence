@@ -1,18 +1,18 @@
-FROM node:24-alpine
+FROM node:24-bookworm-slim
 
 WORKDIR /app
 
-COPY package*.json ./
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends sqlite3 && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apk update && apk add sqlite
-
-RUN npm install
-
+# Copy project files
 COPY . .
 
 COPY secrets/.env ./secrets/.env
 
-RUN npm run build
+# Install dependencies (force rebuild sodium-native) and build project
+RUN npm install && npm run build
 
 EXPOSE 3000
 

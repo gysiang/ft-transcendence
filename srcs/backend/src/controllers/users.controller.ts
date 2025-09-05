@@ -6,6 +6,7 @@ const cookie = require("cookie");
 import { serialize } from 'cookie';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client } from '../services/s3';
+import { processEmailInput, processUsername, check2faToken, passwordPolicy } from '../utils/helper'
 import nodemailer from 'nodemailer'
 import speakeasy from 'speakeasy';
 
@@ -16,9 +17,10 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 				email: string;
 				password: string;
 			}
+	let sanemail = processEmailInput(email);
 
 	const db = req.server.db;
-	const user = await findUserByEmail(db, email);
+	const user = await findUserByEmail(db, sanemail);
 	if (!user) {
 		return reply.status(401).send({ message: "Invalid email" });
 	}
@@ -81,13 +83,18 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 				password: string;
 			};
 
+	let sanename = processUsername(name);
+	let sanemail = processEmailInput(email);
+	if (!passwordPolicy(password))
+		return reply.status(400).send({ message: 'Password should contain at least 7 Char, 1 Uppercase, 1 Lowercase, 1 Number' });
+
 	const db = req.server.db;
-	const existing = await findUserByEmail(db, email);
+	const existing = await findUserByEmail(db, sanemail);
 	if (existing) {
 		return reply.status(400).send({ message: 'Email already exists' });
 	}
 	const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
-	const user = await createUser(db, { name, email, password, profile_picture });
+	const user = await createUser(db, { name: sanename, email: sanemail, password, profile_picture });
 
 	const payload = {
 		id: user.id,
@@ -343,7 +350,8 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 		return reply.status(401).send({ message: "id is required" });
 	if (!token)
 		return reply.status(401).send({ message: "token is required" });
-
+	if (!check2faToken(token))
+		return reply.status(401).send({ message: "token is not 6 digits" });
 	try {
 	const db = req.server.db;
 	const user = await findUserById(db, id);
