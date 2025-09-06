@@ -22,7 +22,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 		const user = await response.json();// Still in try block just in case json parsing to user fails
-		console.log(user);
+		console.log("Data From USER:", user);
 
 		//--------------------------Wrapper(profile/stats) Section--------------------------
 		const profile_stats_div = document.createElement("div");
@@ -51,7 +51,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			p_email.textContent = user.email;
 
 			const link = document.createElement("a");
-			link.href = "/profile"; //the "/location"
+			link.href = "/profile/update_profile"; //the "/location"
 			link.className = "rounded-xl shadow-lg/40 px-2 py-0.5 text-center text-white font-bold \
 								bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 \
 								focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
@@ -108,9 +108,9 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 				//print Win/loses and put on statsboard as words for now
 				const win_lose_result = document.createElement("p");
-				win_lose_result.className = "text-center text-mid font-bold \
+				win_lose_result.className = "text-mid font-bold \
 											text-yellow-700 dark:text-white text-shadow-lg/15 \
-											flex justify-center gap-1";
+											flex gap-1";
 				win_lose_result.textContent = "Win/Lose Ratio: ";
 				const wins = matches.data.filter(m => m.winner === user.name).length;
 				const win_ratio = document.createElement("p");
@@ -128,6 +128,13 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				const losses = matches.data.length - wins;
 				lose_ratio.textContent = `${losses}`;
 				console.log("[Score(lose)]User:", user.name, lose_ratio.textContent);
+
+				const stats_link = document.createElement("a");
+				stats_link.href = "/profile/stats"; //the "/location"
+				stats_link.className = "animate-pulse rounded-xl shadow-lg/40 px-2 py-0.5 text-center text-yellow-300 font-bold \
+									bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 \
+									focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
+				stats_link.textContent = "Check your stats"; // For textbox name
 
 
 				//create a second page for more details copy and paste the total matches + win/lose
@@ -147,7 +154,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			//fetch data from backend and print out the stats
 
 			//append
-			statsdiv.append(statsheader, totalMatches, win_lose_result);
+			statsdiv.append(statsheader, totalMatches, win_lose_result, stats_link);
 			statsHeaderWrapper.append(statsdiv);
 			profile_stats_div.append(profilediv, statsHeaderWrapper)
 			//(2e)--------------------------game stats Section--------------------------

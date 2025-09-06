@@ -3,6 +3,7 @@ import { renderHomePage } from "./home.js";
 import { renderSignUpPage } from "./signup";
 import { renderProfilePage } from "./profile.js";
 import { renderFriendsPage } from "./friends.js";
+import { statsProfile } from "./stats.js";
 import { renderModes } from "./pong/registration/modes.js";
 
 
@@ -22,15 +23,14 @@ export function renderApp() {
 	} else if (path === '/') {
 		renderHomePage(app);
 	} else if (path === '/profile') {
-		renderProfilePage(app);
-	} else if (path === '/newer_replacement_profile') {
 		marcus_renderProfilePage(app);
+	} else if (path === '/profile/update_profile') {
+		renderProfilePage(app);
 	} else if (path === '/play'){
 		renderModes(app);
 	} else if (path == '/friends') {
 		renderFriendsPage(app);
-	} 
-	//  else if (path == '/stats') {
-	// 	renderFriendsPage(app);
-	// }
+	} else if (path == '/profile/stats') {
+		statsProfile(app);
+	}
 }
