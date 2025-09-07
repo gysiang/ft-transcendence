@@ -1,15 +1,32 @@
 import { renderHeader } from "./components/header.ts";
-import { Chart, DoughnutController, LineController, ArcElement,
-		LineElement, PointElement, CategoryScale, LinearScale,
-		Title, Tooltip, Legend } from 'chart.js';
+import { Chart }from 'chart.js/auto';
+import { DoughnutController, ArcElement, 
+		BarController, BarElement, CategoryScale, LinearScale,
+		Decimation, SubTitle, Title, Tooltip, Legend } from 'chart.js'; 	// these are from here:
+													//https://www.chartjs.org/docs/latest/getting-started/integration.html
 
 // register controllers and elements
 Chart.register(
-  DoughnutController, LineController,
-  ArcElement, LineElement, PointElement,
-  CategoryScale, LinearScale,
-  Title, Tooltip, Legend
+  DoughnutController, ArcElement,
+  BarController, BarElement, CategoryScale, LinearScale,
+  Decimation, SubTitle, Title, Tooltip, Legend
 );
+
+const ctx = document.getElementById("myChart") as HTMLCanvasElement;
+
+new Chart(ctx, {
+  type: "doughnut",
+  data: {
+    labels: ["Red", "Blue", "Yellow"],
+    datasets: [
+      {
+        label: "Votes",
+        data: [12, 19, 3],
+        backgroundColor: ["#f87171", "#60a5fa", "#facc15"],
+      },
+    ],
+  },
+});
 
 //reference:
 // https://www.positech.co.uk/cliffsblog/2014/06/16/stats-overload-a-lesson-in-game-over-design/
@@ -59,12 +76,6 @@ export async function statsProfile(container: HTMLElement) {
 				//2.1) Top is donut + line chart and bottom will contain the legends
 				const donutlineWrapper = document.createElement("div");
 				donutlineWrapper.className = "flex flex-row"
-				// const donut_chart = document.createElement("div");
-				// donut_chart.id = "pie_chart";
-				// donut_chart.className = "max-w-sm w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6";
-				// donut_chart.textContent = "pie_chart!";
-				// donutlineWrapper.append(donut_chart);
-				// stats_ranking.appendChild(donutlineWrapper);
 				// Donut chart
 				const donutCanvas = document.createElement("canvas");
 				donutCanvas.id = "donutChart";
@@ -92,6 +103,50 @@ export async function statsProfile(container: HTMLElement) {
 			statsWrapper.append(profile_user, stats_ranking, totalmatches_against_others);
 		//--------------------------Wrapper(stats) Section--------------------------
 		container.appendChild(statsWrapper);
+	
+
+
+	//--------------------------Charts--------------------------
+    // Example stats (replace with user’s actual data when available)
+    const wins = 12;
+    const losses = 5;
+
+    // Donut chart
+    new Chart(donutCanvas, {
+		type: "doughnut",
+		data: {
+			labels: ["Wins", "Losses"],
+			datasets: [
+			{
+				label: "Game Results",
+				data: [wins, losses],
+				backgroundColor: ["#4ade80", "#f87171"], // green & red
+			},
+			],
+		},
+    });
+
+    // Line chart
+    new Chart(lineCanvas, {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr"], // x-axis labels
+        datasets: [
+          {
+            label: "Wins",
+            data: [3, 5, 2, 6],
+            borderColor: "#4ade80",
+            fill: false,
+          },
+          {
+            label: "Losses",
+            data: [1, 2, 1, 3],
+            borderColor: "#f87171",
+            fill: false,
+          },
+        ],
+      },
+    });
 
 	} catch (error) {
 		console.error("Failed to load stats Page:", error);
