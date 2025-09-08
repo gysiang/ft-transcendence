@@ -190,7 +190,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 		//marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email") {}
 		//const email2faSwitch = marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email");
-		const google2faSwitch = marcus_2faGoogle("Activate 2FA via google Auth", "toggle-2fa");
+		const google2faSwitch = marcus_2faGoogle("This button currently does nothing", "toggle-2fa");
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center \
 									justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
