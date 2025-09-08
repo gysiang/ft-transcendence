@@ -67,7 +67,7 @@ const registerPlugins = async (app : FastifyInstance) =>
 const startServer = async () => {
 	try {
 		dotenv.config({ path: './secrets/.env' });
-		
+
 		await initializeDatabase();
 		await registerPlugins(app);
 		registerSchemas(app);
