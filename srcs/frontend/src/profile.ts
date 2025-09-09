@@ -2,6 +2,8 @@ import { renderHeader } from "./components/header";
 import { profileHandler, profilepicHandler } from "./handlers/profileHandler";
 import { initTwoFAToggle, initTwoFAToggleEmail, verify2faHandler, initTwoFAMutualExclusion } from './handlers/2faHandler'
 
+//for colour change for buttons
+//https://tailwindcss.com/docs/hover-focus-and-other-states
 export async function renderProfilePage(container: HTMLElement) {
 	renderHeader(container);
 	try {
@@ -27,7 +29,6 @@ export async function renderProfilePage(container: HTMLElement) {
 		const qrSection = document.createElement("div");
 		qrSection.id = "twofa-section";
 		qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
-
 		qrSection.innerHTML = `
 		<div id="qrcode"></div>
 		<input
@@ -75,7 +76,7 @@ export async function renderProfilePage(container: HTMLElement) {
 			Verify
 		</button>
 		`
-		emailToggleWrapper.append(inputBox);
+		emailToggleWrapper.appendChild(inputBox);
 		profileWrapper.appendChild(emailToggleWrapper);
 
 		// Profile image
@@ -141,8 +142,8 @@ export async function renderProfilePage(container: HTMLElement) {
 		container.appendChild(profileWrapper);
 
 		// Fill in form values
-		(document.getElementById("name") as HTMLInputElement).value = user.name;
-		(document.getElementById("email") as HTMLInputElement).value = user.email;
+		(document.getElementById("name") as HTMLInputElement).value = user.name;// show the original names in profile first
+		(document.getElementById("email") as HTMLInputElement).value = user.email;// show the original email in profile first
 		profileHandler("profile-form");
 		profilepicHandler("file-input");
 		initTwoFAToggle("toggle-2fa");

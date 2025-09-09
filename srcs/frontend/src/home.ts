@@ -20,7 +20,7 @@ export async function renderHomePage(container: HTMLElement) {
 
 	const isLoggedIn = localStorage.getItem("id");//get the user id
 	if (isLoggedIn) {
-		title.append(document.createTextNode("Welcome\""));
+		title.append(document.createTextNode("Welcome \""));
 		title.append(user_name);//insert name here (test atm)
 		title.append(document.createTextNode("\"!"));
 		title.append(document.createElement("br"));
@@ -57,7 +57,9 @@ export async function renderHomePage(container: HTMLElement) {
 	// Tooltip
     const tooltipDiv = document.createElement("div");
     tooltipDiv.className =
-        "tooltip absolute left-1/2 -translate-x-1/2 mt-1 w-max text-sm text-gray-800 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none transition-all duration-1000";
+        "tooltip absolute left-1/2 -translate-x-1/2 mt-1 w-max text-sm text-gray-800 bg-white \
+		border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 \
+		transition-opacity duration-200 pointer-events-none transition-all duration-1000";
     tooltipDiv.textContent = "GO AHEAD MR JOESTAR!";
 
 	// Append link and tooltip to wrapper
