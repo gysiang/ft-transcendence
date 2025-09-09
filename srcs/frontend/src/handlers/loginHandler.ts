@@ -15,11 +15,10 @@ export async function loginHandler(formId: string) {
 
 		if (localStorage.getItem("id")) {
 			console.log("Already logged in, skipping login request");
-			renderApp(); // just re-render homepage or dashboard
+			renderApp();
 			return;
 		}
 
-		//JSON is used as a language to send to backend
 		try {
 			const res = await fetch("http://localhost:3000/api/login", {
 			method: "POST",
@@ -40,10 +39,9 @@ export async function loginHandler(formId: string) {
 				errorDiv!.textContent = data.message;
 			} else {
 				localStorage.setItem("id", data.id);
-				console.log("Logged in! Your Id should b in local storage?");
 				history.pushState({}, '', "/");
 				renderApp();
-		}} catch (err) {
+		}} catch (err: any) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
 	});

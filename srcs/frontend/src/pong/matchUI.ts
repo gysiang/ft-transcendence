@@ -6,10 +6,10 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
       const popup = document.getElementById("match-announcement")!;
       const heading = document.getElementById("match-heading")!;
       const button = document.getElementById("start-match-btn")!;
-  
+
       const left = players.find((p) => p.side === "left")?.name || "Left";
       const right = players.find((p) => p.side === "right")?.name || "Right";
-  
+
       heading.textContent = `${left} vs ${right}`;
       popup.style.display = "flex";
       if (rounds) {
@@ -26,7 +26,7 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
 	const bracket = document.getElementById("bracket");
 	if (!bracket) return;
 
-	bracket.innerHTML = ""; 
+	bracket.innerHTML = "";
 
 	rounds.forEach((round, roundIndex) => {
 		const roundDiv = document.createElement("div");
@@ -37,7 +37,7 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
 		heading.className = "text-xl font-bold mb-2";
 		roundDiv.appendChild(heading);
 
-		round.forEach((match, matchIndex) => {
+		round.forEach((match, _matchIndex) => {
 			const p1 = match.contestant1?.name || "TBD";
 			const p2 = match.contestant2?.name || "BYE";
 			const winner = match.winner?.name;

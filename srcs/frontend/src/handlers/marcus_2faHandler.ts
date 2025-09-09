@@ -1,4 +1,3 @@
-import QRCode from "qrcode";
 // import { verify2faHandler } from '../handlers/2faHandler'
 
 //double check whats the checkboxid for again?
@@ -68,11 +67,11 @@ export function marcus_2faGoogle(method: string, checkboxid: string) {
 		// 			qrContainer.innerHTML = "";
 		// 			const canvas = document.createElement("canvas");
 		// 			qrContainer.appendChild(canvas);
-			
+
 		// 			QRCode.toCanvas(canvas, data.otpauth_url, { width: 200 }, (err) => {
-		// 				if (err) 
+		// 				if (err)
 		// 					console.error(err);
-		// 				else 
+		// 				else
 		// 					console.log("QR code generated!");
 		// 			});
 		// 		}
@@ -209,4 +208,3 @@ export function protect2faNotify(Msg: string, duration = 3000) {
         setTimeout(() => smallbox.remove(), 500);
     }, duration);
 }
-

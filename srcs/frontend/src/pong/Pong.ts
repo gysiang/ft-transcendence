@@ -1,6 +1,6 @@
 import {Ball} from "./Ball.js"
 import { Paddle } from "./Paddle.js";
-import type { Vector2D } from "./types.js";
+//import type { Vector2D } from "./types.js";
 import { Renderer } from "./Renderer.js";
 import type { Player } from "./types.js";
 
@@ -50,7 +50,7 @@ export class Game {
         window.addEventListener("keydown", (e) => {
           this.keys[e.key] = true;
         });
-    
+
         window.addEventListener("keyup", (e) => {
           this.keys[e.key] = false;
         });
@@ -127,16 +127,16 @@ export class Game {
         if (this.trackScore("right")) return;
         this.resetRound();
       }
-    
+
       if (this.ball.position.x - this.ball.radius > this.canvas.width) {
         if (this.trackScore("left")) return;
         this.resetRound();
       }
-    
+
       this.draw();
-        
+
       }
-    
+
     draw(): void
     {
         this.renderer.clear();
@@ -152,18 +152,18 @@ export class Game {
       loop(): void {
         if (this.gameFinished) {
           const mode = localStorage.getItem("mode");
-      
+
           if (mode === "quickplay") {
             //localStorage.clear();
           }
           return;
         }
-      
+
         this.update();
         this.draw();
         requestAnimationFrame(() => this.loop());
       }
-      
+
     startCountdown(): void
     {
       const countdown = ["3","2","1", "GO!"];
@@ -174,7 +174,7 @@ export class Game {
           index++;
           setTimeout(showCountdown, 1000);
         } else {
-          this.start(); 
+          this.start();
         }
       }
       showCountdown();

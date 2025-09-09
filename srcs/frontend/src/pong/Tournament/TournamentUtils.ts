@@ -11,7 +11,7 @@ export function sanitizeRounds(rounds: Match[][]): Match[][] {
     }))
   );
 }
-export function advanceToNextMatchOrRound(match: Match,rounds: Match[][],
+export function advanceToNextMatchOrRound(_match: Match,rounds: Match[][],
   currentRoundIndex: number,currentMatchIndex: number, goalLimit: number
 ): { done: boolean; updatedData?: {
       rounds: Match[][],

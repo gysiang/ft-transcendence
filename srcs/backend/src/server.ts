@@ -49,7 +49,7 @@ const registerPlugins = async (app : FastifyInstance) =>
 
 		app.register(authPlugin);
 		app.register(fastifyCors, {
-			origin: process.env.FRONTEND_URL,
+			origin: ['http://localhost:5173', 'http://localhost:8080'],
 			methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 			credentials: true
 		});

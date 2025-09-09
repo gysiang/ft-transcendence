@@ -28,7 +28,7 @@ export async function signupHandler(formId: string) {
 			console.log("Sign UP success! Check local Storage!");
 			history.pushState({}, '', "/");
 			renderApp();
-		}} catch (err) {
+		}} catch (err : any) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
 	});

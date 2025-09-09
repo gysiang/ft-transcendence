@@ -1,34 +1,37 @@
 services:
-
-  frontend:
-    build:
-      context: ./frontend
-    container_name: frontend
-    networks:
-      - pong-network
-    ports:
-      - "9000:9000"
-    volumes:
-      - frontend_dist:/app/dist
-    restart: always
-
   backend:
     build: ./backend
-    container_name: backend
-    networks:
-      - pong-network
-    volumes:
-      - sqlite_data:/app/data
     env_file:
-      - ../secrets/.env
+      - ./backend/secrets/.env
+    container_name: pong-backend
     expose:
       - "3000"
-    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "3000:3000"
 
+  frontend:
+    build: ./frontend
+    volumes:
+      - frontend-dist:/app/dist
+    container_name: pong-frontend
+
+  nginx:
+    build: ./nginx
+    container_name: pong-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - frontend-dist:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
 
 volumes:
-  sqlite_data:
-  frontend_dist:
-
-networks:
-  pong-network:
+  frontend-dist:
