@@ -22,7 +22,7 @@ export async function authRoutes(app: FastifyInstance) {
 	app.post('/2fa/verify', verify2fa);
 	app.post('/2fa/setup/email',{preHandler: [app.authenticate]}, setUpEmail2FA)
 	app.post('/api/logout', logoutUser);
-	app.get('/api/ping', {preHandler: [app.authenticate]}, async (request, reply) => {
+	app.get('/api/ping', async (request, reply) => {
 		return reply.send({ ok: true });
 	});
 }

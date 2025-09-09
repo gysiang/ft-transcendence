@@ -25,7 +25,7 @@ if (!form) return;
 			errorDiv!.textContent = err.message;
 		} else {
 			window.location.href = "/";
-		}} catch (err) {
+		}} catch (err: any) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
 	});
@@ -33,9 +33,9 @@ if (!form) return;
 
 
 export async function profilepicHandler(fileInputId: string) {
-	const fileInput = document.getElementById(fileInputId) as HTMLElement;
+	const fileInput = document.getElementById(fileInputId) as HTMLInputElement;
 	const userId = localStorage.getItem("id");
-	const profilepic = document.getElementById("profile-pic") as HTMLElement;
+	const profilepic = document.getElementById("profile-pic") as HTMLImageElement;
 
 	fileInput.addEventListener("change", async() => {
 		const file = fileInput.files?.[0];
@@ -55,8 +55,7 @@ export async function profilepicHandler(fileInputId: string) {
 		const formData = new FormData();
 		formData.append("profile_picture", file);
 		try {
-			const res = await fetch(`http://localhost:3000/api/profile/${userId}/pic`,
-			{
+			const res = await fetch(`http://localhost:3000/api/profile/${userId}/pic`, {
 				method: "PATCH",
 				body: formData,
 				credentials: "include",
@@ -65,7 +64,7 @@ export async function profilepicHandler(fileInputId: string) {
 			if (!res.ok) throw new Error("Upload failed");
 				const data = await res.json();
 				profilepic.src = data.image;
-				} catch (err) {
+				} catch (err: any) {
 				console.error("Error uploading image:", err);
 				}
 			}

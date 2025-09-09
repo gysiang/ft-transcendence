@@ -1,9 +1,10 @@
 import { renderHeader } from "./components/header.ts";
 import { Chart }from 'chart.js/auto';
-import { DoughnutController, ArcElement, 
+import { DoughnutController, ArcElement,
 		BarController, BarElement, CategoryScale, LinearScale,
 		Decimation, SubTitle, Title, Tooltip, Legend } from 'chart.js'; 	// these are from here:
 													//https://www.chartjs.org/docs/latest/getting-started/integration.html
+import type { Match } from "./pong/Tournament/singleElim.ts"
 
 // register controllers and elements
 Chart.register(
@@ -53,7 +54,7 @@ export async function statsProfile(container: HTMLElement) {
 		}
 		const matches = await res.json();
 		console.log("user:", user.name, " | userId:", userId, " | And their stats:", matches);
-		const wins = matches.data.filter(m => m.winner === user.name).length;
+		const wins = matches.data.filter((m: Match) => m.winner?.name === user.name).length;
 		const losses = matches.data.length - wins;
 		console.log("THIS data is from stats.ts:", user);
 		//--------------------------Wrapper(stats) Section--------------------------
@@ -70,7 +71,7 @@ export async function statsProfile(container: HTMLElement) {
 									bg-stone-400 p-6 outline outline-black/5 \
 									dark:bg-slate-800 dark:shadow-none \
 									dark:-outline-offset-1 dark:outline-white/10";
-				//1.1) Top is line chart and bottom will be total matches played			
+				//1.1) Top is line chart and bottom will be total matches played
 				const linechartWrapper = document.createElement("div");
 				linechartWrapper.className = "flex flex-col max-w-sm"
 				const lineWrapper = document.createElement("div");
@@ -147,7 +148,7 @@ export async function statsProfile(container: HTMLElement) {
 			statsWrapper.append(totalmatches_against_others, stats_ranking, profile_user);
 		//--------------------------Wrapper(stats) Section--------------------------
 		container.appendChild(statsWrapper);
-	
+
 
 
 	//--------------------------Charts--------------------------

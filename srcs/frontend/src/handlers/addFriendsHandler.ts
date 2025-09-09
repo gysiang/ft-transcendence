@@ -3,16 +3,15 @@ export async function addFriendsHandler(form: HTMLFormElement) {
 
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
-		console.log("[Form Submit] Event triggered");
+		//console.log("[Form Submit] Event triggered");
 
-		const friend_email = (form.querySelector("#friend-email") as HTMLInputElement)?.value;
-		const user_id = localStorage.getItem("id");
-
-		console.log("[Form Submit] Friend Email:", friend_email);
-		console.log("[Form Submit] User ID from localStorage:", user_id);
+		//console.log("[Form Submit] Friend Email:", friend_email);
+		//console.log("[Form Submit] User ID from localStorage:", user_id);
 
 		try {
-			console.log("[Form Submit] Sending POST request...");
+			const friend_email = (form.querySelector("#friend-email") as HTMLInputElement)?.value;
+			const user_id = localStorage.getItem("id");
+			//console.log("[Form Submit] Sending POST request...");
 			const res = await fetch("http://localhost:3000/api/friend", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -20,7 +19,7 @@ export async function addFriendsHandler(form: HTMLFormElement) {
 				body: JSON.stringify({ user_id, friend_email }),
 			});
 
-			console.log("[Form Submit] Response status:", res.status);
+			//console.log("[Form Submit] Response status:", res.status);
 
 			const data = await res.json().catch(() => {
 				console.log("[Form Submit] ⚠️ Response was not valid JSON");
@@ -35,9 +34,10 @@ export async function addFriendsHandler(form: HTMLFormElement) {
 			} else {
 				console.log("[Form Submit] ✅ Friend added successfully");
 				errorDiv.textContent = data.message || "Success!";
-				fetchFriends(user_id);
+				if (user_id)
+					fetchFriends(user_id);
 			}
-		} catch (err) {
+		} catch (err: any) {
 			console.log("[Form Submit] ❌ Network error:", err);
 			errorDiv.textContent = "Network error. Try again.";
 		}
@@ -59,7 +59,7 @@ export async function fetchFriends(userId: string) {
 		}
 		const data = await res.json();
 		renderFriendsList(data.friendlist);
-		} catch (err) {
+		} catch (err: any) {
 		console.error("[fetchFriends] ❌", err);
 		const ul = document.getElementById("friends-ul");
 		if (ul)
@@ -118,7 +118,7 @@ async function deleteFriend(userId: string, friendId: string) {
 			console.error("[deleteFriend] ❌", data.message);
 			alert(data.message || "Failed to delete friend");
 		}
-	} catch (err) {
+	} catch (err: any) {
 		console.error("[deleteFriend] ❌", err);
 		alert("Error deleting friend");
 	}

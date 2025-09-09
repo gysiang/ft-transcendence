@@ -1,6 +1,7 @@
 all : up
 
 up :
+	@docker compose -f ./srcs/docker-compose.yml build frontend
 	@docker compose -f ./srcs/docker-compose.yml up -d
 
 down :

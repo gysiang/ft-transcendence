@@ -4,6 +4,8 @@ import { marcus_2faGoogle } from './handlers/marcus_2faHandler';
 // import { profileHandler } from "./handlers/profileHandler";
 import { verify2faHandler } from './handlers/2faHandler'
 // import { createLogger } from "vite";
+import type { Match } from "./pong/Tournament/singleElim.ts"
+
 
 //https://tailwind.build/classes
 //https://tailwindcss.com/docs/vertical-align
@@ -63,7 +65,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 \
 				transition-opacity duration-200 pointer-events-none transition-all duration-1000";
 			tooltipDiv.textContent = "Change your details here"; //prints out the string u wanna write
-			
+
 			const update_profile = document.createElement("div");
 			update_profile.className = "relative group inline-block";
 			update_profile.append(link, tooltipDiv);
@@ -112,7 +114,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 											text-yellow-700 dark:text-white text-shadow-lg/15 \
 											flex gap-1";
 				win_lose_result.textContent = "Win/Lose Ratio: ";
-				const wins = matches.data.filter(m => m.winner === user.name).length;
+				const wins = matches.data.filter((m: Match)=> m.winner === user.name).length;
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \
 											text-green-700 dark:text-white text-shadow-lg/15";
@@ -145,7 +147,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				win_lose_result.append(win_ratio, slash_win_lose, lose_ratio)
 			//user_matches--------
 
-			
+
 
 
 			//determine also what they can present and print out here
@@ -182,9 +184,9 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		fa2spantext2.textContent = "Activate 2FA:";
 		fa2.appendChild(fa2spantext2);
 
-		// *2fa -- for switches 
+		// *2fa -- for switches
 		const switchContainer = document.createElement("div");
-		switchContainer.className = "flex flex-row gap-4 justify-center mt-4"; 
+		switchContainer.className = "flex flex-row gap-4 justify-center mt-4";
 		// `gap-4` gives spacing, `justify-center` keeps them centered
 		fa2.appendChild(switchContainer);
 
@@ -195,7 +197,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center \
 									justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
 		profileWrapper.append(profile_stats_div, fa2);
-		
+
 		switchContainer.append(google2faSwitch);
 		//switchContainer.append(email2faSwitch, google2faSwitch);
 		container.appendChild(profileWrapper);
