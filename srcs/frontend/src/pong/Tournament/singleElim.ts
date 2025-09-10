@@ -28,6 +28,7 @@ export function generateFirstRound(players: Player[]): Round {
       }
       return matches;
 }
+
 export function generateRound(players: Player[]): Match[] {
 	const matches: Match[] = [];
 
@@ -50,6 +51,7 @@ export function generateRound(players: Player[]): Match[] {
 
 	return matches;
 }
+
 export function getWinners(round: Round): Player[] {
   const winners: Player[] = [];
 

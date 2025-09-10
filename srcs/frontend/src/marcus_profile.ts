@@ -114,7 +114,11 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 											text-yellow-700 dark:text-white text-shadow-lg/15 \
 											flex gap-1";
 				win_lose_result.textContent = "Win/Lose Ratio: ";
-				const wins = matches.data.filter((m: Match)=> m.winner === user.name).length;
+				//print console.log the JSON.string
+				console.log(JSON.stringify(matches));
+				
+				const wins = matches.data.filter((m: Match) => m.winner === user.name).length;
+				console.log ("VALUE OF WINS: ", wins);
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \
 											text-green-700 dark:text-white text-shadow-lg/15";

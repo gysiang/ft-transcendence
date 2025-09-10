@@ -52,9 +52,18 @@ export async function statsProfile(container: HTMLElement) {
 		if (!res.ok) {
 			throw new Error(`HTTP error! Status: ${res.status}`);
 		}
+		//"true"(NaN) == true(1) -> false
+		// "true" === true --> false (type, value)
+		// null | undefined
+		// null == undefined --> true
+		// null === undefined --> false
 		const matches = await res.json();
 		console.log("user:", user.name, " | userId:", userId, " | And their stats:", matches);
+		console.log(JSON.stringify(matches));
+		//const wins = matches.data.filter((m: Match) => m.winner?.name === user.name).length;
 		const wins = matches.data.filter((m: Match) => m.winner?.name === user.name).length;
+		//const wins = matches.data.filter((m: any) => m.winner == user.name).length;
+		console.log ("VALUE OF WINS: ", wins);
 		const losses = matches.data.length - wins;
 		console.log("THIS data is from stats.ts:", user);
 		//--------------------------Wrapper(stats) Section--------------------------
