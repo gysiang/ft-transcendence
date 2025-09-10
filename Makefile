@@ -1,6 +1,7 @@
 all : up
 
 up :
+	@./srcs/scripts/add-host.sh
 	@docker compose -f ./srcs/docker-compose.yml build frontend
 	@docker compose -f ./srcs/docker-compose.yml up -d
 
@@ -14,6 +15,7 @@ start :
 	@docker compose -f ./srcs/docker-compose.yml start
 
 clean:
+	@./srcs/scripts/remove-host.sh
 	@docker compose -f ./srcs/docker-compose.yml down --rmi all -v
 
 status :
@@ -22,5 +24,4 @@ status :
 logs:
 	@docker compose -f ./srcs/docker-compose.yml logs -f
 
-re :
-	@docker compose -f ./srcs/docker-compose.yml up -d --build
+re : clean up
