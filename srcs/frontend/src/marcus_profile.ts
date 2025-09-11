@@ -115,9 +115,10 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 											flex gap-1";
 				win_lose_result.textContent = "Win/Lose Ratio: ";
 				//print console.log the JSON.string
-				console.log(JSON.stringify(matches));
+				console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
 				
-				const wins = matches.data.filter((m: Match) => m.winner === user.name).length;
+				//guranteed to be a number..... always but honestly how? -ask maybe xf?
+				const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
 				console.log ("VALUE OF WINS: ", wins);
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \

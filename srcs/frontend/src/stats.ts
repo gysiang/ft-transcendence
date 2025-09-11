@@ -5,6 +5,7 @@ import { DoughnutController, ArcElement,
 		Decimation, SubTitle, Title, Tooltip, Legend } from 'chart.js'; 	// these are from here:
 													//https://www.chartjs.org/docs/latest/getting-started/integration.html
 import type { Match } from "./pong/Tournament/singleElim.ts"
+import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
 
 // register controllers and elements
 Chart.register(
@@ -59,10 +60,10 @@ export async function statsProfile(container: HTMLElement) {
 		// null === undefined --> false
 		const matches = await res.json();
 		console.log("user:", user.name, " | userId:", userId, " | And their stats:", matches);
-		console.log(JSON.stringify(matches));
-		//const wins = matches.data.filter((m: Match) => m.winner?.name === user.name).length;
-		const wins = matches.data.filter((m: Match) => m.winner?.name === user.name).length;
-		//const wins = matches.data.filter((m: any) => m.winner == user.name).length;
+		console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
+		console.log("[Total_Score]User:", user.name, matches.data.length);
+
+		const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
 		console.log ("VALUE OF WINS: ", wins);
 		const losses = matches.data.length - wins;
 		console.log("THIS data is from stats.ts:", user);
@@ -104,7 +105,7 @@ export async function statsProfile(container: HTMLElement) {
 				totalmatches_against_others.appendChild(linechartWrapper);
 
 
-			// 2) This box contains both the line and donut chart of the total wins and losses
+			// 2) This box contains the donut chart as well as the text for wins
 			const stats_ranking = document.createElement("div");
 			stats_ranking.id = "ranking";
 			stats_ranking.className = "flex flex-col w-90 h-64 justify-center items-center \
@@ -209,7 +210,45 @@ export async function statsProfile(container: HTMLElement) {
     //   },
     // });
 
-	//update with tournamentID
+	//1) Tournament entry + tournament_ID
+	const tournamentsMap = new Map<number, { name: string; tourney_wins: number; tourney_losses: number }>();
+	
+	//2) Update the tournamentsMap
+	matches.data.forEach((m: CreateMatchBody) => {
+		const tournamentId = Number(m.tournament_id);
+		console.log("VALUE OF THIS TOURNAMENT ID BTW:_____>", tournamentId);
+
+		if (!tournamentsMap.has(tournamentId)) {
+			tournamentsMap.set(tournamentId, {
+			name: `Tourney-${tournamentId}`, // You can replace with actual tournament name if available
+			tourney_wins: wins,
+			tourney_losses: losses,
+			})
+		}
+		
+		// (tournamentId)! the '!' is used here cause i am very sure the tournament exists in the map
+		const t = tournamentsMap.get(tournamentId)!;
+
+		// Check if current user is the winner or loser
+		if (String(m.winner) === "mlowplayer") {
+			t.tourney_wins++;
+		} else {
+			t.tourney_losses++;
+		}
+	});
+
+	//3) Extract data from tournamentsMap into arrays->labels
+	const tournamentLabels: string[] = [];
+	const winsData: number[] = [];
+	const lossesData: number[] = [];
+
+	for (const [, t] of tournamentsMap) {
+		tournamentLabels.push(t.name);
+		winsData.push(t.tourney_wins);
+		lossesData.push(t.tourney_losses);
+	}
+
+	//update with tournamentID (also why type line?)
     new Chart(lineCanvas, {
       type: "line",
 	  options: {
@@ -217,17 +256,17 @@ export async function statsProfile(container: HTMLElement) {
 			maintainAspectRatio: false,
 		},
       data: {
-        labels: ["Jan", "Feb", "Mar", "Apr"], // x-axis labels
+        labels: tournamentLabels.length > 0 ? tournamentLabels : ["No tournaments yet"],
         datasets: [
           {
             label: "Wins",
-            data: [wins, wins, wins, wins],
+            data: tournamentLabels.length > 0 ? winsData : [0],
             borderColor: "#2bc933ff",
             fill: false,
           },
           {
             label: "Losses",
-            data: [losses, losses, losses, losses],
+            data: tournamentLabels.length > 0 ? lossesData : [0],
             borderColor: "#fd0202ff",
             fill: false,
           },

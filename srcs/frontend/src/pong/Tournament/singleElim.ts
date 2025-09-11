@@ -4,7 +4,7 @@ import { shuffle } from "./TournamentUtils";
 export type Match ={
     contestant1: Player;
     contestant2?: Player | null;
-    winner?: Player | null;
+    winner?: Player | null; //Player's ID
 }
 export type Round = Match[];
 export type Tournament = Round[];
