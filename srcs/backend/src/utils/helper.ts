@@ -47,26 +47,33 @@ export function processUsername(username: string): string
 	return (sanitized);
 }
 
+/** *
+export function aliasPolicy(alias: string) : boolean
+{
+	if (alias.length < 1 || alias.length > 32) {
+		return false;
+	}
+	const regex = /^[A-Za-z0-9]+$/;
+	return regex.test(alias);
+}
+
 export function passwordPolicy(password: string): boolean
 {
-	if (password.length < 7) {
-		console.log("password len");
+	if (password.length < 8 || password.length >= 128) {
 		return false;
 	}
 	if (!/[a-z]/.test(password)) {
-		console.log("no lowercase");
 		return false;
 	}
 	if (!/[A-Z]/.test(password)){
-		console.log("no uppercase");
 		return false;
 	}
 	if (!/[0-9]/.test(password)){
-		console.log("no number");
 		return false;
 	}
 	return (true);
 }
+**/
 
 export function check2faToken(token: string): boolean
 {
