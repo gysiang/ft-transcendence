@@ -8,7 +8,7 @@ export async function authRoutes(app: FastifyInstance) {
 	app.post('/api/login', {schema: { body: { $ref: 'LoginSchema#' } }}, loginUser);
 	app.get<{Params: IUserParams}>('/api/profile/:id', {schema: { params: { $ref: 'IdString#' }}, preHandler: [app.authenticate]}, getUser);
 	app.patch<{ Params: IUserParams; Body: IUserBody;}>('/api/profile/:id',{schema: { params: { $ref: 'IdString#' }, body: { $ref: 'EditUserSchema#' }}, preHandler: [app.authenticate]} , editUser);
-	app.patch<{ Params: IUserParams; Body: IProfileBody}>('/api/profile/:id/pic', {preHandler: [app.authenticate]}, editPicture)
+	app.patch<{ Params: IUserParams; Body: IProfileBody}>('/api/profile/:id/pic', {schema: { params: { $ref: 'IdString#' }}, preHandler: [app.authenticate]} , editPicture)
 	app.get('/auth/google', {preValidation: fastifyPassport.authenticate('google', { scope: [ 'email', 'profile' ] })},
 		async(req, reply) => {
 			reply.redirect('/');
