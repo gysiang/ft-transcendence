@@ -53,11 +53,6 @@ export async function statsProfile(container: HTMLElement) {
 		if (!res.ok) {
 			throw new Error(`HTTP error! Status: ${res.status}`);
 		}
-		//"true"(NaN) == true(1) -> false
-		// "true" === true --> false (type, value)
-		// null | undefined
-		// null == undefined --> true
-		// null === undefined --> false
 		const matches = await res.json();
 		console.log("user:", user.name, " | userId:", userId, " | And their stats:", matches);
 		console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
@@ -91,7 +86,7 @@ export async function statsProfile(container: HTMLElement) {
 				const totalMatches = document.createElement("p");
 				totalMatches.className = "text-center text-2xl font-bold \
 											text-white dark:text-white";
-				totalMatches.textContent = "Total Matches won: " + wins;
+				totalMatches.textContent = "Total Matches played: " + matches.data.length;
 
 				lineWrapper.appendChild(lineCanvas);
 				totalMatchesWrapper.append(totalMatches);//, scoreWins_score);
@@ -111,7 +106,7 @@ export async function statsProfile(container: HTMLElement) {
 				donutchartWrapper.className = "flex flex-row max-w-sm"
 				// Donut chart
 				const donutWrapper = document.createElement("div");
-				donutWrapper.className = "w-32 h-32 relative"; // fixed container
+				donutWrapper.className = "w-32 h-32 relative";// fixed container
 				const donutCanvas = document.createElement("canvas");
 				donutCanvas.id = "donutChart";
 				donutCanvas.className = "w-32 h-32 p-1";
@@ -125,10 +120,21 @@ export async function statsProfile(container: HTMLElement) {
 				scoreWins_score.className = "text-2xl font-bold text-center text-white dark:text-white"
 				scoreWins_score.textContent = `${wins_percent}` + "%";
 
+				const gamescore_Wrapper = document.createElement("div");
+				gamescore_Wrapper.className = "flex flex-col";
+				const game_score_header = document.createElement("p");
+				game_score_header.className = "place-content-center text-lg font-bold text-center text-gray-900/50 dark:text-white";
+				game_score_header.textContent = "GAME SCORE:";
+				const game_score = (wins * 10000) - (losses * 100);
+				const game_score_text = document.createElement("p");
+				game_score_text.className = "place-content-center text-2xl font-bold text-center text-white dark:text-white";
+				game_score_text.textContent = `${game_score}`;
+				gamescore_Wrapper.append(game_score_header, game_score_text);
+
 				donutWrapper.appendChild(donutCanvas);
 				scoreWrapper.append(scoreWins, scoreWins_score);
-				donutchartWrapper.append(donutWrapper, scoreWrapper);
-				stats_ranking.appendChild(donutchartWrapper);
+				donutchartWrapper.append(donutWrapper, scoreWrapper, gamescore_Wrapper);
+				stats_ranking.append(donutchartWrapper, gamescore_Wrapper);
 
 
 			//3) Profile and name
@@ -148,32 +154,155 @@ export async function statsProfile(container: HTMLElement) {
 				p_name.textContent = "User: " + user.name// Put user's name inside the <p>
 				profile_user.append(p_img, p_name);
 
-			//4) Profile and name
+			
+
+
+
+			//4) here include the total matches you played 
 			const match_history = document.createElement("div");
-			match_history.id = "pieline_chart";
-			match_history.className = "w-90 h-64 justify-center items-center \
-									bg-stone-400 p-0 outline outline-black/5 \
+			match_history.id = "match_history";
+			match_history.className = "flex flex-col place-content-center w-180 h-64 justify-center items-center \
+									bg-stone-400 outline outline-black/5 \
 									dark:bg-slate-800 dark:shadow-none \
 									dark:-outline-offset-1 dark:outline-white/10";
-			match_history.textContent = "Total Matches played: " + matches.data.length;
+				//Time to include text
+				const wrap_played_and_img = document.createElement("div");
+				wrap_played_and_img.className = "flex flex-row"
+				const wrap_played_text = document.createElement("div");
+				wrap_played_text.className = "place-content-center flex flex-col"
+					const match_played_wins = document.createElement("p");
+					match_played_wins.className = "place-content-center text-xl font-bold text-center text-green-800 dark:text-white"
+					match_played_wins.textContent = "Total Matches won: " + wins;
+					const match_played_loss = document.createElement("p");
+					match_played_loss.className = "place-content-center text-xl font-bold text-center text-red-800 dark:text-white"
+					match_played_loss.textContent = "Total Matches lost: " + losses;
+					const tips_img = document.createElement("img");
+					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
+						.then(badge_res => {
+							if (badge_res.ok) {
+								player_rank_msg.textContent = "BRONZE RANK";
+								tips_img.src = '../imgs/joystick.png';
+								tips_img.className = "w-24 h-24";
+							} else {
+								console.warn("Badge image not found!");
+							}
+						})
+						.catch(err => console.error("Error checking badge image:", err));
+				wrap_played_text.append(match_played_wins, match_played_loss);
+				wrap_played_and_img.append(tips_img, wrap_played_text);
+				const tips = document.createElement("p");
+				tips.className = "flex p-10";
+				//tips.textContent = "Tips: Damn you need to play more."
+				tips.textContent = "Tips: Okay you should stop playing and pay me to make this game better."
+				if (wins >= 5 && wins < 10) {
+					tips.textContent = "Tips: Trying poking your opponent in real life beside you, distract them •ᴗ•"
+				} else if (wins >= 10 && wins < 15) {
+					tips.textContent = "Tips: Try joining a 42 school and learn how to hack, maybe you can win that way"
+				} else {
+					tips.textContent = "Tips: Okay you should stop playing and pay me to make this game better"
+				}
+				
+				
+				
+				match_history.append(wrap_played_and_img, tips);
 
+			// 4.5) Ranking
+			const player_rank_score = document.createElement("div");
+			player_rank_score.id = "rank";
+			player_rank_score.className = "place-content-center w-90 h-64 flex flex-col justify-center items-center \
+									bg-stone-400 outline outline-black/5 \
+									dark:bg-slate-800 dark:shadow-none \
+									dark:-outline-offset-1 dark:outline-white/10";
+				//Time to rank you based on how many wins
+				const player_rank_msg = document.createElement("p");
+				player_rank_msg.className = "place-content-center text-2xl font-bold p-5 text-center";
+				player_rank_msg.textContent = "NEWBIE RANK";
+				const player_rank_badge = document.createElement("img");
+				player_rank_badge.className = "w-24 h-24";
+				fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
+					.then(badge_res => {
+						if (badge_res.ok) {
+							player_rank_badge.src = '../imgs/Newbie_badge.png';
+						} else {
+							console.warn("Badge image not found!");
+						}
+					})
+					.catch(err => console.error("Error checking badge image:", err));
+				/*
+				const p_img = document.createElement("img");
+				p_img.src = user.profile_picture;
+				p_img.alt = `${user.name}'s profile picture`;
+				p_img.className = "w-24 h-24 rounded-full object-cover shadow-lg/40";
+				const p_name = document.createElement("p");
+				p_name.className = "text-lg font-bold text-center text-gray-900 dark:text-white text-shadow-lg/15";
+				p_name.textContent = "User: " + user.name// Put user's name inside the <p>
+				profile_user.append(p_img, p_name);
+				*/
+				//why use .then()? what is it for?
+				if (wins >= 5 && wins < 10) {
+					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
+					.then(badge_res => {
+						if (badge_res.ok) {
+							player_rank_msg.textContent = "BRONZE RANK";
+							player_rank_badge.src = '../imgs/Bronze_badge.png';
+						} else {
+							console.warn("Badge image not found!");
+						}
+					})
+					.catch(err => console.error("Error checking badge image:", err));
+				} else if (wins >= 10 && wins < 15) {
+					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
+					.then(badge_res => {
+						if (badge_res.ok) {
+							player_rank_msg.textContent = "BRONZE RANK";
+							player_rank_badge.src = '../imgs/Bronze_badge.png';
+						} else {
+							console.warn("Badge image not found!");
+						}
+					})
+					.catch(err => console.error("Error checking badge image:", err));
+					player_rank_msg.textContent = "SLIVER RANK";
+					player_rank_badge.src = '../imgs/Bronze_badge.png';
+				} else if (wins > 15) {
+					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
+					.then(badge_res => {
+						if (badge_res.ok) {
+							player_rank_msg.textContent = "BRONZE RANK";
+							player_rank_badge.src = '../imgs/Sliver_badge.png';
+						} else {
+							console.warn("Badge image not found!");
+						}
+					})
+					.catch(err => console.error("Error checking badge image:", err));
+					player_rank_msg.textContent = "GOLD RANK";
+					player_rank_badge.src = '../imgs/Gold_badge.png';
+				} else {
+					player_rank_msg.textContent = "GOLD RANK";
+				}
+				player_rank_score.append(player_rank_badge, player_rank_msg);
+
+				
+
+
+
+
+			//----FINAL step, append stuff----
 			const statsWrapper = document.createElement("div");
 			statsWrapper.id = "stats_data";
-			statsWrapper.className = "h-screen w-full flex flex-row items-center \
+			statsWrapper.className = "w-full flex flex-row items-center \
 									justify-center bg-gray-100 dark:bg-slate-900";
 
-			//here include the total matches you played 
 			const other_data = document.createElement("div");
 			other_data.id = "other_data";
-			other_data.className = "h-screen w-full flex flex-row items-center \
+			other_data.className = "w-full flex flex-row items-center \
 									justify-center bg-gray-100 dark:bg-slate-900";
 
 			const profile_column = document.createElement("div");
 			profile_column.className = "h-screen w-full flex flex-col items-center \
 									justify-center bg-gray-100 dark:bg-slate-900"
-			//append stuff
+
 			statsWrapper.append(totalmatches_against_others, stats_ranking, profile_user);
-			other_data.append(match_history);
+			other_data.append(player_rank_score, match_history);
 			profile_column.append(statsWrapper, other_data);
 
 
