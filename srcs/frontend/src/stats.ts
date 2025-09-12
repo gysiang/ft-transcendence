@@ -79,14 +79,13 @@ export async function statsProfile(container: HTMLElement) {
 				const lineCanvas = document.createElement("canvas");
 				lineCanvas.id = "lineChart";
 				lineCanvas.className = "flex flex-col w-50 p-1";
-
-				//TotalmatchesWrapper
-				const totalMatchesWrapper = document.createElement("div");
-				totalMatchesWrapper.className = "flex flex-col justify-center items-center"
-				const totalMatches = document.createElement("p");
-				totalMatches.className = "text-center text-2xl font-bold \
-											text-white dark:text-white";
-				totalMatches.textContent = "Total Matches played: " + matches.data.length;
+					//TotalmatchesWrapper
+					const totalMatchesWrapper = document.createElement("div");
+					totalMatchesWrapper.className = "flex flex-col justify-center items-center"
+					const totalMatches = document.createElement("p");
+					totalMatches.className = "text-center text-2xl font-bold \
+												text-white dark:text-white";
+					totalMatches.textContent = "Total Matches played: " + matches.data.length;
 
 				lineWrapper.appendChild(lineCanvas);
 				totalMatchesWrapper.append(totalMatches);//, scoreWins_score);
@@ -125,13 +124,30 @@ export async function statsProfile(container: HTMLElement) {
 				const game_score_header = document.createElement("p");
 				game_score_header.className = "place-content-center text-lg font-bold text-center text-gray-900/50 dark:text-white";
 				game_score_header.textContent = "GAME SCORE:";
-				const game_score = (wins * 10000) - (losses * 100);
+				let game_score = (wins * 10000) - (losses * 100);
+				if (game_score < 0)
+					game_score = 0;
 				const game_score_text = document.createElement("p");
 				game_score_text.className = "place-content-center text-2xl font-bold text-center text-white dark:text-white";
 				game_score_text.textContent = `${game_score}`;
 				gamescore_Wrapper.append(game_score_header, game_score_text);
 
-				donutWrapper.appendChild(donutCanvas);
+				//picture shrug
+				const shrug = document.createElement("img");
+				shrug.className = "w-24 h-24 rounded-full outline"
+				fetch('../imgs/shrug.png', { method: "HEAD" })
+					.then(badge_res => {
+						if (badge_res.ok) {
+							shrug.src = '../imgs/shrug.png';
+						} else {
+							console.warn("shurg image not found!");
+						}
+					})
+					.catch(err => console.error("Error checking shurg image:", err));
+				if (matches.data.length != 0)
+					donutWrapper.appendChild(donutCanvas);
+				else
+					donutWrapper.appendChild(shrug);
 				scoreWrapper.append(scoreWins, scoreWins_score);
 				donutchartWrapper.append(donutWrapper, scoreWrapper, gamescore_Wrapper);
 				stats_ranking.append(donutchartWrapper, gamescore_Wrapper);
@@ -180,25 +196,26 @@ export async function statsProfile(container: HTMLElement) {
 					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
 						.then(badge_res => {
 							if (badge_res.ok) {
-								player_rank_msg.textContent = "BRONZE RANK";
 								tips_img.src = '../imgs/joystick.png';
 								tips_img.className = "w-24 h-24";
 							} else {
-								console.warn("Badge image not found!");
+								console.warn("joystick image not found!");
 							}
 						})
-						.catch(err => console.error("Error checking badge image:", err));
+						.catch(err => console.error("Error checking joystick image:", err));
 				wrap_played_text.append(match_played_wins, match_played_loss);
 				wrap_played_and_img.append(tips_img, wrap_played_text);
 				const tips = document.createElement("p");
 				tips.className = "flex p-10";
-				//tips.textContent = "Tips: Damn you need to play more."
-				tips.textContent = "Tips: Okay you should stop playing and pay me to make this game better."
+				tips.textContent = "Tips: Damn you need to play more."
+				if (matches.data.length == 0) {
+					tips.textContent = "Tips: How about playing a game already NOOOOOOOOOOOB"
+				}
 				if (wins >= 5 && wins < 10) {
 					tips.textContent = "Tips: Trying poking your opponent in real life beside you, distract them •ᴗ•"
 				} else if (wins >= 10 && wins < 15) {
 					tips.textContent = "Tips: Try joining a 42 school and learn how to hack, maybe you can win that way"
-				} else {
+				} else if (wins > 15) {
 					tips.textContent = "Tips: Okay you should stop playing and pay me to make this game better"
 				}
 				
@@ -224,10 +241,10 @@ export async function statsProfile(container: HTMLElement) {
 						if (badge_res.ok) {
 							player_rank_badge.src = '../imgs/Newbie_badge.png';
 						} else {
-							console.warn("Badge image not found!");
+							console.warn("Newbie_Badge image not found!");
 						}
 					})
-					.catch(err => console.error("Error checking badge image:", err));
+					.catch(err => console.error("Error checking Newbie_badge image:", err));
 				/*
 				const p_img = document.createElement("img");
 				p_img.src = user.profile_picture;
@@ -246,23 +263,23 @@ export async function statsProfile(container: HTMLElement) {
 							player_rank_msg.textContent = "BRONZE RANK";
 							player_rank_badge.src = '../imgs/Bronze_badge.png';
 						} else {
-							console.warn("Badge image not found!");
+							console.warn("Bronze_Badge image not found!");
 						}
 					})
-					.catch(err => console.error("Error checking badge image:", err));
+					.catch(err => console.error("Error checking Bronze_badge image:", err));
 				} else if (wins >= 10 && wins < 15) {
 					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
 					.then(badge_res => {
 						if (badge_res.ok) {
-							player_rank_msg.textContent = "BRONZE RANK";
-							player_rank_badge.src = '../imgs/Bronze_badge.png';
+							player_rank_msg.textContent = "SLIVER RANK";
+							player_rank_badge.src = '../imgs/Sliver_badge.png';
 						} else {
-							console.warn("Badge image not found!");
+							console.warn("Sliver_Badge image not found!");
 						}
 					})
-					.catch(err => console.error("Error checking badge image:", err));
-					player_rank_msg.textContent = "SLIVER RANK";
-					player_rank_badge.src = '../imgs/Bronze_badge.png';
+					.catch(err => console.error("Error checking Sliver_badge image:", err));
+					player_rank_msg.textContent = "GOLD RANK";
+					player_rank_badge.src = '../imgs/Gold_badge.png';
 				} else if (wins > 15) {
 					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
 					.then(badge_res => {
@@ -270,14 +287,12 @@ export async function statsProfile(container: HTMLElement) {
 							player_rank_msg.textContent = "BRONZE RANK";
 							player_rank_badge.src = '../imgs/Sliver_badge.png';
 						} else {
-							console.warn("Badge image not found!");
+							console.warn("Gold_Badge image not found!");
 						}
 					})
-					.catch(err => console.error("Error checking badge image:", err));
+					.catch(err => console.error("Error checking Gold_badge image:", err));
 					player_rank_msg.textContent = "GOLD RANK";
 					player_rank_badge.src = '../imgs/Gold_badge.png';
-				} else {
-					player_rank_msg.textContent = "GOLD RANK";
 				}
 				player_rank_score.append(player_rank_badge, player_rank_msg);
 
