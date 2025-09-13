@@ -52,6 +52,9 @@ export function quickplayForm(app: HTMLElement): void
             <button id ="quickplayStart" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md text-xl">
                 Start
             </button>
+            <button id="quickmatchOnline" class="mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-md text-xl">
+            Online Quickmatch
+            </button>
         </div>
             `;
             let userAlias: string | null = null;
@@ -90,6 +93,20 @@ export function quickplayForm(app: HTMLElement): void
                     startGame(canvas);
                 });
             }, 0);
+            const onlineBtn = document.getElementById("quickmatchOnline");
+onlineBtn?.addEventListener("click", () => {
+  const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
+
+  // Persist only what online mode needs
+  localStorage.setItem("goalLimit", goals.toString());
+  localStorage.setItem("mode", "online");
+
+  // Clear page, mount canvas, and hand off to startGame
+  app.innerHTML = "";
+  const { canvas, container } = createGameCanvas();
+  app.appendChild(container);
+  startGame(canvas);
+});
 }
 export function tournamentForm(app: HTMLElement): void {
 	app.innerHTML = `

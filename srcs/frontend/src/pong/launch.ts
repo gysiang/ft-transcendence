@@ -6,6 +6,9 @@ import { matchUI} from "./matchUI";
 import { createMatch } from "./Tournament/backendutils";
 import { checkAuthentication } from "./registration/auth";
 import { clearGameStorage } from "./Tournament/TournamentUtils";
+import { openWs,type MatchHandlers, type StartMsg,type StateMsg, type EndMsg } from "../wsClient";
+import type { NetState } from "./types";
+import { lockCanvasAtCurrent, unlockCanvas,lockCanvasWorld } from "./Renderer";
 
 async function launchGame(
 	canvas: HTMLCanvasElement,
@@ -28,13 +31,101 @@ export async function startGame(canvas: HTMLCanvasElement) {
 		throw new Error("Canvas not supported");
 	}
 
-	const mode = localStorage.getItem("mode");
+	const rawMode = localStorage.getItem("mode");
 	const goalLimit = parseInt(localStorage.getItem("goalLimit") || "5", 10);
-
-	if (mode === "quickplay") {
+	const mode = (rawMode === "online-quickmatch") ? "online" : rawMode;
+  	console.log("[startGame] mode =", rawMode, "→", mode, "goalLimit =", goalLimit);
+	  if (mode === 'online') {
+		let game: Game | null = null;
+	  
+		const handlers: MatchHandlers = {
+		  onStart: (msg: StartMsg) => {
+			const { goalLimit: gl, side, world } = msg;
+			const W = world?.w ?? 800;
+			const H = world?.h ?? 600;
+			lockCanvasWorld(canvas, world?.w ?? 800, world?.h ?? 600);
+	  
+			const players: Player[] = side === 'left'
+			  ? [{ name: 'You', side: 'left' }, { name: 'Opponent', side: 'right' }]
+			  : [{ name: 'Opponent', side: 'left' }, { name: 'You', side: 'right' }];
+	  
+			game = new Game(canvas, ctx, players, gl);
+			game.enableNetMode();
+			game.startCountdown();
+		  },
+		  onState: (s: StateMsg) => game?.applyNetState(s as any),
+		  onEnd:   (e: EndMsg)   => {
+			unlockCanvas(canvas);
+			alert(`${e.winnerSide === 'left' ? 'Left' : 'Right'} wins ${e.score[0]}–${e.score[1]}`);
+			setTimeout(() => { localStorage.removeItem('mode'); window.location.href = '/play'; }, 1000);
+		  }
+		};
+	  
+		const api = openWs(handlers);
+		api.queue(goalLimit);
+		return;
+	  }
+	/*if (mode === "online") {
+		let game: Game | null = null;
+		const handlers: MatchHandlers = {
+			onStart: ({ goalLimit: gl, side, world, ballR, geom }) => {
+			  const W = world?.w ?? 800;
+			  const H = world?.h ?? 600;
+			  lockCanvasWorld(canvas, W, H); // ← prevents right-paddle visual drift
+		  
+			  const players: Player[] = side === 'left'
+				? [{ name: 'You', side: 'left' }, { name: 'Opponent', side: 'right' }]
+				: [{ name: 'Opponent', side: 'left' }, { name: 'You', side: 'right' }];
+		  
+			  const game = new Game(canvas, ctx, players, gl);
+			  game.enableNetMode();
+			  // (optional) if you use ballR/geom in the client, set them here
+			  game.startCountdown();
+			},
+			onState: (s) => game?.applyNetState(s as any),
+			onEnd: ({ winnerSide, score }) => {
+			  unlockCanvas(canvas);*//*
+		const handlers: MatchHandlers = {
+		  onStart: ({ goalLimit: gl, side }) => {
+			console.log("[startGame] onStart received. side =", side, "goalLimit =", gl);
+			const players: Player[] = side === "left"
+			  ? [{ name: "You", side: "left" }, { name: "Opponent", side: "right" }]
+			  : [{ name: "Opponent", side: "left" }, { name: "You", side: "right" }];
+	
+			game = new Game(canvas, ctx, players, gl);
+			game.enableNetMode();
+			game.startCountdown();
+		  },
+		  onState: (s) => {
+			// If you didn't export NetState, just cast to any:
+			// game?.applyNetState(s as any);
+			game?.applyNetState(s as NetState);
+		  },
+		  onEnd: ({ winnerSide, score }) => {*//*
+			console.log("[startGame] match.end", { winnerSide, score });
+			alert(`${winnerSide === "left" ? "Left" : "Right"} wins ${score[0]}–${score[1]}`);
+			setTimeout(() => {
+			  localStorage.removeItem("mode");
+			  window.location.href = "/play";
+			}, 1000);
+		  },
+		};
+	
+		console.log("[startGame] opening WS…");
+		const api = openWs(handlers);
+		(window as any).wsMatch = api; // debug handle
+	
+		console.log("[startGame] calling queue(%d)…", goalLimit);
+		api.queue(goalLimit); // 👈 must be called here
+		console.log("[startGame] queue() invoked");
+		return;
+	  }*/
+	else if (mode === "quickplay") {
 		const players = JSON.parse(localStorage.getItem("players") || "[]");
+		lockCanvasAtCurrent(canvas);
 		await launchGame(canvas, ctx, players, goalLimit, () => {
 			clearGameStorage();
+			unlockCanvas(canvas);
 			setTimeout(() => {
 				window.location.href = "/play";
 			}, 2000);
@@ -62,8 +153,10 @@ export async function startGame(canvas: HTMLCanvasElement) {
 			{ ...match.contestant1, side: "left" },
 			{ ...match.contestant2, side: "right"},
 		];
+		lockCanvasAtCurrent(canvas);
 		await launchGame(canvas, ctx, players, goalLimit, async (winner, score) => {
 			match.winner = winner;
+			unlockCanvas(canvas);
 			const finalMatch =
 			  currentRoundIndex === rounds.length - 1 &&
 			  currentMatchIndex === rounds[currentRoundIndex].length - 1;
@@ -71,7 +164,7 @@ export async function startGame(canvas: HTMLCanvasElement) {
 			const persist = (async () => {
 			  try {
 				const authed = await checkAuthentication();
-				if (!authed) return; // local-only tournament
+				if (!authed) return; // localonly tournament
 		  
 				const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
 				const tournamentId = snapshot?.id;

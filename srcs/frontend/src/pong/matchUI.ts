@@ -1,6 +1,13 @@
 import type { Player } from "./types";
 import type { Match } from "./Tournament/singleElim";
-
+/*
+export function matchUI(players: Player[], rounds?: Match[][]): Promise<void> {
+	const popup = document.getElementById('match-announcement');
+	if (popup) popup.style.display = 'none';
+	return Promise.resolve();
+  }*/
+  
+  
 export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
     return new Promise((resolve) => {
       const popup = document.getElementById("match-announcement")!;
@@ -20,6 +27,7 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
         resolve();
       };
     });
+
   }
 
   export function renderTournamentBracket(rounds: Match[][]) {
@@ -55,4 +63,32 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
 
 		bracket.appendChild(roundDiv);
 	});
+}
+
+import type { TRounds, TPlayer} from '../onlineClient'
+
+// Map TRounds -> Match[][]
+export function adaptTRoundsToLocal(trounds: TRounds, players: TPlayer[]): Match[][] {
+  const nameById = new Map(players.map(p => [p.id, p.name]));
+
+  return trounds.map(round =>
+    round.map(tm => {
+      const contestant1 = tm.p1
+        ? ({ name: nameById.get(tm.p1) ?? '???', side: 'left' } as Player)
+        : undefined;
+
+      const contestant2 = tm.p2
+        ? ({ name: nameById.get(tm.p2) ?? '???', side: 'right' } as Player)
+        : undefined;
+
+      const winner = tm.winner
+        ? ({
+            name: nameById.get(tm.winner) ?? '???',
+            side: tm.winner === tm.p1 ? 'left' : 'right',
+          } as Player)
+        : null;
+
+      return { contestant1, contestant2, winner } as Match;
+    })
+  );
 }
