@@ -1,8 +1,6 @@
-// realtime/tournaments.ts
 import type { WebSocket as WSSocket } from 'ws';
 import { joinRoom, broadcast } from './rooms';
-import { startAuthoritativeMatch as runMatch } from './onlineTourn'; // export it there
-// If runMatch isn't exported, move it into a shared module and export.
+import { startAuthoritativeMatch as runMatch } from './onlineTourn';
 
 type PlayerId = string;
 type Side = 'left' | 'right';
@@ -18,14 +16,14 @@ export type TRounds = TMatch[][];
 export type TournamentOpts = {
   name: string;
   goalLimit: number;
-  maxPlayers: number; // 2–8
+  maxPlayers: number;
 };
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
 export class Tournament {
   id = uid();
-  code = this.id.slice(0, 6); // easy join code
+  code = this.id.slice(0, 6);
   name: string;
   goalLimit: number;
   maxPlayers: number;
@@ -67,12 +65,17 @@ export class Tournament {
   roomMatch(r: number, m: number) { return `t:${this.id}:m:${r}:${m}`; }
 
   start() {
-    if (this.started) return;
+    if (this.started)
+        return;
     const list = [...this.players.values()];
-    if (list.length < 2) { this.broadcastLobby({ type:'t.error', msg:'Need at least 2 players' }); return; }
-    if (!list.every(p => p.ready)) { this.broadcastLobby({ type:'t.error', msg:'All players must be ready' }); return; }
+    if (list.length < 2) { 
+        this.broadcastLobby({ type:'t.error', msg:'Need at least 2 players' });
+        return; }
+    if (!list.every(p => p.ready)) { 
+        this.broadcastLobby({ type:'t.error', msg:'All players must be ready' });
+        return; }
 
-    this.rounds = buildSingleElim(list.map(p => p.id)); // BYEs handled inside
+    this.rounds = buildSingleElim(list.map(p => p.id));
     this.started = true;
     this.currentRound = 0;
     this.currentMatch = 0;
@@ -81,30 +84,26 @@ export class Tournament {
     this.kickoffCurrentMatch();
   }
 
-  private kickoffCurrentMatch() {
+  private kickoffCurrentMatch()
+  {
     const r = this.currentRound, m = this.currentMatch;
     const match = this.rounds[r][m];
     const p1 = match.p1 ? this.players.get(match.p1)! : undefined;
     const p2 = match.p2 ? this.players.get(match.p2)! : undefined;
 
-    // BYE handling
     if (!p1 || !p2) {
       match.winner = (p1?.id ?? p2?.id)!;
       this.advance();
       return;
     }
-
-    // Move both sockets to a dedicated match room (optional, for broadcast grouping)
     joinRoom(p1.ws, this.roomMatch(r,m));
     joinRoom(p2.ws, this.roomMatch(r,m));
 
-    // Start the server-authoritative game
     runMatch(
       this.roomMatch(r,m),
       p1.ws,
       p2.ws,
       this.goalLimit,
-      // onMatchEnd callback:
       ({ winnerSide, score }) => {
         const winner = winnerSide === 'left' ? p1.id : p2.id;
         match.winner = winner;
@@ -112,15 +111,12 @@ export class Tournament {
         this.advance();
       }
     );
-
-    // Let only the two players receive match.start; everyone else watches bracket via t.state
     this.broadcastLobby({ type:'t.matchStart', r, m, p1: p1.id, p2: p2.id });
   }
 
   private advance() {
     const r = this.currentRound;
     const round = this.rounds[r];
-    // If round complete, build next round from winners
     if (round.every(mt => mt.winner)) {
       const winners = round.map(mt => mt.winner!) ;
       if (winners.length === 1) {
@@ -136,7 +132,6 @@ export class Tournament {
       return;
     }
 
-    // Otherwise move to next match within the round
     this.currentMatch++;
     this.pushState();
     this.kickoffCurrentMatch();
@@ -164,14 +159,11 @@ export class Tournament {
   }
 }
 
-/* ---------- Bracket helpers (single-elim + BYEs) ---------- */
-
 export function buildSingleElim(playerIds: PlayerId[]): TRounds {
-  // Seed to next power of 2 with BYEs
   const n = playerIds.length;
   const pow2 = 1 << Math.ceil(Math.log2(n));
   const seeds = playerIds.slice();
-  while (seeds.length < pow2) seeds.push(undefined as any); // BYE
+  while (seeds.length < pow2) seeds.push(undefined as any);
 
   const round0: TMatch[] = [];
   for (let i = 0; i < pow2; i += 2) {
@@ -187,8 +179,6 @@ export function buildRoundFromSeeds(winners: PlayerId[]): TMatch[] {
   }
   return out;
 }
-
-/* ---------- Registry (multiple tournaments) ---------- */
 
 export const tournaments = new Map<string, Tournament>();
 

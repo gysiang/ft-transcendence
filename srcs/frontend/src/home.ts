@@ -65,30 +65,8 @@ export async function renderHomePage(container: HTMLElement) {
 	const wrapper = document.createElement("div");
     wrapper.className = "relative group inline-block";
     wrapper.append(link, tooltipDiv);
-	const wsBtn = document.createElement('button');
-  wsBtn.className = 'mt-6 px-3 py-2 border rounded bg-gray-800 text-white hover:bg-gray-700';
-  wsBtn.textContent = 'Test WebSocket';
-  wsBtn.onclick = () => {
-    const client = openWs({
-      onStart: (m) => console.log('[UI] onStart', m),
-      onState: (s) => console.log('[UI] onState', s),
-      onEnd:   (e) => console.log('[UI] onEnd', e),
-    });
-    (window as any).wsTest = client; // optional: use from console
-  };
+	
 
-  // Button: quickmatch
-  const qmBtn = document.createElement('button');
-  qmBtn.className = 'mt-2 px-3 py-2 border rounded bg-sky-600 text-white hover:bg-sky-500';
-  qmBtn.textContent = 'Quickmatch Online';
-  qmBtn.onclick = () => {
-    const api = (window as any).wsTest ?? openWs(); // ensure a connection
-    (window as any).wsTest = api;
-    api.queue(5); // optional goalLimit
-  };
-  
-	// append to page
-	homePage.append(title, wrapper, wsBtn,qmBtn); 
 
 	// append to page
 	homePage.append(title, wrapper);
