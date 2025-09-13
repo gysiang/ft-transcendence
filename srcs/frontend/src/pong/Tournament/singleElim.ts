@@ -4,7 +4,7 @@ import { shuffle } from "./TournamentUtils";
 export type Match ={
     contestant1: Player;
     contestant2?: Player | null;
-    winner?: Player | null;
+    winner?: Player | null; //Player's ID
 }
 export type Round = Match[];
 export type Tournament = Round[];
@@ -28,6 +28,7 @@ export function generateFirstRound(players: Player[]): Round {
       }
       return matches;
 }
+
 export function generateRound(players: Player[]): Match[] {
 	const matches: Match[] = [];
 
@@ -50,6 +51,7 @@ export function generateRound(players: Player[]): Match[] {
 
 	return matches;
 }
+
 export function getWinners(round: Round): Player[] {
   const winners: Player[] = [];
 

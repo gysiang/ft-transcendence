@@ -7,8 +7,8 @@ export const SignupSchema = {
       name:     {$ref: 'Alias#'},
       email:    {
          type: 'string',format: 'email',
-         errorMessage: {format: 'Please enter a valid email.'}},  
-      password: { type: 'string'} //minLength: 8, maxLength: 128, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,128}$'} rules = one lowercase, one uppercase, and one digit.
+         errorMessage: {format: 'Please enter a valid email.'}},
+      password: { type: 'string', minLength: 8, maxLength: 128, pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"} //minLength: 8, maxLength: 128, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,128}$'} rules = one lowercase, one uppercase, and one digit.
     },
     errorMessage: {
         required: {

@@ -6,7 +6,7 @@ const cookie = require("cookie");
 import { serialize } from 'cookie';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client } from '../services/s3';
-import { processEmailInput, processUsername, check2faToken, passwordPolicy } from '../utils/helper'
+import { processEmailInput, processUsername, check2faToken } from '../utils/helper'
 import nodemailer from 'nodemailer'
 import speakeasy from 'speakeasy';
 
@@ -17,6 +17,7 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 				email: string;
 				password: string;
 			}
+
 	let sanemail = processEmailInput(email);
 
 	const db = req.server.db;
@@ -85,8 +86,6 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 
 	let sanename = processUsername(name);
 	let sanemail = processEmailInput(email);
-	if (!passwordPolicy(password))
-		return reply.status(400).send({ message: 'Password should contain at least 7 Char, 1 Uppercase, 1 Lowercase, 1 Number' });
 
 	const db = req.server.db;
 	const existing = await findUserByEmail(db, sanemail);
@@ -133,18 +132,14 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 		const user = req.user as any;
 		const name = user._json?.name;
 		const email = user._json?.email;
-		//const profile_picture = user._json?.picture
-		//console.log('Authenticated user:', user)
+		const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
+
 		if (!name || !email) {
 			return reply.status(400).send({ message: 'Missing name or email from Google profile' });
 		}
 
-		console.log('Google Name:', name);
-		console.log('Google Email:', email);
-		//console.log('Google profile:', profile_picture);
-		const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
-
 		const existing = await findUserByEmail(db, email);
+
 		let profile;
 		if (!existing) {
 			profile = await createUser(db, { name, email, password, profile_picture });
@@ -157,6 +152,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 			name: profile.name,
 			email : profile.email,
 		}
+
 		const token = jwt.sign(payload, process.env.JWT_SECRET);
 
 		const cookieStr = cookie.serialize('access_token', token, {
@@ -188,6 +184,7 @@ export async function getUser(req: FastifyRequest<{Params: IUserParams}>, reply:
 		if (req.userData?.id != id) {
 			return reply.status(400).send({ message: "Forbidden" });
 		}
+
 		const db = req.server.db;
 		const user = await findUserById(db, id);
 		if (!user) {
@@ -239,10 +236,7 @@ export async function logoutUser(req: FastifyRequest, reply: FastifyReply) {
 };
 
 
-export async function editUser(req: FastifyRequest<{
-    Params: IUserParams;
-    Body: IUserBody;
-}>, reply: FastifyReply) {
+export async function editUser(req: FastifyRequest<{ Params: IUserParams; Body: IUserBody;}>, reply: FastifyReply) {
 	try {
 		const { id } = req.params;
 		const { name, email } = req.body;
@@ -251,9 +245,13 @@ export async function editUser(req: FastifyRequest<{
 		if (req.userData?.id != id) {
 			return reply.status(400).send({ message: "Forbidden" });
 		}
+
+		let sanename = processUsername(name);
+		let sanemail = processEmailInput(email);
+
 		await db.run(
 			`UPDATE users SET name = ?, email = ?, updated_at = ? WHERE id = ?`,
-			[name, email, new Date().toISOString(), id]
+			[sanename, sanemail, new Date().toISOString(), id]
 		);
 		reply.status(200)
 			 .send({

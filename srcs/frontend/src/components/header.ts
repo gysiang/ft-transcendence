@@ -44,16 +44,24 @@ export function createHeader(): HTMLElement {
 	const isLoggedIn = !!localStorage.getItem("id");//get the user id
 	if (isLoggedIn)
 	{
-        // profile
-		const profileItem = createMenuItem("Profile", "/profile", "Check your profile");
-		profileItem.querySelector(".tooltip")?.classList.remove("left-0");
-		profileItem.querySelector(".tooltip")?.classList.add("-left-20");
-		nav.append(profileItem);
+        // marcus_profile_version
+		const marcus_profileItem = createMenuItem("Profile", "/profile", "Check your info here!");
+        marcus_profileItem.querySelector(".tooltip")?.classList.remove("left-0");
+		marcus_profileItem.querySelector(".tooltip")?.classList.add("-left-20");
+		nav.append(marcus_profileItem);
+
 		// friends
-		const friendsItem = createMenuItem("Friends", "/friends", "Friends");
+		const friendsItem = createMenuItem("Friends", "/friends", "Friends~");
 		friendsItem.querySelector(".tooltip")?.classList.remove("left-0");
-		friendsItem.querySelector(".tooltip")?.classList.add("-left-20");
+		friendsItem.querySelector(".tooltip")?.classList.add("-left-1");
 		nav.append(friendsItem);
+
+        // stats
+        // const stats = createMenuItem("Stats_overview", "/stats", "Check your Gameplay here!");
+		// stats.querySelector(".tooltip")?.classList.remove("left-0");
+		// stats.querySelector(".tooltip")?.classList.add("-left-16");
+		// nav.append(stats);
+
         //logout
         const logoutbutton = createMenuItem("Log Out", "/", "Log Out");
         logoutbutton.addEventListener("click", (e: Event) => {

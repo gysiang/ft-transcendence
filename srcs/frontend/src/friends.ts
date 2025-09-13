@@ -1,5 +1,5 @@
 import { renderHeader } from "./components/header";
-import { addFriendsHandler, fetchFriends, renderFriendsList } from "./handlers/addFriendsHandler";
+import { addFriendsHandler, fetchFriends } from "./handlers/addFriendsHandler";
 
 export function renderFriendsPage(container: HTMLElement) {
 
