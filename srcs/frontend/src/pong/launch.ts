@@ -65,62 +65,7 @@ export async function startGame(canvas: HTMLCanvasElement) {
 		api.queue(goalLimit);
 		return;
 	  }
-	/*if (mode === "online") {
-		let game: Game | null = null;
-		const handlers: MatchHandlers = {
-			onStart: ({ goalLimit: gl, side, world, ballR, geom }) => {
-			  const W = world?.w ?? 800;
-			  const H = world?.h ?? 600;
-			  lockCanvasWorld(canvas, W, H); // ← prevents right-paddle visual drift
-		  
-			  const players: Player[] = side === 'left'
-				? [{ name: 'You', side: 'left' }, { name: 'Opponent', side: 'right' }]
-				: [{ name: 'Opponent', side: 'left' }, { name: 'You', side: 'right' }];
-		  
-			  const game = new Game(canvas, ctx, players, gl);
-			  game.enableNetMode();
-			  // (optional) if you use ballR/geom in the client, set them here
-			  game.startCountdown();
-			},
-			onState: (s) => game?.applyNetState(s as any),
-			onEnd: ({ winnerSide, score }) => {
-			  unlockCanvas(canvas);*//*
-		const handlers: MatchHandlers = {
-		  onStart: ({ goalLimit: gl, side }) => {
-			console.log("[startGame] onStart received. side =", side, "goalLimit =", gl);
-			const players: Player[] = side === "left"
-			  ? [{ name: "You", side: "left" }, { name: "Opponent", side: "right" }]
-			  : [{ name: "Opponent", side: "left" }, { name: "You", side: "right" }];
-	
-			game = new Game(canvas, ctx, players, gl);
-			game.enableNetMode();
-			game.startCountdown();
-		  },
-		  onState: (s) => {
-			// If you didn't export NetState, just cast to any:
-			// game?.applyNetState(s as any);
-			game?.applyNetState(s as NetState);
-		  },
-		  onEnd: ({ winnerSide, score }) => {*//*
-			console.log("[startGame] match.end", { winnerSide, score });
-			alert(`${winnerSide === "left" ? "Left" : "Right"} wins ${score[0]}–${score[1]}`);
-			setTimeout(() => {
-			  localStorage.removeItem("mode");
-			  window.location.href = "/play";
-			}, 1000);
-		  },
-		};
-	
-		console.log("[startGame] opening WS…");
-		const api = openWs(handlers);
-		(window as any).wsMatch = api; // debug handle
-	
-		console.log("[startGame] calling queue(%d)…", goalLimit);
-		api.queue(goalLimit); // 👈 must be called here
-		console.log("[startGame] queue() invoked");
-		return;
-	  }*/
-	else if (mode === "quickplay") {
+	if (mode === "quickplay") {
 		const players = JSON.parse(localStorage.getItem("players") || "[]");
 		lockCanvasAtCurrent(canvas);
 		await launchGame(canvas, ctx, players, goalLimit, () => {

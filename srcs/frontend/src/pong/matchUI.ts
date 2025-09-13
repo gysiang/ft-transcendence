@@ -1,13 +1,6 @@
 import type { Player } from "./types";
 import type { Match } from "./Tournament/singleElim";
-/*
-export function matchUI(players: Player[], rounds?: Match[][]): Promise<void> {
-	const popup = document.getElementById('match-announcement');
-	if (popup) popup.style.display = 'none';
-	return Promise.resolve();
-  }*/
-  
-  
+
 export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
     return new Promise((resolve) => {
       const popup = document.getElementById("match-announcement")!;
@@ -67,7 +60,7 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
 
 import type { TRounds, TPlayer} from '../onlineClient'
 
-// Map TRounds -> Match[][]
+// Map TRounds to Match[][]
 export function adaptTRoundsToLocal(trounds: TRounds, players: TPlayer[]): Match[][] {
   const nameById = new Map(players.map(p => [p.id, p.name]));
 

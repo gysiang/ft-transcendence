@@ -1,6 +1,5 @@
 import { openWs, type MatchHandlers, type StartMsg, type StateMsg, type EndMsg } from './wsClient';
 
-/* ----- Strong types for tournament messages ----- */
 export type TPlayer = { id: string; name: string; ready: boolean };
 export type TMatch  = { id: string; p1?: string; p2?: string; winner?: string };
 export type TRounds = TMatch[][];
@@ -34,18 +33,12 @@ export type TClientHandlers = {
   onEnded?:      (m: TEndedMsg) => void;
 };
 
-/**
- * Open ONE websocket for both tournament + gameplay.
- * Pass your normal game handlers so online matches still start.
- */
 export function openTourneySocket(tHandlers: TClientHandlers, gameHandlers?: MatchHandlers) {
   const api = openWs({
-    // Forward gameplay handlers so match.start/state/end still work
     onStart: gameHandlers?.onStart as ((m: StartMsg) => void) | undefined,
     onState: gameHandlers?.onState as ((m: StateMsg) => void) | undefined,
     onEnd:   gameHandlers?.onEnd   as ((m: EndMsg)   => void) | undefined,
 
-    // Tournament messages come via onRaw
     onRaw: (msg: any) => {
       switch (msg?.type) {
         case 't.state':       tHandlers.onState?.(msg as TStateMsg); break;
@@ -54,13 +47,12 @@ export function openTourneySocket(tHandlers: TClientHandlers, gameHandlers?: Mat
         case 't.matchStart':  tHandlers.onMatchStart?.(msg as TMatchStartMsg); break;
         case 't.matchResult': tHandlers.onMatchResult?.(msg as TMatchResultMsg); break;
         case 't.ended':       tHandlers.onEnded?.(msg as TEndedMsg); break;
-        // ignore other messages; gameplay handled above
       }
     }
   });
 
   return {
-    ...api, // includes ws, send, queue, input, close (from your patched openWs)
+    ...api,
 
     tCreate: (name: string, goalLimit: number, maxPlayers: number, alias: string) =>
       api.send({ type: 't.create', name, goalLimit, maxPlayers, alias }),

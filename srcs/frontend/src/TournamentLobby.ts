@@ -60,7 +60,6 @@ export function renderTournamentScreen(root: HTMLElement) {
   let sock: ReturnType<typeof openTourneySocket> | null = null;
   let game: Game | null = null;
 
-  // helpers
   const setReadyBtn = () => {
     btnReady.textContent = meReady ? 'Unready' : 'Ready';
     btnReady.classList.toggle('bg-amber-600', !meReady);
@@ -69,10 +68,8 @@ export function renderTournamentScreen(root: HTMLElement) {
 
   function ensureSocket() {
     if (sock) return sock;
-    // Gameplay handlers (reuse your online quickmatch glue):
     const gh = {
       onStart: (msg: StartMsg) => {
-        // Build/lock canvas + start client in net mode
         gameWrap.innerHTML = '';
         const { canvas, container } = createGameCanvas();
         gameWrap.appendChild(container);
@@ -102,30 +99,23 @@ export function renderTournamentScreen(root: HTMLElement) {
       },
     };
 
-    // Tournament handlers update lobby/bracket
     sock = openTourneySocket(
       {
         onState: (s) => {
           lobby.classList.remove('hidden');
-          // players
           playersDiv.innerHTML =
             s.players.map(p => `• ${p.name} ${p.ready ? '✅' : '⌛'}`).join('<br/>');
-          // host sees Start when all ready & not started
           const allReady = s.players.length >= 2 && s.players.every(p => p.ready);
           btnStart.classList.toggle('hidden', !(isHost && allReady && !s.started));
-          // bracket
-         /*bracketWrap.innerHTML = '';
-          const b = document.createElement('div');
-          renderTournamentBracket(s.rounds, b); // allow renderTournamentBracket(rounds, mount?)
-          bracketWrap.appendChild(b);*/
+
           bracketWrap.innerHTML = '<div id="bracket" class="space-y-4 text-sm"></div>';
           const localRounds = adaptTRoundsToLocal(s.rounds, s.players);
           renderTournamentBracket(localRounds)},
         onCreated: (m) => { joinCode.textContent = `Join code: ${m.code}`; },
-        onJoined:  () => { /* no-op */ },
-        onMatchStart: () => { /* optional UI highlight */ },
-        onMatchResult:() => { /* optional UI highlight */ },
-        onEnded:      () => { /* show champion if you want */ },
+        onJoined:  () => {  },
+        onMatchStart: () => { },
+        onMatchResult:() => {},
+        onEnded:      () => { },
       },
       gh
     );
