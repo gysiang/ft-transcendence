@@ -114,7 +114,12 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 											text-yellow-700 dark:text-white text-shadow-lg/15 \
 											flex gap-1";
 				win_lose_result.textContent = "Win/Lose Ratio: ";
-				const wins = matches.data.filter((m: Match)=> m.winner === user.name).length;
+				//print console.log the JSON.string
+				console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
+				
+				//guranteed to be a number..... always but honestly how? -ask maybe xf?
+				const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
+				console.log ("VALUE OF WINS: ", wins);
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \
 											text-green-700 dark:text-white text-shadow-lg/15";
@@ -192,7 +197,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 		//marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email") {}
 		//const email2faSwitch = marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email");
-		const google2faSwitch = marcus_2faGoogle("This button currently does nothing", "toggle-2fa");
+		const google2faSwitch = marcus_2faGoogle("Working on getting this to work now", "toggle-2fa");
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center \
 									justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
