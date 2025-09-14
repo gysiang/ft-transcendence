@@ -26,26 +26,30 @@ export async function initializeDatabase() {
 				);
 
 				CREATE TABLE IF NOT EXISTS tournaments (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				player1_alias STRING NOT NULL,
-				player2_alias STRING NOT NULL,
-				created_by TEXT NOT NULL,
-				created_at TIMESTAMP NOT NULL,
+				id	INTEGER PRIMARY KEY AUTOINCREMENT,
+				name	TEXT NOT NULL,
+				created_by  INTEGER NOT NULL,
+				created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 				FOREIGN KEY (created_by) REFERENCES users(id)
 				);
-
-				CREATE TABLE IF NOT EXISTS matches (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				player1_alias STRING NOT NULL,
-				player2_alias STRING,
-				player1_score INTEGER NOT NULL,
-				player2_score INTEGER NOT NULL,
-				winner STRING NOT NULL,
-				tournament_id INTEGER NOT NULL,
-				created_at TIMESTAMP NOT NULL,
-				FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
+				CREATE TABLE matches (
+				id	INTEGER PRIMARY KEY AUTOINCREMENT,
+				tournament_id	INTEGER NOT NULL,
+				player1_id	INTEGER,    
+				player2_id	INTEGER,
+				player1_alias   TEXT NOT NULL,
+				player2_alias   TEXT,
+				player1_score   INTEGER NOT NULL,
+				player2_score   INTEGER NOT NULL,
+				winner_id       INTEGER,
+				winner_alias    TEXT,
+				created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				FOREIGN KEY (tournament_id) REFERENCES tournaments(id),
+				FOREIGN KEY (player1_id) REFERENCES users(id),
+				FOREIGN KEY (player2_id) REFERENCES users(id),
+				FOREIGN KEY (winner_id)  REFERENCES users(id),
+				CHECK (player1_score >= 0 AND player2_score >= 0)
 				);
-
 				CREATE TABLE IF NOT EXISTS friends (
 				user_id INTEGER NOT NULL,
 				friend_id INTEGER NOT NULL,
@@ -56,23 +60,26 @@ export async function initializeDatabase() {
 				);
 
 			`);
-			// sample seed data
-			/** *
+			// sample seed data*
+			/*
 			await db.exec(`
-				INSERT INTO tournaments (player1_alias, player2_alias, created_by, created_at)
-				VALUES
-					('Alice', 'Bob', 1, CURRENT_TIMESTAMP),
-					('Charlie', 'Alice', 3, CURRENT_TIMESTAMP),
-					('Test1', 'Test2', 1, CURRENT_TIMESTAMP);
+			INSERT INTO tournaments (name, created_by) VALUES
+    		('Alice vs Bob Test',        1),
+    		('Charlie vs Alice Test',    3),
+    		('Test Cup 3',               1);
 
-				INSERT INTO matches (player1_alias, player2_alias, player1_score, player2_score, winner, tournament_id, created_at)
-				VALUES
-					('Alice', 'Bob', 10, 8, 'Alice', 1, CURRENT_TIMESTAMP),
-					('Bob', 'Alice', 7, 11, 'Alice', 1, CURRENT_TIMESTAMP),
-					('Charlie', 'Alice', 9, 12, 'Alice', 2, CURRENT_TIMESTAMP),
-					('Test1', 'Test2', 10, 11, 'Test2', 3, CURRENT_TIMESTAMP);
-				`);
-			**/
+  			-- matches (IDs optional; aliases always kept)
+  			INSERT INTO matches (
+    		tournament_id, player1_id, player2_id,
+    		player1_alias, player2_alias,
+    		player1_score, player2_score,
+    		winner_id, winner_alias
+  			) VALUES
+    		(1, 1, 2, 'Alice',  'Bob',     10,  8,  1,   'ALICE'),
+    		(1, 2, 1, 'Bob',    'Alice',    7, 11,  1,   'ALICE'),
+    		(2, 3, 1, 'Charlie','Alice',    9, 12,  1,   'ALICE'),
+    		(3, NULL, NULL, 'Test1','Test2',10, 11, NULL,'Test2');  -- guest winner example`);
+			*/
 			console.log('SQLite database initialized and table created.');
 			return (db);
 			} catch (error) {

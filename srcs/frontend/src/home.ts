@@ -1,4 +1,5 @@
 import { renderHeader } from "./components/header";
+import { openWs } from "./wsClient"; 
 
 //For reference:
 //https://tailwind.build/classes
@@ -66,6 +67,8 @@ export async function renderHomePage(container: HTMLElement) {
 	const wrapper = document.createElement("div");
     wrapper.className = "relative group inline-block";
     wrapper.append(link, tooltipDiv);
+	
+
 
 	// append to page
 	homePage.append(title, wrapper);

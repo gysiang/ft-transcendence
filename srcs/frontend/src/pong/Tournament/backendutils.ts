@@ -1,19 +1,20 @@
 import { api } from "../registration/apiWrapper";
 
 export type CreateTournamentBody = {
-    player1_alias: string;
-    player2_alias: string;
-    created_by: string;
+    name: string;
   };
-  export type CreateTournamentRes = { id?: number; tournament_id?: number; message?: string };
+export type CreateTournamentRes = {tournament_id?: number; message?: string};
   
   export type CreateMatchBody = {
-    player1_alias: string;
-    player2_alias: string;
-    player1_score: number;
-    player2_score: number;
-    winner: string;
-    tournament_id: number | string;
+    tournament_id: number;
+    player1_alias?: string;
+    player2_alias?: string | null;
+    player1_id?: number | null;
+    player2_id?: number | null;
+    player1_score?: number;
+    player2_score?: number;
+    winner_id?: number | null;
+    winner_alias?: string | null;
   };
   export type CreateMatchRes = { id: number };
   
@@ -23,7 +24,7 @@ export type CreateTournamentBody = {
       body: JSON.stringify(body),
       signal,
     });
-    const id = (res as any).id ?? (res as any).tournament_id;
+    const id = res.tournament_id;
     if (typeof id !== 'number') throw new Error('Backend did not return a tournament id');
     return id;
   }

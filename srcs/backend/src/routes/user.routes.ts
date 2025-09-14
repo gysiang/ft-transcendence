@@ -25,4 +25,9 @@ export async function authRoutes(app: FastifyInstance) {
 	app.get('/api/ping', async (request, reply) => {
 		return reply.send({ ok: true });
 	});
+	app.get('/api/me', { onRequest: [app.authenticate] }, async (req: any, reply) => {
+		const user = req.userData;
+		if (!user?.id) return reply.code(401).send({ message: 'Unauthenticated' });
+		return reply.code(200).send({ name: String(user.name || '') });
+	  });
 }

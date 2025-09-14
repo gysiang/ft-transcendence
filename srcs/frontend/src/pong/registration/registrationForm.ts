@@ -8,18 +8,16 @@ import { checkAuthentication } from "./auth";
 import { api } from "./apiWrapper";
 import { validAlias,validGoal,setFieldError } from "./InputValidation";
 
-async function getLoggedInUserName(): Promise<string | null> {
-  const id = localStorage.getItem('id'); 
-  if (!id)
-    return null;
-
+export async function getLoggedInUserName(): Promise<string | null> {
   try {
-    const user = await api<{ name: string }>(`http://localhost:3000/api/profile/${id}`, {
-      method: 'GET',
-      skipAuthRedirect: true,                
+    const res = await fetch('http://localhost:3000/api/me', {
+      credentials: 'include',
+      cache: 'no-store',
     });
-    const name = (user?.name ?? '').trim();
-    return name || null;
+    if (res.status !== 200) return null;
+    const { name } = await res.json();
+    const trimmed = String(name || '').trim();
+    return trimmed || null;
   } catch {
     return null;
   }
@@ -51,6 +49,9 @@ export function quickplayForm(app: HTMLElement): void
             
             <button id ="quickplayStart" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md text-xl">
                 Start
+            </button>
+            <button id="quickmatchOnline" class="mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-md text-xl">
+            Online Quickmatch
             </button>
         </div>
             `;
@@ -90,108 +91,127 @@ export function quickplayForm(app: HTMLElement): void
                     startGame(canvas);
                 });
             }, 0);
+            /*
+            const onlineBtn = document.getElementById("quickmatchOnline");
+onlineBtn?.addEventListener("click", () => {
+  const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
+
+  // Persist only what online mode needs
+  localStorage.setItem("goalLimit", goals.toString());
+  localStorage.setItem("mode", "online");
+
+  // Clear page, mount canvas, and hand off to startGame
+  app.innerHTML = "";
+  const { canvas, container } = createGameCanvas();
+  app.appendChild(container);
+  startGame(canvas);
+});*/
 }
 export function tournamentForm(app: HTMLElement): void {
-	app.innerHTML = `
-		<div class="max-w-md mx-auto mt-12 text-black space-y-6">
-			<h2 class="text-3xl text-center">Tournament Setup</h2>
+  app.innerHTML = `
+    <div class="max-w-md mx-auto mt-12 text-black space-y-6">
+      <h2 class="text-3xl text-center">Tournament Setup</h2>
 
-			<div>
-				<label class="block mb-2">Tournament Name</label>
-				<input id="tournamentName" type="text" class="w-full px-4 py-2 text-black rounded-md" />
-			</div>
+      <div>
+        <label class="block mb-2">Tournament Name</label>
+        <input id="tournamentName" type="text" class="w-full px-4 py-2 text-black rounded-md" />
+      </div>
 
-			<div>
-				<label class="block mb-2">Number of Players (2–8)</label>
-				<input id="numPlayers" type="number" min="2" max="8" value="4" class="w-full px-4 py-2 text-black rounded-md" />
+      <div>
+        <label class="block mb-2">Number of Players (2–8)</label>
+        <input id="numPlayers" type="number" min="2" max="8" value="4" class="w-full px-4 py-2 text-black rounded-md" />
         <div id="playerCountAlert" class="text-red-600 text-sm mt-1 hidden">Number of players must be between 2 and 8.</div>
+      </div>
 
-			</div>
+      <div id="playerInputs" class="space-y-4"></div>
 
-			<div id="playerInputs" class="space-y-4"></div>
-
-			<div>
-				<label class="block mb-2">Goals to Win</label>
-				<input id="goalLimit" type="number" min="1" max="10" value="5" class="w-full px-4 py-2 text-black rounded-md" />
+      <div>
+        <label class="block mb-2">Goals to Win</label>
+        <input id="goalLimit" type="number" min="1" max="10" value="5" class="w-full px-4 py-2 text-black rounded-md" />
         <div id="goalError" class="text-red-600 text-sm mt-1"></div>
-			</div>
+      </div>
+
       <div id="formError" class="text-red-700 text-sm"></div>
 
-			<button id="startTournament" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md text-xl">
-				Start Tournament
-			</button>
-		</div>
-	`;
+      <button id="startTournament" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md text-xl">
+        Start Tournament
+      </button>
+    </div>
+  `;
 
-	const playerCountInput = document.getElementById("numPlayers") as HTMLInputElement;
-	const aliasContainer = document.getElementById("playerInputs")!;
-	const startButton = document.getElementById("startTournament")!;
+  const playerCountInput = document.getElementById("numPlayers") as HTMLInputElement;
+  const aliasContainer = document.getElementById("playerInputs")!;
+  const startButton = document.getElementById("startTournament")!;
   const formError = document.getElementById("formError")!;
   const goalInput = document.getElementById("goalLimit") as HTMLInputElement;
   const goalError = document.getElementById("goalError")!;
+  const nameInput = document.getElementById("tournamentName") as HTMLInputElement;
 
   let userAlias: string | null = null;
-    function updateAliasFields(userAlias?: string | null) {
-        const count = parseInt(playerCountInput.value, 10);
-        const alert = document.getElementById("playerCountAlert")!;
-    
-        if (isNaN(count) || count < 2 || count > 8) {
-            alert.classList.remove("hidden");
-            aliasContainer.innerHTML = ""; 
-            return;
-        } else {
-            alert.classList.add("hidden");
-        }
-    
-        aliasContainer.innerHTML = "";
-    
-        for (let i = 0; i < count; i++) {
-            const input = document.createElement("input");
-            input.type = "text";
-            input.placeholder = `Player ${i + 1}`;
-            input.className = "w-full p-2 border border-gray-300 rounded text-black";
-            input.dataset.index = i.toString();
-            input.maxLength = 32;
-            input.required = true;
-            
-            if (i === 0 && userAlias)
-              {
-                input.value = userAlias;
-                input.readOnly = true;
-                input.classList.add('bg-gray-100', 'cursor-not-allowed');
-              }
-              input.addEventListener('input', () => {
-                const msg = validAlias(input.value || '');
-                setFieldError(input, msg);});
-        
-              aliasContainer.appendChild(input);
-              setFieldError(input, null);
-            
-        }
+
+  function updateAliasFields(currentUserAlias?: string | null) {
+    const count = parseInt(playerCountInput.value, 10);
+    const alert = document.getElementById("playerCountAlert")!;
+    if (isNaN(count) || count < 2 || count > 8) {
+      alert.classList.remove("hidden");
+      aliasContainer.innerHTML = "";
+      return;
+    } else {
+      alert.classList.add("hidden");
     }
-    
-	updateAliasFields();
+
+    aliasContainer.innerHTML = "";
+    for (let i = 0; i < count; i++) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = `Player ${i + 1}`;
+      input.className = "w-full p-2 border border-gray-300 rounded text-black";
+      input.dataset.index = i.toString();
+      input.maxLength = 32;
+      input.required = true;
+
+      if (i === 0 && currentUserAlias) {
+        input.value = currentUserAlias;
+        input.readOnly = true;
+        input.classList.add("bg-gray-100", "cursor-not-allowed");
+      }
+
+      input.addEventListener("input", () => {
+        const msg = validAlias(input.value || "");
+        setFieldError(input, msg);
+      });
+
+      aliasContainer.appendChild(input);
+      setFieldError(input, null);
+    }
+  }
+
+  updateAliasFields();
+
   (async () => {
-    userAlias = await getLoggedInUserName();
+    try {
+      userAlias = await getLoggedInUserName();
+    } catch { userAlias = null; }
     updateAliasFields(userAlias);
-    playerCountInput.addEventListener("input", () => updateAliasFields(userAlias));
+    playerCountInput.addEventListener("input", () => updateAliasFields(userAlias || undefined));
   })();
-  goalInput.addEventListener('input', () => {
+
+  goalInput.addEventListener("input", () => {
     const n = parseInt(goalInput.value, 10);
     const err = validGoal(Number.isNaN(n) ? 0 : n);
-    goalError.textContent = err || '';
-    goalInput.classList.toggle('border-red-500', !!err);
+    goalError.textContent = err || "";
+    goalInput.classList.toggle("border-red-500", !!err);
   });
 
-  startButton.addEventListener("click", () => {
-    formError.textContent = '';
+  startButton.addEventListener("click", async () => {
+    formError.textContent = "";
 
     const aliasInputs = Array.from(aliasContainer.querySelectorAll("input")) as HTMLInputElement[];
     const players: Player[] = [];
 
     let firstInvalid: HTMLInputElement | null = null;
     for (const input of aliasInputs) {
-      const msg = validAlias(input.value || '');
+      const msg = validAlias(input.value || "");
       setFieldError(input, msg);
       if (msg && !firstInvalid) firstInvalid = input;
     }
@@ -201,31 +221,33 @@ export function tournamentForm(app: HTMLElement): void {
     names.forEach(n => dupMap.set(n, (dupMap.get(n) || 0) + 1));
     const duplicates = names.filter(n => dupMap.get(n)! > 1);
     if (duplicates.length) {
-      formError.textContent = 'Aliases must be unique.';
-      if (!firstInvalid)
-        firstInvalid = aliasInputs[names.indexOf(duplicates[0])];
+      formError.textContent = "Aliases must be unique.";
+      if (!firstInvalid) firstInvalid = aliasInputs[names.indexOf(duplicates[0])];
     }
 
     const goal = parseInt(goalInput.value, 10);
     const goalMsg = validGoal(Number.isNaN(goal) ? 0 : goal);
-    goalError.textContent = goalMsg || '';
+    goalError.textContent = goalMsg || "";
     if (goalMsg && !firstInvalid) firstInvalid = goalInput as any;
 
     if (firstInvalid) {
       firstInvalid.focus();
       return;
     }
-    aliasInputs.forEach((input, i) => { const name = input.value.trim() || `Player ${i + 1}`;
-      players.push({ name, side: "left" });
+
+    aliasInputs.forEach((input, i) => {
+      const name = (input.value.trim() || `Player ${i + 1}`);
+      players.push({ name, side: "left" }); // side is used by your game; you can assign real sides later
     });
 
-    handleStartTournament(app, players, goal);
+    await handleStartTournament(app, players, goal);
   });
 }
 export async function handleStartTournament(
   app: HTMLElement,
   players: Player[],
-  goalLimit: number = 5
+  goalLimit: number = 5,
+  
 ) {
   const rounds = runTournament(players);
 
@@ -235,44 +257,35 @@ export async function handleStartTournament(
     'tournamentData',
     JSON.stringify({ rounds, currentRoundIndex: 0, currentMatchIndex: 0 })
   );
+  
   const authed = await checkAuthentication();
 
   let tournamentId: number | null = null;
   let localOnly = true;
-  
+
+  const rawName =
+    (document.getElementById('tournamentName') as HTMLInputElement | null)?.value ?? '';
+  const trimmed = rawName.trim();
+  const fallback = 'Untitled Tournament';
+  const tournamentName: string = trimmed || fallback;
+
   if (authed) {
-    const Id = localStorage.getItem('id');
-    const createdById = Id ? Number(Id) : NaN;
-  
-    if (Number.isFinite(createdById)) {
-      try {
-        const p1 = players[0]?.name ?? 'Player 1';
-        const p2 = players[1]?.name ?? 'Player 2';
-  
-        tournamentId = await createTournament({
-          player1_alias: p1,
-          player2_alias: p2,
-          created_by: String(createdById),
-        });
-        localOnly = false;
-      } catch (e) {
-        console.log('Backend tournament create failed;', e);
-      }
-    } else {
-      console.log('No valid currentUserId;');
+    try {
+      tournamentId = await createTournament({ name: tournamentName });
+      localOnly = false;
+    } catch (e) {
+      console.log('Backend tournament create failed;', e);
     }
   } else {
     console.log('Not logged in. Local tournament only.');
   }
-  
+
   localStorage.setItem(
     'tournamentSnapshot',
     JSON.stringify({
       id: tournamentId,
       localOnly,
-      name:
-        (document.getElementById('tournamentName') as HTMLInputElement)?.value?.trim() ||
-        'Untitled Tournament',
+      name: tournamentName,
       goalLimit,
       players,
       rounds,
@@ -281,7 +294,7 @@ export async function handleStartTournament(
       createdAt: new Date().toISOString(),
     })
   );
-  
+
   app.innerHTML = '';
   const { canvas, container } = createGameCanvas();
   app.appendChild(container);

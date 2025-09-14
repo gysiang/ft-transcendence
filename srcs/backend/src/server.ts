@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import addFormats from 'ajv-formats';
 import ajvErrors from 'ajv-errors';
 import fastifyCors from '@fastify/cors';
+import websocket from '@fastify/websocket';
 import dotenv from 'dotenv';
 import { FastifyInstance } from 'fastify/types/instance';
 import { initializeDatabase } from "./database"
@@ -15,6 +16,9 @@ import fastifyPassport from '@fastify/passport'
 import fastifySecureSession from '@fastify/secure-session'
 import { VerifyCallback } from 'passport-google-oauth2'
 import { registerSchemas } from './schemas/list';
+import { wsRoutes } from './routes/ws.routes';
+import { makeDbEntry} from './remoteTournament/dbHelpers';
+import { setDbEntry } from './remoteTournament/realtimeTournament';
 
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
 
@@ -61,6 +65,7 @@ const registerPlugins = async (app : FastifyInstance) =>
 			files: 1,           // Max number of file fields
 			headerPairs: 1,  // Max number of header key=>value pairs
 		}})
+		app.register(websocket);
 
 }
 
@@ -70,10 +75,15 @@ const startServer = async () => {
 
 		await initializeDatabase();
 		await registerPlugins(app);
+		await app.after();
 		registerSchemas(app);
+		const dbEntry = makeDbEntry(app);
+		setDbEntry(dbEntry);
+
 		await app.register(authRoutes);
 		await app.register(gameRoutes);
 		await app.register(friendRoutes);
+		await app.register(wsRoutes);
 
 		fastifyPassport.use('google', new GoogleStrategy({
 			clientID:     process.env.GOOGLE_CLIENT_ID,

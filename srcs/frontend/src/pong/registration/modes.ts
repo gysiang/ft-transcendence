@@ -1,4 +1,7 @@
 import { tournamentForm, quickplayForm } from "./registrationForm";
+import { renderTournamentScreen } from "../../TournamentLobby";
+import { checkAuthentication } from "./auth";
+import { getLoggedInUserName } from "./registrationForm";
 
 export function renderModes(app: HTMLElement): void {
 
@@ -12,6 +15,9 @@ export function renderModes(app: HTMLElement): void {
         <button id="TournamentBtn" class="bg-indigo-800 w-56 px-10 py-5 text-xl uppercase tracking-widest text-white hover:bg-white hover:text-black rounded-full transition">
             Tournament
         </button>
+        <button id="OnlineTournamentBtn" class="bg-purple-700 w-56 px-10 py-5 text-xl uppercase tracking-widest text-white hover:bg-white hover:text-black rounded-full transition">
+          Online Tournament
+        </button>
         </div>
     </div>
   `;
@@ -23,6 +29,16 @@ export function renderModes(app: HTMLElement): void {
     document.getElementById("TournamentBtn")?.addEventListener("click", () => {
       tournamentForm(app);
     });
+    document.getElementById("OnlineTournamentBtn")?.addEventListener("click", async() => {
+      const authed = await checkAuthentication();
+      if (!authed) {
+        alert("You must be logged in to use Online Tournament.");
+          window.location.href = "/login";
+        return;
+      }
+      const alias = (await getLoggedInUserName()) ?? '';
+      app.innerHTML = '';
+    renderTournamentScreen(app, { alias, lockAlias: true });});
   }, 0);
 }
 

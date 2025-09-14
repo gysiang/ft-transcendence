@@ -7,14 +7,18 @@ export async function newMatch(req: FastifyRequest, reply: FastifyReply) {
 
 	try
 	{
-		const { player1_alias, player2_alias, player1_score, player2_score, winner, tournament_id } = req.body as
+		const { player1_alias, player2_alias, player1_score, player2_score, winner_alias, tournament_id,player1_id,player2_id,winner_id } = req.body as
 		{
 			player1_alias: string;
 			player2_alias: string;
 			player1_score: number;
 			player2_score: number;
-			winner: string;
+			winner_alias: string;
 			tournament_id: string;
+			player1_id: number | null;
+			player2_id: number | null;
+			winner_id: number | null;
+
 		};
 
 	const db = req.server.db;
@@ -25,7 +29,7 @@ export async function newMatch(req: FastifyRequest, reply: FastifyReply) {
 		return reply.status(401).send({ message: "Invalid tournament id" });
 	}
 
-	const match = await createMatch(db, { player1_alias, player2_alias, player1_score, player2_score, winner, tournament_id });
+	const match = await createMatch(db, { player1_alias, player2_alias, player1_score, player2_score, winner_alias, tournament_id, player1_id,player2_id,winner_id });
 
 	reply.status(201)
 		 .send({
@@ -59,8 +63,9 @@ export async function getMatch(req: FastifyRequest<{Params: IMatchParams}>, repl
 					player2: match.player2_alias,
 					player1_score: match.player1_score,
 					player2_score: match.player2_score,
-					winner: match.winner,
-					tournament_id: match.tournament_id
+					winner: match.winner_alias,
+					tournament_id: match.tournament_id,
+					winner_id: match.winner_id,
 				}));
 	} catch (err : any) {
 	req.log.error(err);
