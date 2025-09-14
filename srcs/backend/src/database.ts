@@ -75,9 +75,9 @@ export async function initializeDatabase() {
     		player1_score, player2_score,
     		winner_id, winner_alias
   			) VALUES
-    		(1, 1, 2, 'Alice',  'Bob',     10,  8,  1,   ALICE),
-    		(1, 2, 1, 'Bob',    'Alice',    7, 11,  1,   ALICE),
-    		(2, 3, 1, 'Charlie','Alice',    9, 12,  1,   ALICE),
+    		(1, 1, 2, 'Alice',  'Bob',     10,  8,  1,   'ALICE'),
+    		(1, 2, 1, 'Bob',    'Alice',    7, 11,  1,   'ALICE'),
+    		(2, 3, 1, 'Charlie','Alice',    9, 12,  1,   'ALICE'),
     		(3, NULL, NULL, 'Test1','Test2',10, 11, NULL,'Test2');  -- guest winner example`);
 			*/
 			console.log('SQLite database initialized and table created.');
