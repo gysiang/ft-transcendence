@@ -1,8 +1,9 @@
 
-import type { WebSocket as WSSocket } from 'ws';
+import type { WebSocket} from 'ws';
 import { joinRoom, broadcast } from './rooms';
 
-type Intent = -1 | 0 | 1;
+type Intent = -1 | 0 | 1; 
+//- 1 = up , 1 = down, 0 stop
 
 type MatchState = {
   w: number;
@@ -14,9 +15,6 @@ type MatchState = {
   geom: { padX: number; padW: number; padH: number; speed: number };
 };
 
-function clampI(i: unknown): Intent {
-  return typeof i === 'number' ? (i < 0 ? -1 : i > 0 ? 1 : 0) : 0;
-}
 function clamp(v: number, lo: number, hi: number) {
   return v < lo ? lo : v > hi ? hi : v;
 }
@@ -26,26 +24,10 @@ function clampVY(vy: number) {
   if (vy < -max) return -max;
   return vy;
 }
-function sendSafe(ws: WSSocket, payload: unknown) {
+function sendSafe(ws: WebSocket, payload: unknown) {
   try { ws.send(JSON.stringify(payload)); } catch {}
 }
 
-const queue: WSSocket[] = [];
-
-export function enqueue(ws: WSSocket, goalLimit = 5) {
-  if (ws.readyState !== ws.OPEN) return;
-  queue.push(ws);
-  tryMatch(goalLimit);
-}
-
-function tryMatch(goalLimit: number) {
-  while (queue.length >= 2) {
-    const left = queue.shift()!;
-    const right = queue.shift()!;
-    const room = `m:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 6)}`;
-    startAuthoritativeMatch(room, left, right, goalLimit);
-  }
-}
 
 export type MatchEndPayload = {
   winnerSide: 'left' | 'right';
@@ -53,10 +35,10 @@ export type MatchEndPayload = {
 };
 export type OnMatchEnd = (payload: MatchEndPayload) => void;
 
-export function startAuthoritativeMatch(
+export function startMatch(
   room: string,
-  left: WSSocket,
-  right: WSSocket,
+  left: WebSocket,
+  right: WebSocket,
   goalLimit: number,
   onEnd?: OnMatchEnd
 ) {
@@ -84,13 +66,24 @@ export function startAuthoritativeMatch(
   const leftMsgHandler = (buf: any) => {
     try {
       const m = JSON.parse(typeof buf === 'string' ? buf : buf.toString());
-      if (m?.type === 'input') state.left.intent = clampI(m.intent);
+      if (m?.type === 'input')
+        {
+          const i = Number(m.intent);
+          if (i === -1 || i === 0 || i === 1) {
+            state.left.intent = i as -1 | 0 | 1;
+          }
+        }
     } catch {}
   };
   const rightMsgHandler = (buf: any) => {
     try {
       const m = JSON.parse(typeof buf === 'string' ? buf : buf.toString());
-      if (m?.type === 'input') state.right.intent = clampI(m.intent);
+      if (m?.type === 'input'){
+        const i = Number(m.intent);
+        if (i === -1 || i === 0 || i === 1) {
+          state.right.intent = i as -1 | 0 | 1;
+      }
+      }
     } catch {}
   };
   left.on('message', leftMsgHandler);
@@ -148,12 +141,11 @@ export function startAuthoritativeMatch(
   }
 }
 
-// ---------- Physics (swept collisions) ----------
+// swept collisions ................:(
 function integrate(s: MatchState) {
   const { padX, padW, padH, speed } = s.geom;
   const r = s.ball.r;
 
-  // Move paddles from intents (server authoritative)
   s.left.y  = clamp(s.left.y  + s.left.intent  * speed, 0, s.h - padH);
   s.right.y = clamp(s.right.y + s.right.intent * speed, 0, s.h - padH);
 
@@ -161,17 +153,16 @@ function integrate(s: MatchState) {
   let   x1 = x0 + s.ball.vx;
   let   y1 = y0 + s.ball.vy;
 
-  if (y1 - r <= 0)   { y1 = r;       s.ball.vy = Math.abs(s.ball.vy);   }
-  if (y1 + r >= s.h) { y1 = s.h - r; s.ball.vy = -Math.abs(s.ball.vy);  }
+  if (y1 - r <= 0)   { y1 = r;s.ball.vy = Math.abs(s.ball.vy);}
+  if (y1 + r >= s.h) { y1 = s.h - r; s.ball.vy = -Math.abs(s.ball.vy);}
 
-  // LEFT paddle (right edge plane pr = padX + padW), check crossing of (x - r)
   if (s.ball.vx < 0) {
     const pr = padX + padW;
     if (x0 - r >= pr && x1 - r <= pr) {
       const t = (x0 - r - pr) / Math.abs(s.ball.vx || 1e-6);
       const yAtPlane = y0 + t * s.ball.vy;
       if (yAtPlane >= s.left.y && yAtPlane <= s.left.y + padH) {
-        x1 = pr + r + 0.1;  // center just outside after bounce
+        x1 = pr + r + 0.1;
         y1 = yAtPlane;
         s.ball.vx = Math.abs(s.ball.vx);
         const off = (yAtPlane - (s.left.y + padH / 2)) / (padH / 2);
@@ -180,7 +171,7 @@ function integrate(s: MatchState) {
     }
   }
 
-  // RIGHT paddle (left edge plane pl = s.w - padX - padW), check crossing of (x + r)
+  // r paddle left edge plane pl = s.w - padX - padW, check crossing of (x + r)
   if (s.ball.vx > 0) {
     const pl = s.w - padX - padW;
     if (x0 + r <= pl && x1 + r >= pl) {
@@ -214,3 +205,20 @@ function resetAfterGoal(s: MatchState, dir: -1 | 1) {
   s.ball.vx = 4 * dir;
   s.ball.vy = Math.random() > 0.5 ? 3 : -3;
 }
+/* online quick match for testing
+const queue: WebSocket[] = [];
+
+export function enqueue(ws: WebSocket, goalLimit = 5) {
+  if (ws.readyState !== ws.OPEN) return;
+  queue.push(ws);
+  tryMatch(goalLimit);
+}
+
+function tryMatch(goalLimit: number) {
+  while (queue.length >= 2) {
+    const left = queue.shift()!;
+    const right = queue.shift()!;
+    const room = `m:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 6)}`;
+    startAuthoritativeMatch(room, left, right, goalLimit);
+  }
+}*/

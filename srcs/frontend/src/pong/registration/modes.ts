@@ -1,6 +1,7 @@
 import { tournamentForm, quickplayForm } from "./registrationForm";
 import { renderTournamentScreen } from "../../TournamentLobby";
 import { checkAuthentication } from "./auth";
+import { getLoggedInUserName } from "./registrationForm";
 
 export function renderModes(app: HTMLElement): void {
 
@@ -35,9 +36,9 @@ export function renderModes(app: HTMLElement): void {
           window.location.href = "/login";
         return;
       }
-      app.innerHTML = "";
-      renderTournamentScreen(app);      
-    });
+      const alias = (await getLoggedInUserName()) ?? '';
+      app.innerHTML = '';
+    renderTournamentScreen(app, { alias, lockAlias: true });});
   }, 0);
 }
 

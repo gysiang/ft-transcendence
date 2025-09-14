@@ -4,20 +4,20 @@ import { ITournamentParams, createTournament, findTournamentById } from '../mode
 export async function newTournament(req: FastifyRequest, reply: FastifyReply) {
 
 	try {
-		const { player1_alias, player2_alias, created_by } = req.body as
-		{
-			player1_alias: string;
-			player2_alias: string;
-			created_by: string;
-		};
+	const { name } = req.body as{name: string;};
+	const userId = req.userData?.id;
+	if (!userId) {
+		return reply.status(401).send({ message: 'Unauthorized' });
+	  }
 
 	const db = req.server.db;
-	const tournament = await createTournament(db, { player1_alias, player2_alias, created_by });
+	const tournament = await createTournament(db, { name: name.trim(), created_by: userId });
 
 	reply.status(201)
 		 .send({
 			message: "success",
-			tournament_id : tournament.id
+			tournament_id : tournament.id,
+			name: name,
 		 })
 	} catch (err : any) {
 	req.log.error(err);
@@ -43,9 +43,9 @@ export async function getTournament(req: FastifyRequest<{Params: ITournamentPara
 				.send({
 					message: "Authentication success",
 					id: tournament.id,
-					player1: tournament.player1_alias,
-					player2: tournament.player2_alias,
-					created_by : tournament.created_by
+					name: tournament.name,
+					created_by : tournament.created_by,
+					created_at: tournament.created_at,
 				}));
 	} catch (err : any) {
 	req.log.error(err);

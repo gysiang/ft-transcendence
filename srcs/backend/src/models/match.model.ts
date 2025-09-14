@@ -3,11 +3,14 @@ import { Database } from 'sqlite';
 export interface Match {
 	id?: string;
 	player1_alias: string;
-	player2_alias: string;
+	player2_alias: string | null;
 	player1_score: number;
 	player2_score: number;
-	winner: string;
+	winner_alias: string;
 	tournament_id: string;
+	player1_id: number | null;
+	player2_id: number | null;
+	winner_id: number | null;
 }
 
 export interface IMatchParams {
@@ -16,16 +19,19 @@ export interface IMatchParams {
 
 export async function createMatch(db: Database, match: Match)
 {
-	const { player1_alias, player2_alias, player1_score, player2_score, winner, tournament_id } = match;
+	const { player1_alias, player2_alias, player1_score, player2_score, winner_alias, tournament_id, player1_id, player2_id, winner_id} = match;
 	const result = await db.run(
-		`INSERT INTO matches (player1_alias, player2_alias, player1_score, player2_score, winner, tournament_id, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO matches (player1_alias, player2_alias, player1_score, player2_score, winner_id, winner_alias, tournament_id, player1_id, player2_id, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		[	player1_alias,
 			player2_alias,
 			parseInt(player1_score.toString(), 10),
 			parseInt(player2_score.toString(), 10),
-			winner,
+			winner_id,
+			winner_alias,
 			tournament_id,
+			player1_id,
+			player2_id,
 			new Date().toISOString()]
 	);
 	return { id: result.lastID};

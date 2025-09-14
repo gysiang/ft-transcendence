@@ -17,6 +17,8 @@ import fastifySecureSession from '@fastify/secure-session'
 import { VerifyCallback } from 'passport-google-oauth2'
 import { registerSchemas } from './schemas/list';
 import { wsRoutes } from './routes/ws.routes';
+import { makeDbEntry} from './remoteTournament/dbHelpers';
+import { setDbEntry } from './remoteTournament/realtimeTournament';
 
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
 
@@ -73,7 +75,11 @@ const startServer = async () => {
 
 		await initializeDatabase();
 		await registerPlugins(app);
+		await app.after();
 		registerSchemas(app);
+		const dbEntry = makeDbEntry(app);
+		setDbEntry(dbEntry);
+
 		await app.register(authRoutes);
 		await app.register(gameRoutes);
 		await app.register(friendRoutes);
