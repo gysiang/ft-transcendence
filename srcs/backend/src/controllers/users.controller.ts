@@ -92,7 +92,7 @@ export async function signupUser(req: FastifyRequest, reply: FastifyReply) {
 	if (existing) {
 		return reply.status(400).send({ message: 'Email already exists' });
 	}
-	const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
+	const profile_picture = process.env.PRODUCTION_URL + '/default-profile.jpg';
 	const user = await createUser(db, { name: sanename, email: sanemail, password, profile_picture });
 
 	const payload = {
@@ -127,12 +127,13 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 
 	try {
 		const db = req.server.db;
-		const frontend = process.env.FRONTEND_URL;
+		//const frontend = process.env.FRONTEND_URL;
+		const production = process.env.PRODUCTION_URL;
 		const password = null;
 		const user = req.user as any;
 		const name = user._json?.name;
 		const email = user._json?.email;
-		const profile_picture = process.env.FRONTEND_URL + '/default-profile.jpg';
+		const profile_picture = process.env.PRODUCTION_URL + '/default-profile.jpg';
 
 		if (!name || !email) {
 			return reply.status(400).send({ message: 'Missing name or email from Google profile' });
@@ -164,7 +165,7 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 
 		return (reply
 				.header('Set-Cookie', cookieStr)
-				.redirect(frontend + '/?userId=' + profile.id)
+				.redirect(production + '/?userId=' + profile.id)
 			);
 	} catch (err : any) {
 	req.log.error(err);

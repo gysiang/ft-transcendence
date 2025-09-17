@@ -5,6 +5,7 @@ import { marcus_2faGoogle } from './handlers/marcus_2faHandler';
 import { verify2faHandler } from './handlers/2faHandler'
 // import { createLogger } from "vite";
 import type { Match } from "./pong/Tournament/singleElim.ts"
+import { API_BASE } from "./variable.ts"
 
 
 //https://tailwind.build/classes
@@ -17,7 +18,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 	try {
 		const userId = localStorage.getItem("id");
-		const response = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+		const response = await fetch(`${API_BASE}/api/profile/${userId}`, {
 			credentials: "include"
 		});
 		if (!response.ok) {
@@ -91,7 +92,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			statsheader.textContent = "Stats";
 
 			//determine which files and which to fetch
-			const res = await fetch(`http://localhost:3000/api/game/data/${userId}`, {
+			const res = await fetch(`${API_BASE}/api/game/data/${userId}`, {
 				method: "GET",
 				credentials: "include",
 			});
@@ -116,7 +117,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				win_lose_result.textContent = "Win/Lose Ratio: ";
 				//print console.log the JSON.string
 				console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
-				
+
 				//guranteed to be a number..... always but honestly how? -ask maybe xf?
 				const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
 				console.log ("VALUE OF WINS: ", wins);

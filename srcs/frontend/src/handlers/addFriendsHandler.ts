@@ -1,44 +1,39 @@
+import { API_BASE } from '../variable.ts'
+
 export async function addFriendsHandler(form: HTMLFormElement) {
 	const errorDiv = form.querySelector("#error") as HTMLDivElement;
 
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
-		//console.log("[Form Submit] Event triggered");
-
-		//console.log("[Form Submit] Friend Email:", friend_email);
-		//console.log("[Form Submit] User ID from localStorage:", user_id);
 
 		try {
 			const friend_email = (form.querySelector("#friend-email") as HTMLInputElement)?.value;
 			const user_id = localStorage.getItem("id");
-			//console.log("[Form Submit] Sending POST request...");
-			const res = await fetch("http://localhost:3000/api/friend", {
+			const res = await fetch(`${API_BASE}/api/friend`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
 				body: JSON.stringify({ user_id, friend_email }),
 			});
 
-			//console.log("[Form Submit] Response status:", res.status);
-
 			const data = await res.json().catch(() => {
 				console.log("[Form Submit] ⚠️ Response was not valid JSON");
 				return {};
 			});
 
-			console.log("[Form Submit] Response data:", data);
+			//console.log("[Form Submit] Response data:", data);
 
 			if (!res.ok) {
-				console.log("[Form Submit] ❌ Server returned error");
+				//console.log("[Form Submit] ❌ Server returned error");
 				errorDiv.textContent = data.message || "Unknown error";
 			} else {
-				console.log("[Form Submit] ✅ Friend added successfully");
+				//console.log("[Form Submit] ✅ Friend added successfully");
 				errorDiv.textContent = data.message || "Success!";
 				if (user_id)
 					fetchFriends(user_id);
 			}
 		} catch (err: any) {
-			console.log("[Form Submit] ❌ Network error:", err);
+			//console.log("[Form Submit] ❌ Network error:", err);
 			errorDiv.textContent = "Network error. Try again.";
 		}
 	});
@@ -46,7 +41,7 @@ export async function addFriendsHandler(form: HTMLFormElement) {
 
 export async function fetchFriends(userId: string) {
 	try {
-		const res = await fetch(`http://localhost:3000/api/friend/${userId}`, {
+		const res = await fetch(`${API_BASE}/api/friend/${userId}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -101,7 +96,7 @@ export function renderFriendsList(friends: any[]) {
 
 async function deleteFriend(userId: string, friendId: string) {
 	try {
-		const res = await fetch("http://localhost:3000/api/friend", {
+		const res = await fetch(`${API_BASE}/api/friend`, {
 			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json",

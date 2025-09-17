@@ -1,5 +1,6 @@
 import { renderHeader } from "./components/header";
-import { openWs } from "./wsClient"; 
+import { API_BASE } from "./variable"
+//import { openWs } from "./wsClient";
 
 //For reference:
 //https://tailwind.build/classes
@@ -34,7 +35,7 @@ export async function renderHomePage(container: HTMLElement) {
 
 	if (isLoggedIn) {
 		try {
-			const response = await fetch(`http://localhost:3000/api/profile/${isLoggedIn}`, {
+			const response = await fetch(`${API_BASE}/api/profile/${isLoggedIn}`, {
 				credentials: "include"
 			});
 			if (!response.ok) {
@@ -67,7 +68,7 @@ export async function renderHomePage(container: HTMLElement) {
 	const wrapper = document.createElement("div");
     wrapper.className = "relative group inline-block";
     wrapper.append(link, tooltipDiv);
-	
+
 
 
 	// append to page

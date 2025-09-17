@@ -152,7 +152,7 @@ export function lockCanvasWorld(canvas: HTMLCanvasElement, w: number, h: number)
   const ctx = canvas.getContext("2d")!;
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
-  resizeCanvas(canvas); 
+  resizeCanvas(canvas);
 }
 
 export function lockCanvasAtCurrent(canvas: HTMLCanvasElement) {

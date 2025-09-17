@@ -1,8 +1,9 @@
 import { renderApp } from "../router.js";
+import { API_BASE } from '../variable.ts'
 
 export async function logoutHandler() {
 	const id = localStorage.getItem("id");
-	const data = await fetch("http://localhost:3000/api/logout", {
+	const data = await fetch(`${API_BASE}/api/logout`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		credentials: "include",

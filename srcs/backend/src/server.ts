@@ -53,7 +53,7 @@ const registerPlugins = async (app : FastifyInstance) =>
 
 		app.register(authPlugin);
 		app.register(fastifyCors, {
-			origin: ['http://localhost:5173', 'http://localhost:8080'],
+			origin: ['http://localhost:5173', 'https://pong.42.fr'],
 			methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 			credentials: true
 		});
@@ -88,7 +88,7 @@ const startServer = async () => {
 		fastifyPassport.use('google', new GoogleStrategy({
 			clientID:     process.env.GOOGLE_CLIENT_ID,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-			callbackURL: "http://localhost:3000/auth/google/callback",
+			callbackURL: "https://pong.42.fr/auth/google/callback",
 			passReqToCallback   : true
 		}, async function (
 				request: Request,
