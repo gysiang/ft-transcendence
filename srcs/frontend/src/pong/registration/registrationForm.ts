@@ -7,10 +7,10 @@ import { createTournament } from "../Tournament/backendutils";
 import { checkAuthentication } from "./auth";
 import { api } from "./apiWrapper";
 import { validAlias,validGoal,setFieldError } from "./InputValidation";
-
+import { API_BASE } from "../../variable"
 export async function getLoggedInUserName(): Promise<string | null> {
   try {
-    const res = await fetch('http://localhost:3000/api/me', {
+    const res = await fetch(`${API_BASE}/api/me`, {
       credentials: 'include',
       cache: 'no-store',
     });
@@ -46,7 +46,7 @@ export function quickplayForm(app: HTMLElement): void
             <div>
                 <label for="goalLimit" class="block mb-2"> Goals </label>
                 <input id="goalLimit" type = "number" min="1" max="10" value="5" class="w-full px-4 py-2 text-black rounded-md" />
-            
+
             <button id ="quickplayStart" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md text-xl">
                 Start
             </button>
@@ -68,7 +68,7 @@ export function quickplayForm(app: HTMLElement): void
                     p1.classList.add('bg-gray-100', 'cursor-not-allowed');
                   }
               }})();
-            
+
             setTimeout(() => {
                 const button = document.getElementById("quickplayStart");
                 button?.addEventListener("click", () => {
@@ -85,7 +85,7 @@ export function quickplayForm(app: HTMLElement): void
                     localStorage.setItem("players", JSON.stringify(players));
                     localStorage.setItem("goalLimit", goals.toString());
                     localStorage.setItem("mode", "quickplay");
-                    app.innerHTML = ""; 
+                    app.innerHTML = "";
                     const { canvas, container } = createGameCanvas();
                     app.appendChild(container);
                     startGame(canvas);
@@ -245,10 +245,10 @@ export function tournamentForm(app: HTMLElement): void {
   });
 }
 export async function handleStartTournament(
-  app: HTMLElement,
+  _app: HTMLElement,
   players: Player[],
   goalLimit: number = 5,
-  
+
 ) {
   const rounds = runTournament(players);
 
@@ -258,7 +258,7 @@ export async function handleStartTournament(
     'tournamentData',
     JSON.stringify({ rounds, currentRoundIndex: 0, currentMatchIndex: 0 })
   );
-  
+
   const authed = await checkAuthentication();
 
   let tournamentId: number | null = null;

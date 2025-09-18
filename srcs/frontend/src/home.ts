@@ -1,6 +1,7 @@
 import { renderHeader } from "./components/header";
 // import { openWs } from "./wsClient";
 import { renderGameModes } from "./pong/ui/gameMode";
+import { API_BASE } from "./variable"
 
 //For reference:
 //https://tailwind.build/classes
@@ -35,7 +36,7 @@ export async function renderHomePage(container: HTMLElement) {
 
 	if (isLoggedIn) {
 		try {
-			const response = await fetch(`http://localhost:3000/api/profile/${isLoggedIn}`, {
+			const response = await fetch(`${API_BASE}/api/profile/${isLoggedIn}`, {
 				credentials: "include"
 			});
 			if (!response.ok) {
@@ -54,19 +55,19 @@ export async function renderHomePage(container: HTMLElement) {
 	  "w-48 bg-sky-500 text-white px-4 py-2 rounded-md text-center " +
 	  "hover:bg-sky-600 transition animate-pulse text-sm";
 	playBtn.textContent = "Open The Game!";
-  
-	// tooltip 
+
+	// tooltip
 	const tooltipDiv = document.createElement("div");
 	tooltipDiv.className =
 	  "tooltip absolute left-1/2 -translate-x-1/2 mt-1 w-max text-sm text-gray-800 bg-white " +
 	  "border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 " +
 	  "transition-opacity duration-200 pointer-events-none transition-all duration-1000";
 	tooltipDiv.textContent = "GO AHEAD MR JOESTAR!";
-  
+
 	const wrapper = document.createElement("div");
 	wrapper.className = "relative group inline-block";
 	wrapper.append(playBtn, tooltipDiv);
-  
+
 	playBtn.addEventListener("click", (e) => {
 	  e.preventDefault();
 	  renderGameModes(homePage);

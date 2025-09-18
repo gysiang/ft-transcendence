@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { API_BASE } from '../variable.ts'
 
 export function initTwoFAToggle(checkboxId: string) {
 	const toggle = document.getElementById(checkboxId) as HTMLInputElement;
@@ -14,7 +15,7 @@ export function initTwoFAToggle(checkboxId: string) {
 	if ((event.target as HTMLInputElement).checked) {
 		qrSection?.classList.remove("hidden");
 
-	const res = await fetch("http://localhost:3000/2fa/setup", {
+	const res = await fetch(`${API_BASE}/2fa/setup`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		credentials: "include",
@@ -37,7 +38,7 @@ export function initTwoFAToggle(checkboxId: string) {
 	} else {
 		qrSection?.classList.add("hidden");
 
-	await fetch("http://localhost:3000/2fa/disable", {
+	await fetch(`${API_BASE}/2fa/disable`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		credentials: "include",
@@ -60,7 +61,7 @@ export function initTwoFAToggleEmail(checkboxId: string) {
 	if ((event.target as HTMLInputElement).checked) {
 	email2FAContainer?.classList.remove("hidden");
 
-	await fetch("http://localhost:3000/2fa/setup/email", {
+	await fetch(`${API_BASE}/2fa/setup/email`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		credentials: "include",
@@ -68,7 +69,7 @@ export function initTwoFAToggleEmail(checkboxId: string) {
 	});
 } else {
 		email2FAContainer?.classList.add("hidden");
-		await fetch("http://localhost:3000/2fa/disable", {
+		await fetch(`${API_BASE}/2fa/disable`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -97,7 +98,7 @@ export function verify2faHandler(buttonId: string, inputId: string, twofa_method
 	}
 
 	try {
-		const res = await fetch("http://localhost:3000/2fa/verify", {
+		const res = await fetch(`${API_BASE}/2fa/verify`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -145,7 +146,7 @@ export function verify2faLoginHandler(buttonId: string, inputId: string) {
 		return;
 	}
 	try {
-		const res = await fetch("http://localhost:3000/2fa/verify", {
+		const res = await fetch(`${API_BASE}/2fa/verify`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

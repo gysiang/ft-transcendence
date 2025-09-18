@@ -1,13 +1,14 @@
 import { renderApp } from "../router.js";
+import { API_BASE } from '../variable.ts'
 
 export async function loginHandler(formId: string) {
 
 	const form = document.getElementById(formId) as HTMLFormElement;
 	const errorDiv = document.getElementById("error");
-	if (!form) return; // if no form, stop here
+	if (!form) return;
 
 	form.addEventListener("submit", async (e) => {
-		e.preventDefault(); //prevent reload
+		e.preventDefault();
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
 
@@ -18,7 +19,7 @@ export async function loginHandler(formId: string) {
 		}
 
 		try {
-			const res = await fetch("http://localhost:3000/api/login", {
+			const res = await fetch(`${API_BASE}/api/login`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

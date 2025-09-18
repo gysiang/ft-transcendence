@@ -1,3 +1,5 @@
+import { API_BASE } from '../variable.ts'
+
 export async function profileHandler(formId: string) {
 
 const form = document.getElementById(formId) as HTMLFormElement;
@@ -13,7 +15,7 @@ if (!form) return;
 
 		try {
 			const userId = localStorage.getItem("id"); // same as in profile.ts
-			const res = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+			const res = await fetch(`${API_BASE}/api/profile/${userId}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
@@ -55,7 +57,7 @@ export async function profilepicHandler(fileInputId: string) {
 		const formData = new FormData();
 		formData.append("profile_picture", file);
 		try {
-			const res = await fetch(`http://localhost:3000/api/profile/${userId}/pic`, {
+			const res = await fetch(`${API_BASE}/api/profile/${userId}/pic`, {
 				method: "PATCH",
 				body: formData,
 				credentials: "include",

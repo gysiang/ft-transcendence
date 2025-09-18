@@ -6,6 +6,7 @@ import { all_2faswitches } from './handlers/marcus_2faHandler';
 // import { verify2faHandler } from './handlers/2faHandler'
 // import { createLogger } from "vite";
 import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
+import { API_BASE } from "./variable.ts"
 
 
 //https://tailwind.build/classes
@@ -18,7 +19,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 	try {
 		const userId = localStorage.getItem("id");
-		const response = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+		const response = await fetch(`${API_BASE}/api/profile/${userId}`, {
 			credentials: "include"
 		});
 		if (!response.ok) {
@@ -92,7 +93,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			statsheader.textContent = "Stats";
 
 			//determine which files and which to fetch
-			const res = await fetch(`http://localhost:3000/api/game/data/${userId}`, {
+			const res = await fetch(`${API_BASE}/api/game/data/${userId}`, {
 				method: "GET",
 				credentials: "include",
 			});
@@ -117,9 +118,9 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				win_lose_result.textContent = "Win/Lose Ratio: ";
 				//print console.log the JSON.string
 				console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
-				
-				const wins = matches.data.filter((m: CreateMatchBody) => m.winner_id
-										&& String(m.winner_id) === String(userId)).length;
+
+				//guranteed to be a number..... always but honestly how? -ask maybe xf?
+				const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
 				console.log ("VALUE OF WINS: ", wins);
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \
@@ -211,6 +212,9 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		//switchContainer.append(email2faSwitch, google2faSwitch);
 		container.appendChild(profileWrapper);
 		//(e)--------------------------2fa section--------------------------
+
+		verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
+		verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");

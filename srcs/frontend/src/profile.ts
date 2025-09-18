@@ -1,14 +1,14 @@
 import { renderHeader } from "./components/header";
 import { profileHandler, profilepicHandler } from "./handlers/profileHandler";
-//import { initTwoFAToggle, initTwoFAToggleEmail, verify2faHandler, initTwoFAMutualExclusion } from './handlers/2faHandler'
-
+import { initTwoFAToggle, initTwoFAToggleEmail, verify2faHandler, initTwoFAMutualExclusion } from './handlers/2faHandler'
+import { API_BASE } from "./variable.ts"
 //for colour change for buttons
 //https://tailwindcss.com/docs/hover-focus-and-other-states
 export async function renderProfilePage(container: HTMLElement) {
 	renderHeader(container);
 	try {
 		const userId = localStorage.getItem("id");
-		const response = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+		const response = await fetch(`${API_BASE}/api/profile/${userId}`, {
 			credentials: "include"
 		});
 		if (!response.ok) {

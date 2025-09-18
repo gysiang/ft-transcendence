@@ -1,9 +1,10 @@
 import { renderApp } from "../router.js";
+import { API_BASE } from "../variable.js"
 
 export async function signupHandler(formId: string) {
 	const form = document.getElementById(formId) as HTMLFormElement;
 	const errorDiv = document.getElementById("error");
-	if (!form) return; // if no form, stop here
+	if (!form) return;
 
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
@@ -13,7 +14,7 @@ export async function signupHandler(formId: string) {
 		const password = (document.getElementById("password") as HTMLInputElement).value;
 
 		try {
-			const res = await fetch("http://localhost:3000/api/signup",
+			const res = await fetch(`${API_BASE}/api/signup`,
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -39,7 +40,7 @@ export async function googleHandler(buttonId: string) {
 	if (!googleButton) return;
 
 	googleButton.addEventListener('click', () => {
-		window.location.href = 'http://localhost:3000/auth/google';
+		window.location.href = `${API_BASE}/auth/google`;
 	});
 	window.addEventListener("DOMContentLoaded", () => {
 	const params = new URLSearchParams(window.location.search);
