@@ -2,10 +2,9 @@ import { renderHeader } from "./components/header.ts";
 import { Chart }from 'chart.js/auto';
 import { DoughnutController, ArcElement,
 		BarController, BarElement, CategoryScale, LinearScale,
-		Decimation, SubTitle, Title, Tooltip, Legend } from 'chart.js'; 	// these are from here:
-													//https://www.chartjs.org/docs/latest/getting-started/integration.html
-import type { Match } from "./pong/Tournament/singleElim.ts"
-//import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
+		Decimation, SubTitle, Title, Tooltip, Legend } from 'chart.js'; // these are from here:
+//https://www.chartjs.org/docs/latest/getting-started/integration.html
+import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
 import { API_BASE } from "./variable.ts"
 // register controllers and elements
 Chart.register(
@@ -58,7 +57,7 @@ export async function statsProfile(container: HTMLElement) {
 		console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
 		console.log("[Total_Score]User:", user.name, matches.data.length);
 
-		const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
+		const wins = matches.data.filter((m: CreateMatchBody) => m.winner_id && String(m.winner_id) === String(userId)).length;
 		console.log ("VALUE OF WINS: ", wins);
 		const losses = matches.data.length - wins;
 		console.log("THIS data is from stats.ts:", user);
@@ -245,17 +244,7 @@ export async function statsProfile(container: HTMLElement) {
 						}
 					})
 					.catch(err => console.error("Error checking Newbie_badge image:", err));
-				/*
-				const p_img = document.createElement("img");
-				p_img.src = user.profile_picture;
-				p_img.alt = `${user.name}'s profile picture`;
-				p_img.className = "w-24 h-24 rounded-full object-cover shadow-lg/40";
-				const p_name = document.createElement("p");
-				p_name.className = "text-lg font-bold text-center text-gray-900 dark:text-white text-shadow-lg/15";
-				p_name.textContent = "User: " + user.name// Put user's name inside the <p>
-				profile_user.append(p_img, p_name);
-				*/
-				//why use .then()? what is it for?
+
 				if (wins >= 5 && wins < 10) {
 					fetch('../imgs/Bronze_badge.png', { method: "HEAD" })
 					.then(badge_res => {
@@ -324,12 +313,6 @@ export async function statsProfile(container: HTMLElement) {
 		//--------------------------Wrapper(stats) Section--------------------------
 		container.appendChild(profile_column);
 
-
-
-	//--------------------------Charts--------------------------
-    // const wins = matches.data.filter(m => m.winner === user.name).length;
-    // const losses = matches.data.length - wins;
-
     // Donut chart
     new Chart(donutCanvas, {
 		type: "doughnut",
@@ -368,7 +351,7 @@ export async function statsProfile(container: HTMLElement) {
 		// (tournamentId)! the '!' is used here cause i am very sure the tournament exists in the map
 		const t = tournamentsMap.get(tournamentId)!;
 		// Check if current user is the winner or loser
-		if (String(m.winner) ===  user.name) {
+		if (String(m.winner_id) ===  userId) {
 			t.tourney_wins++;
 		} else {
 			t.tourney_losses++;
@@ -433,16 +416,6 @@ export interface BackendUserResponse {
 	profile_picture: string,
 	twofa_method: string | null,
 }
-
-//From Divya's code
-export type CreateMatchBody = {
-	player1_alias: string;
-	player2_alias: string;
-	player1_score: number;
-	player2_score: number;
-	winner: string;
-	tournament_id: number | string;
-};
 
 export async function obtainBackendData(endpoint: string, userId: string): Promise<BackendUserResponse> {
   const response = await fetch(`${API_BASE}/api/${endpoint}/${userId}`, {

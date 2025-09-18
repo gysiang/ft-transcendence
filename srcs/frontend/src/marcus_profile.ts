@@ -1,10 +1,11 @@
 import { renderHeader } from './components/header';
 // import { marcus_2faEmail, marcus_2faGoogle } from './handlers/marcus_2faHandler';
-import { marcus_2faGoogle } from './handlers/marcus_2faHandler';
+//import { marcus_2faGoogle } from './handlers/marcus_2faHandler';
+import { all_2faswitches } from './handlers/marcus_2faHandler';
 // import { profileHandler } from "./handlers/profileHandler";
-import { verify2faHandler } from './handlers/2faHandler'
+// import { verify2faHandler } from './handlers/2faHandler'
 // import { createLogger } from "vite";
-import type { Match } from "./pong/Tournament/singleElim.ts"
+import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
 import { API_BASE } from "./variable.ts"
 
 
@@ -185,8 +186,9 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		fa2spantext.textContent = "Keep your account secure!";
 		fa2span.appendChild(fa2spantext);
 
+		//replace this with a button
 		const fa2spantext2 = document.createElement("div");
-		fa2spantext2.className = "mt-1 text-black dark:text-gray-950";
+		fa2spantext2.className = "flex flex-row justify-center mt-1 text-black dark:text-gray-950";
 		fa2spantext2.textContent = "Activate 2FA:";
 		fa2.appendChild(fa2spantext2);
 
@@ -198,13 +200,15 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 		//marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email") {}
 		//const email2faSwitch = marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email");
-		const google2faSwitch = marcus_2faGoogle("Working on getting this to work now", "toggle-2fa");
+		//const google2faSwitch = marcus_2faGoogle("Activate 2FA via google Auth", "toggle-2fa");
+		//const google2faSwitch = marcus_2faGoogle("Activate 2FA:", "toggle-2fa");
+		const all_2faSwitch = await all_2faswitches("Status Of 2FA:", "toggle-2fa");
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center \
 									justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
 		profileWrapper.append(profile_stats_div, fa2);
 
-		switchContainer.append(google2faSwitch);
+		switchContainer.append(all_2faSwitch);
 		//switchContainer.append(email2faSwitch, google2faSwitch);
 		container.appendChild(profileWrapper);
 		//(e)--------------------------2fa section--------------------------
