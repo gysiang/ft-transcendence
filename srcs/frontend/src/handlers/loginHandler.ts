@@ -31,6 +31,7 @@ export async function loginHandler(formId: string) {
 				const loginForm = document.getElementById("login-form") as HTMLFormElement;
 				const email2fa = document.getElementById("email2fa-input") as HTMLElement;
 				localStorage.setItem("id", data.id);
+				localStorage.setItem("twofa_method", data.twofa_method);
 				loginForm.classList.add("hidden");
 				email2fa.classList.remove("hidden");
 			}

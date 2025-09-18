@@ -5,6 +5,7 @@ import { renderProfilePage } from "./profile.js";
 import { renderFriendsPage } from "./friends.js";
 import { statsProfile } from "./stats.js";
 import { renderModes } from "./pong/registration/modes.js";
+import { renderGameModes } from "./pong/ui/gameMode.js";
 
 
 //delete later
@@ -27,8 +28,8 @@ export function renderApp() {
 	} else if (path === '/profile/update_profile') {
 		renderProfilePage(app);
 	} else if (path === '/play'){
-		renderModes(app);
-	} else if (path == '/friends') {
+		renderGameModes(app);
+	}else if (path == '/friends') {
 		renderFriendsPage(app);
 	} else if (path == '/profile/stats') {
 		statsProfile(app);

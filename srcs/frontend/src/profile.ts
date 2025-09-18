@@ -148,8 +148,8 @@ export async function renderProfilePage(container: HTMLElement) {
 		profilepicHandler("file-input");
 		initTwoFAToggle("toggle-2fa");
 		initTwoFAToggleEmail("toggle-2fa-email");
-		verify2faHandler("verify-2fa-app", "twofa-token-app");
-		verify2faHandler("verify-2fa-email", "twofa-token-email");
+		verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
+		verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
 		initTwoFAMutualExclusion(user.twofa_method);
 
 	} catch (error) {

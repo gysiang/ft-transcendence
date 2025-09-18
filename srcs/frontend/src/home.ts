@@ -1,4 +1,6 @@
 import { renderHeader } from "./components/header";
+import { openWs } from "./wsClient";
+import { renderGameModes } from "./pong/ui/gameMode";
 import { API_BASE } from "./variable"
 //import { openWs } from "./wsClient";
 
@@ -48,23 +50,21 @@ export async function renderHomePage(container: HTMLElement) {
       		user_name.textContent = "Error.exe";
 		}
 	}
+	const playBtn = document.createElement("button");
+	playBtn.type = "button";
+	playBtn.className =
+	  "w-48 bg-sky-500 text-white px-4 py-2 rounded-md text-center " +
+	  "hover:bg-sky-600 transition animate-pulse text-sm";
+	playBtn.textContent = "Open The Game!";
 
-	// button to play! These start in the center due to the parent container
-	// Link button
-    const link = document.createElement("a");
-    link.href = "/play";
-    link.className = "hover:underline w-2xs bg-sky-500 text-white p-2 rounded-md text-center animate-pulse p-2 text-white text-sm";
-    link.textContent = "Open The Game!";
+	// tooltip
+	const tooltipDiv = document.createElement("div");
+	tooltipDiv.className =
+	  "tooltip absolute left-1/2 -translate-x-1/2 mt-1 w-max text-sm text-gray-800 bg-white " +
+	  "border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 " +
+	  "transition-opacity duration-200 pointer-events-none transition-all duration-1000";
+	tooltipDiv.textContent = "GO AHEAD MR JOESTAR!";
 
-	// Tooltip
-    const tooltipDiv = document.createElement("div");
-    tooltipDiv.className =
-        "tooltip absolute left-1/2 -translate-x-1/2 mt-1 w-max text-sm text-gray-800 bg-white \
-		border border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 \
-		transition-opacity duration-200 pointer-events-none transition-all duration-1000";
-    tooltipDiv.textContent = "GO AHEAD MR JOESTAR!";
-
-	// Append link and tooltip to wrapper
 	const wrapper = document.createElement("div");
     wrapper.className = "relative group inline-block";
     wrapper.append(link, tooltipDiv);
