@@ -323,10 +323,7 @@ export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
 		let secret = speakeasy.generateSecret({
 			name: "Pong42",
 		});
-
-
-		await updateOnlySecret(db, id, secret.base32);
-
+		updateOnlySecret(db, id, secret.base32);
 		reply.status(200).send({
 			message: "2fa setup success",
 			otpauth_url: secret.otpauth_url,
