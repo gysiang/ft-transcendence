@@ -57,7 +57,8 @@ export async function renderGameModes(mountInto: HTMLElement) {
     </div>
   `;
 
-  mountInto.replaceWith(root);
+  //mountInto.replaceWith(root);
+  mountInto.replaceChildren(root);
 
   const cardLocal   = root.querySelector<HTMLDivElement>("#cardLocal")!;
   const cardOnline  = root.querySelector<HTMLDivElement>("#cardOnline")!;
