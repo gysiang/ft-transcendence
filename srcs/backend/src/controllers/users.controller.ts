@@ -316,19 +316,22 @@ export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
 		return reply.status(400).send({ message: "Forbidden" });
 	}
 	try {
-	const db = req.server.db;
-	const user = await findUserById(db, id);
-	if (!user)
-		return reply.status(401).send({ message: "User does not exist" });
-	let secret = speakeasy.generateSecret({
-		 name: "Pong42",
-	});
-	updateOnlySecret(db, id, secret.base32);
-	reply.status(200).send({
-		message: "2fa setup success",
-		otpauth_url: secret.otpauth_url,
-		base32: secret.base32,
-	})
+		const db = req.server.db;
+		const user = await findUserById(db, id);
+		if (!user)
+			return reply.status(401).send({ message: "User does not exist" });
+		let secret = speakeasy.generateSecret({
+			name: "Pong42",
+		});
+
+
+		await updateOnlySecret(db, id, secret.base32);
+
+		reply.status(200).send({
+			message: "2fa setup success",
+			otpauth_url: secret.otpauth_url,
+			base32: secret.base32,
+		})
 	} catch (err: any) {
 		req.log.error(err);
 		return reply.status(500).send({ message: 'Internal Server Error' });
@@ -397,6 +400,33 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 		req.log.error(err);
 		return reply.status(500).send({ message: 'Internal Server Error' });
 	}
+}
+
+export async function get2faStatus(req: FastifyRequest, reply: FastifyReply) {
+	// const { id } = req.body as
+	// {
+	// 	id: string;
+	// }
+	// if (!id)
+	// 	return reply.status(401).send({ message: "id is required" });
+	// if (req.userData?.id != id)
+	// 	return reply.status(400).send({ message: "Forbidden" });
+    try {
+		const userId = req.userData?.id;
+        	if (!userId) return reply.status(401).send({ message: "Unauthenticated" });
+		
+        const db = req.server.db;
+        const user = await db.get(`SELECT twofa_enabled, twofa_method FROM users WHERE id = ?`, [userId]);
+        if (!user) return reply.status(404).send({ message: "User not found" });
+
+        reply.status(200).send({
+            twofa_enabled: !!user.twofa_enabled, // convert 0/1 to boolean
+            twofa_method: user.twofa_method
+        });
+    } catch (err: any) {
+        req.log.error(err);
+        reply.status(500).send({ message: "Internal Server Error" });
+    }
 }
 
 async function sendEmailCode(userEmail: string, code: string) {
