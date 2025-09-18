@@ -1,5 +1,5 @@
 import { renderHeader } from "./components/header";
-import { openWs } from "./wsClient";
+// import { openWs } from "./wsClient";
 import { renderGameModes } from "./pong/ui/gameMode";
 
 //For reference:

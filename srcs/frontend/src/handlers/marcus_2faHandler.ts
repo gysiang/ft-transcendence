@@ -1,146 +1,236 @@
-// import { verify2faHandler } from '../handlers/2faHandler'
+import QRCode from "qrcode";
+import { verify2faHandler } from '../handlers/2faHandler'
 
-//double check whats the checkboxid for again?
-export function marcus_2faGoogle(method: string, checkboxid: string) {
-	const qrSection: HTMLDivElement = document.createElement("div");
+export async function all_2faswitches(method: string, checkboxid1: string) {
+	//gap inside the containers all stuff will gap by 4
+	const overall_wrapper = document.createElement("div");
+	overall_wrapper.className = "flex flex-col items-center gap-4";
+
+	const button_wrapper = document.createElement("div");
+	button_wrapper.className = "flex flex-row items-center gap-4";
+
+	const wrapper = document.createElement("div");
+	wrapper.className = "flex flex-row items-center gap-4";
+
+    // Section where QR code / email input will appear
+    const qrSection: HTMLDivElement = document.createElement("div");
 	qrSection.id = "twofa-section";
 	qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
 
-	// Create the QR container
-	const qrBox: HTMLDivElement = document.createElement("div");
-	qrBox.id = "qrcode";
+    // ---- Create buttons for Google and Email 2FA ----
+    const googleBtn = document.createElement("button");
+    googleBtn.className = "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600";
+    googleBtn.textContent = "Enable Google 2FA";
 
-	// Create the input
-	const twofaInput: HTMLInputElement = document.createElement("input");
-	twofaInput.type = "text";
-	twofaInput.id = "twofa-token-app";
-	twofaInput.placeholder = "Enter 6-digit code";
-	twofaInput.className = "border p-2 rounded w-40 text-center";
+    const emailBtn = document.createElement("button");
+    emailBtn.className = "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600";
+    emailBtn.textContent = "Enable Email 2FA";
 
-	// Create the button
-	const verifyBtn: HTMLButtonElement = document.createElement("button");
-	verifyBtn.id = "verify-2fa-app";
-	verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded";
-	verifyBtn.textContent = "Verify";
+    // Disable both after activation to prevent double enabling
+    function disableBoth() {
+        googleBtn.disabled = true;
+        emailBtn.disabled = true;
+        googleBtn.classList.add("opacity-50", "cursor-not-allowed");
+        emailBtn.classList.add("opacity-50", "cursor-not-allowed");
+    }
 
-	// Append children to the section
-	qrSection.append(qrBox, twofaInput, verifyBtn);
-	const id = localStorage.getItem("id");
+	function showBoth() {
+		googleBtn.disabled = false;
+        emailBtn.disabled = false;
+        googleBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        emailBtn.classList.remove("opacity-50", "cursor-not-allowed");
+	}
 
-	const google2faSwitch = create_2faSwitch(method, checkboxid);
+	
+	try {
+		//twofa_enabledChecker
+		const twofa_switch = create_2faSwitch(method, checkboxid1);
+		if (!twofa_switch)
+			console.error("create_2faSwitch returned null or undefined!");
+		const hiddenSwitchInput= twofa_switch.querySelector(`#${checkboxid1}`) as HTMLInputElement | null;
+		if (!hiddenSwitchInput)
+			console.error("Hidden Switch Not found!");
+		button_wrapper.append(twofa_switch);
 
-	async function update_hiddenSwitch() {
-		const hiddenSwitchInput = google2faSwitch.querySelector(`#${checkboxid}`) as HTMLInputElement | null;
+		button_wrapper.addEventListener("click", async () => {
+			if (hiddenSwitchInput && hiddenSwitchInput.checked == true) {
+				const confirmDisable = confirm("Are you sure you want to disable 2FA?");
+				if (confirmDisable) {
+					console.log("✅ User clicked OK");
+					showBoth();
+					if (hiddenSwitchInput)
+						hiddenSwitchInput.checked = false;
+					protect2faNotify("❌ 2FA has been disabled!");
+					const id = localStorage.getItem("id");
+					const disable_2fa = await fetch("http://localhost:3000/2fa/disable", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							credentials: "include",
+							body: JSON.stringify({ id }),
+					});
+					const button_status = await disable_2fa.json();
+					if (button_status.ok) {
 
-		//const hiddenSwitchInput = document.getElementById(checkboxid) as HTMLInputElement | null;//yes u get info from checkbox for hiddenswich with getElementbyId
-		console.log(hiddenSwitchInput);
-		if (hiddenSwitchInput && hiddenSwitchInput.checked) {
-			hiddenSwitchInput.checked = false;
+					} 
+				} else {
+					// ❌ User clicked Cancel
+					console.log("User canceled disabling 2FA.");
+				}
+			}
+		})
+	
+
+		// Google button click handler
+		googleBtn.addEventListener("click", async () => {
 			qrSection.classList.remove("hidden");
-			console.log("HAHAHAHAHAHAHAHAHAHA Value of checked:", hiddenSwitchInput.checked);
-			await fetch("http://localhost:3000/2fa/disable", {
+			qrSection.innerHTML = ""; // clear previous content
+			const qrBox: HTMLDivElement = document.createElement("div");
+			qrBox.id = "qrcode";
+			qrSection.appendChild(qrBox);
+
+			// Create input + verify button
+			const twofaInput = document.createElement("input");
+			twofaInput.type = "text";
+			twofaInput.id = "twofa-token-app";
+			twofaInput.placeholder = "Enter 6-digit code";
+			twofaInput.className = "border p-2 rounded w-40 text-center";
+
+			const verifyBtn = document.createElement("button");
+			verifyBtn.id = "verify-2fa-app";
+			verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600";
+			verifyBtn.textContent = "Verify";
+
+			// ✅ Attach event listener here (after DOM elements exist)
+			//verify2faHandler("verify-2fa-app", "twofa-token-app");
+			qrSection.append(twofaInput, verifyBtn);
+
+			// Request QR code from backend
+			const id = localStorage.getItem("id");
+			const res = await fetch("http://localhost:3000/2fa/setup", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
 				body: JSON.stringify({ id }),
 			});
-			console.log("Google 2FA ON");
-			protect2faNotify("✅ Google 2FA Activated!");
+			const data = await res.json();
+			if (data && data.otpauth_url) {
+				console.log("VALUE OF THE data MARCUS HERE!:", data)
+				const canvas = document.createElement("canvas");
+				qrBox.appendChild(canvas);
+				QRCode.toCanvas(canvas, data.otpauth_url, { width: 200 }, (err: any) => {
+					if (err)
+						console.error(err);
+					else
+						console.log("QR code generated!");
+				});
+			}
+
+			verifyBtn.addEventListener("click", async () => {
+				const token = twofaInput.value.trim();
+				if (!token) return alert("Enter the 6-digit code first!");
+				const verifyRes = await fetch("http://localhost:3000/2fa/verify", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify({ id, token, twofa_method: "totp" }),
+				});
+				if (verifyRes.ok) {
+					alert("✅ Google 2FA Activated!");
+					console.log("Google 2FA ON");
+					if (hiddenSwitchInput)
+						hiddenSwitchInput.checked = true;
+					protect2faNotify("✅ Google 2FA Activated!");
+					disableBoth();
+					qrSection.classList.add("hidden");
+					console.log("VALUE OF THE verifyRES MARCUS HERE!:", verifyRes);
+				} else {
+					alert("❌ Invalid code. Please try again.");
+				}
+			});
+		});
+
+		// Email button click handler (same idea)
+		emailBtn.addEventListener("click", async () => {
+			qrSection.classList.remove("hidden");
+			qrSection.innerHTML = "";
+			const input = document.createElement("input");
+			input.type = "text";
+			input.placeholder = "Enter 6-digit code";
+			input.className = "border p-2 rounded w-40 text-center";
+
+			const verifyBtn = document.createElement("button");
+			verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600";
+			verifyBtn.textContent = "Verify";
+
+			// ✅ Attach event listener here (after DOM elements exist)
+			//verify2faHandler("verify-2fa-email", "twofa-token-email");
+			qrSection.append(input, verifyBtn);
+
+			//Generate a code and send it back to the user's email
+			const id = localStorage.getItem("id");
+			await fetch("http://localhost:3000/2fa/setup/email", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ id }),
+			});
+			protect2faNotify("📧 2FA code sent, please check your Email");
+
+			verifyBtn.addEventListener("click", async () => {
+				const token = input.value.trim();
+				if (!token)
+					return alert("Enter the 6-digit code first!");
+				const verifyRes = await fetch("http://localhost:3000/2fa/verify", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify({ id, token, twofa_method: "email" }),
+				});
+				if (verifyRes.ok) {
+					alert("✅ Email 2FA Activated!");
+					console.log("Email 2FA ON");
+					if (hiddenSwitchInput)
+						hiddenSwitchInput.checked = true;
+					protect2faNotify("✅ Email 2FA Activated!");
+					disableBoth();
+					qrSection.classList.add("hidden");
+					console.log("VALUE OF THE verifyRES MARCUS HERE!:", verifyRes)
+				} else {
+					alert("❌ Invalid code. Please try again.");
+				}
+			});
+    	});
+		const statusRes = await fetch("http://localhost:3000/2fa/status", {
+			method: "GET",
+			credentials: "include"
+		});
+		const status = await statusRes.json();
+		//if (status.twofa_method === "totp") {
+		if (status.twofa_enabled) {
+			disableBoth(); // disables and greys out the buttons
+			if (hiddenSwitchInput)
+				hiddenSwitchInput.checked = true;
+			// optional: hide buttons entirely
+			// googleBtn.classList.add("hidden");
+			// emailBtn.classList.add("hidden");
 		} else {
-			// hiddenSwitchInput.checked = true;
-			//qrSection.classList.add("hidden");
-		// 	qrSection.classList.remove("hidden");
-		// 	const qrContainer = qrBox;
-		// 	if (qrContainer) {
-		// 		console.log("Inside qrContainer");
-		// 		const res = await fetch("http://localhost:3000/2fa/setup", {
-		// 			method: "POST",
-		// 			headers: { "Content-Type": "application/json" },
-		// 			credentials: "include",
-		// 			body: JSON.stringify({ id }),
-		// 		});
-		// 		const data = await res.json();
-		// 		console.log("qrContainer:", qrContainer);
-		// 		console.log("going inside if condition!");
-		// 		if (data) {
-		// 			console.log("i am inside the if qrContainer!");
-		// 			qrContainer.innerHTML = "";
-		// 			const canvas = document.createElement("canvas");
-		// 			qrContainer.appendChild(canvas);
+			showBoth();
+			if (hiddenSwitchInput)
+				hiddenSwitchInput.checked = false;
+		}
+	} catch (err: any) {
+		console.error("Failed to verify Google 2FA:", err);
+		alert("Something went wrong. Please try again, never.");
+	}
 
-		// 			QRCode.toCanvas(canvas, data.otpauth_url, { width: 200 }, (err) => {
-		// 				if (err)
-		// 					console.error(err);
-		// 				else
-		// 					console.log("QR code generated!");
-		// 			});
-		// 		}
-		// 	console.log("Google 2FA OFF");
-		// 	protect2faNotify("❌ Google 2FA Disabled!");
-		// }
-	}}
-	google2faSwitch.appendChild(qrSection);
-	update_hiddenSwitch();
-	return google2faSwitch;
-};
-
-
-//async is used only for event, so here no need
-// export function marcus_2faEmail(method: string, checkboxid: string) {
-// 	// Create the container div
-// 	const inputBox: HTMLDivElement = document.createElement("div");
-// 	inputBox.id = "email2fa-input";
-// 	inputBox.className = "mt-4 hidden flex flex-col items-center space-y-4";
-
-// 	// Create the input element
-// 	const emailInput: HTMLInputElement = document.createElement("input");
-// 	emailInput.type = "text";
-// 	emailInput.id = "twofa-token-email";
-// 	emailInput.placeholder = "Enter 6-digit code";
-// 	emailInput.className = "border p-2 rounded w-40 text-center";
-
-// 	// Create the verify button
-// 	const verifyBtn: HTMLButtonElement = document.createElement("button");
-// 	verifyBtn.id = "verify-2fa-email";
-// 	verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded";
-// 	verifyBtn.textContent = "Verify";
-
-// 	// Append input and button to the container
-// 	inputBox.append(emailInput, verifyBtn);
-// 	const id = localStorage.getItem("id");
-
-// 	//getting the switch button
-// 	const email2faSwitch = create_2faSwitch(method, checkboxid) {
-// 		//
-// 		if (checked) {
-// 			inputBox.classList.remove("hidden");
-// 			await fetch("http://localhost:3000/2fa/setup/email", {
-// 				method: "POST",
-// 				headers: { "Content-Type": "application/json" },
-// 				credentials: "include",
-// 				body: JSON.stringify({ id }),
-// 			});
-
-// 			console.log("Email 2FA ON");
-// 			protect2faNotify("✅ Email 2FA Activated!");
-// 		} else {
-// 			inputBox.classList.add("hidden");
-// 			await fetch("http://localhost:3000/2fa/disable", {
-// 				method: "POST",
-// 				headers: { "Content-Type": "application/json" },
-// 				credentials: "include",
-// 				body: JSON.stringify({ id }),
-// 			});
-// 			console.log("Email 2FA OFF");
-// 			protect2faNotify("❌ Email 2FA Disabled!");
-// 		}
-// 	});
-
-// 	//verify the user:
-// 	verifyBtn.addEventListener
-// 	email2faSwitch.appendChild(inputBox);
-// 	return email2faSwitch;
-// };
+    // Append buttons + QR section to wrapper
+	wrapper.append(googleBtn, emailBtn);
+    overall_wrapper.append(button_wrapper, wrapper, qrSection);
+	// ✅ Attach event listener here (after DOM elements exist)
+	verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
+	verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
+    return overall_wrapper;
+}
 
 // the => void is meant to tell TS that its just a callback function.
 // callback -> a function that you pass as an argument to another function, so it can be “called back” later.
@@ -151,7 +241,7 @@ export function create_2faSwitch(labeltext: string, checkboxid: string) {
 	switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
 
 	const switchLabel = document.createElement("label");// label that holds both text + switch
-	switchLabel.className = "flex inline-flex items-center justify-between w-full cursor-pointer gap-x-4";
+	switchLabel.className = "flex flex-row inline-flex items-center justify-center w-full cursor-pointer gap-x-4";
 	switchWrapper.appendChild(switchLabel);
 
 	const switchText = document.createElement("span");// left side text
@@ -162,12 +252,14 @@ export function create_2faSwitch(labeltext: string, checkboxid: string) {
 	// add the hidden checkbox for tailwind
 	const hiddenSwitchInput = document.createElement("input");
 	hiddenSwitchInput.type = "checkbox";
+		hiddenSwitchInput.disabled = true;//edit this ltr
+		//document.getElementById(checkboxid).disabled = false;
 	hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
 	hiddenSwitchInput.id = checkboxid;
 	switchLabel.appendChild(hiddenSwitchInput);
 
+	//-------------button-------------
 	const track = document.createElement("div");
-	//peer-checked:bg-green-500 → turns track green when checked.
 	track.className = "relative w-13 h-8 bg-gray-200 peer-focus:outline-none border-4 border-gray-500 \
 						peer-checked:border-green-800 peer-focus:ring-4 peer-focus:ring-blue-300 \
 						dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 \
@@ -181,11 +273,6 @@ export function create_2faSwitch(labeltext: string, checkboxid: string) {
 	const thumb = document.createElement("span");
 	thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";//peer-checked:translate-x-5 → moves the thumb right when checked.
 	track.appendChild(thumb);
-
-	// // ✅ Hook up toggle event
-	// hiddenSwitchInput.addEventListener("change", async (e) => {
-	// 	onToggle(hiddenSwitchInput.checked);
-	// });
 	return switchWrapper;
 }
 
