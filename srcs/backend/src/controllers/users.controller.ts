@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic, update2faSecret, updateUserStatus, disable2FA } from '../models/user.model';
+import { IUserParams, IUserBody, IProfileBody, createUser, findUserByEmail, findUserById, updateProfilePic, update2faMethod, updateOnlySecret, updateUserStatus, disable2FA } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
 const cookie = require("cookie");
@@ -44,6 +44,7 @@ export async function loginUser(req: FastifyRequest, reply: FastifyReply) {
 			.status(200)
 			.send({ message: 'stage-2fa',
 					id: user.id,
+					twofa_method: user.twofa_method
 			 });
 	}
 
@@ -322,9 +323,7 @@ export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
 	let secret = speakeasy.generateSecret({
 		 name: "Pong42",
 	});
-
-	await update2faSecret(db, id, 'totp', secret.base32);
-
+	updateOnlySecret(db, id, secret.base32);
 	reply.status(200).send({
 		message: "2fa setup success",
 		otpauth_url: secret.otpauth_url,
@@ -339,15 +338,18 @@ export async function setUp2fa(req: FastifyRequest, reply: FastifyReply) {
 
 export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 
-	const { id, token } = req.body as
+	const { id, token, twofa_method } = req.body as
 	{
 		id: string;
 		token: string;
+		twofa_method: string
 	};
 	if (!id)
 		return reply.status(401).send({ message: "id is required" });
 	if (!token)
 		return reply.status(401).send({ message: "token is required" });
+	if (!twofa_method)
+		return reply.status(401).send({ message: "twofa_method is required" });
 	if (!check2faToken(token))
 		return reply.status(401).send({ message: "token is not 6 digits" });
 	try {
@@ -363,13 +365,15 @@ export async function verify2fa(req: FastifyRequest, reply: FastifyReply) {
 		secret: user.twofa_secret,
 		encoding: 'base32',
 		token,
-		window: 1, // allows +/- 30 sec
+		window: 1,
 	})
 
 	if (!verified)
 		return reply.status(401).send({ message: 'Invalid 2FA token' });
 	if (!user.isLoggedIn && user.id)
 		await updateUserStatus(db, user.id, true);
+
+	await update2faMethod(db, id, twofa_method);
 
 	const payload = {
 		id: user.id,
@@ -436,7 +440,7 @@ export async function setUpEmail2FA(req: FastifyRequest, reply: FastifyReply) {
 		encoding: 'base32'
 	});
 
-	await update2faSecret(db, id, 'email', secret.base32);
+	await updateOnlySecret(db, id, secret.base32);
 	sendEmailCode(user.email, code);
 
 	reply.status(200).send({
