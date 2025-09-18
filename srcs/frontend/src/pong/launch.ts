@@ -9,6 +9,8 @@ import { clearGameStorage } from "./Tournament/TournamentUtils";
 import { openWs,type MatchHandlers, type StartMsg,type StateMsg, type EndMsg } from "../wsClient";
 import { lockCanvasAtCurrent, unlockCanvas,lockCanvasWorld } from "./Renderer";
 import { getLoggedInUserName } from "./registration/registrationForm";
+import { renderTournamentVictoryScreen } from "./ui/victoryScreen";
+
 async function launchGame(
 	canvas: HTMLCanvasElement,
 	ctx: CanvasRenderingContext2D,
@@ -152,18 +154,11 @@ export async function startGame(canvas: HTMLCanvasElement) {
 			  localStorage.setItem("tournamentData", JSON.stringify(result.updatedData));
 			  startGame(canvas);
 			} else {
-			  if (result.tournamentWinner) {
-				alert(`${result.tournamentWinner.name} wins the tournament!`);
-			  }
-			  const snapshot = JSON.parse(localStorage.getItem('tournamentSnapshot') || 'null');
-			  if (snapshot) {
-				snapshot.finished = true;
-				localStorage.setItem('tournamentSnapshot', JSON.stringify(snapshot));
-			  }
-			   clearGameStorage();
-			  
-			  setTimeout(() => { window.location.href = "/play"; }, 2000);
-			}
+			unlockCanvas(canvas);
+		  
+			const app = document.getElementById("app")!;
+			const winnerAlias = result.tournamentWinner?.name ?? winner.name;
+			renderTournamentVictoryScreen(app, winnerAlias);	}		
 		  }, rounds);
 		
 	}

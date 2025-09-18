@@ -133,7 +133,7 @@ export function tournamentForm(app: HTMLElement): void {
 
       <div id="formError" class="text-red-700 text-sm"></div>
 
-      <button id="startTournament" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md text-xl">
+      <button id="startTournament" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md text-xl">
         Start Tournament
       </button>
     </div>
@@ -204,6 +204,7 @@ export function tournamentForm(app: HTMLElement): void {
   });
 
   startButton.addEventListener("click", async () => {
+    history.pushState({ page: "local_started" }, "", "/play/local");
     formError.textContent = "";
 
     const aliasInputs = Array.from(aliasContainer.querySelectorAll("input")) as HTMLInputElement[];
@@ -294,10 +295,15 @@ export async function handleStartTournament(
       createdAt: new Date().toISOString(),
     })
   );
-
+  /*
   app.innerHTML = '';
   const { canvas, container } = createGameCanvas();
-  app.appendChild(container);
+  app.appendChild(container);*/
+  const mount = document.getElementById('app') as HTMLElement;
+
+  mount.innerHTML = '';
+  const { canvas, container } = createGameCanvas();
+  mount.appendChild(container);
   renderTournamentBracket(rounds);
   startGame(canvas);
 }

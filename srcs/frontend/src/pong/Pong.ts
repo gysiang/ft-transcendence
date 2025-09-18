@@ -174,6 +174,8 @@ export class Game {
   }
 
   startCountdown(): void {
+    if (this.netAuth === true)
+      return;
     const countdown = ["3", "2", "1", "GO!"];
     let i = 0;
     const step = () => {

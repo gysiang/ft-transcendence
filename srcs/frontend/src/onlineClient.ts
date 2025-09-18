@@ -22,7 +22,7 @@ export type TCreatedMsg    = { type: 't.created'; id: string; code: string };
 export type TJoinedMsg     = { type: 't.joined'; id: string; pid: string };
 export type TMatchStartMsg = { type: 't.matchStart'; r: number; m: number; p1: string; p2: string };
 export type TMatchResultMsg= { type: 't.matchResult'; r: number; m: number; winner: string; score: [number, number] };
-export type TEndedMsg      = { type: 't.ended'; champion: string };
+export type TEndedMsg      = { type: 't.ended'; champion: string; winner_name:string };
 
 export type TClientHandlers = {
   onState?:      (s: TStateMsg) => void;
