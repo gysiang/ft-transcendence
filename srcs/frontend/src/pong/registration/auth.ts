@@ -8,9 +8,10 @@
         return false;
     }
 }*/
+import { API_BASE } from "../../variable"
 export async function checkAuthentication(): Promise<boolean> {
     try {
-      const res = await fetch('http://localhost:3000/api/me', {
+      const res = await fetch(`${API_BASE}/api/me`, {
         method: 'GET',
         credentials: 'include',
         cache: 'no-store',

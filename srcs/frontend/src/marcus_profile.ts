@@ -209,8 +209,8 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		container.appendChild(profileWrapper);
 		//(e)--------------------------2fa section--------------------------
 
-		verify2faHandler("verify-2fa-app", "twofa-token-app");
-		verify2faHandler("verify-2fa-email", "twofa-token-email");
+		verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
+		verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");

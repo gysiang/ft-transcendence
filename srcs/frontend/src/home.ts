@@ -2,7 +2,6 @@ import { renderHeader } from "./components/header";
 import { openWs } from "./wsClient";
 import { renderGameModes } from "./pong/ui/gameMode";
 import { API_BASE } from "./variable"
-//import { openWs } from "./wsClient";
 
 //For reference:
 //https://tailwind.build/classes
@@ -66,12 +65,13 @@ export async function renderHomePage(container: HTMLElement) {
 	tooltipDiv.textContent = "GO AHEAD MR JOESTAR!";
 
 	const wrapper = document.createElement("div");
-    wrapper.className = "relative group inline-block";
-    wrapper.append(link, tooltipDiv);
+	wrapper.className = "relative group inline-block";
+	wrapper.append(playBtn, tooltipDiv);
 
-
-
-	// append to page
+	playBtn.addEventListener("click", (e) => {
+	  e.preventDefault();
+	  renderGameModes(homePage);
+	});
 	homePage.append(title, wrapper);
 	container.append(homePage);
 

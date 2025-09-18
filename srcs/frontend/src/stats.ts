@@ -6,7 +6,7 @@ import { DoughnutController, ArcElement,
 													//https://www.chartjs.org/docs/latest/getting-started/integration.html
 import type { Match } from "./pong/Tournament/singleElim.ts"
 //import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
-
+import { API_BASE } from "./variable.ts"
 // register controllers and elements
 Chart.register(
   DoughnutController, ArcElement,
@@ -46,7 +46,7 @@ export async function statsProfile(container: HTMLElement) {
 			throw new Error("No user ID found in localStorage");
 		}
 		const user = await obtainBackendData("profile", userId);
-		const res = await fetch(`http://localhost:3000/api/game/data/${userId}`, {
+		const res = await fetch(`${API_BASE}/api/game/data/${userId}`, {
 			method: "GET",
 			credentials: "include",
 		});
@@ -170,11 +170,11 @@ export async function statsProfile(container: HTMLElement) {
 				p_name.textContent = "User: " + user.name// Put user's name inside the <p>
 				profile_user.append(p_img, p_name);
 
-			
 
 
 
-			//4) here include the total matches you played 
+
+			//4) here include the total matches you played
 			const match_history = document.createElement("div");
 			match_history.id = "match_history";
 			match_history.className = "flex flex-col place-content-center w-180 h-64 justify-center items-center \
@@ -218,9 +218,9 @@ export async function statsProfile(container: HTMLElement) {
 				} else if (wins > 15) {
 					tips.textContent = "Tips: Okay you should stop playing and pay me to make this game better"
 				}
-				
-				
-				
+
+
+
 				match_history.append(wrap_played_and_img, tips);
 
 			// 4.5) Ranking
@@ -296,7 +296,7 @@ export async function statsProfile(container: HTMLElement) {
 				}
 				player_rank_score.append(player_rank_badge, player_rank_msg);
 
-				
+
 
 
 
@@ -351,7 +351,7 @@ export async function statsProfile(container: HTMLElement) {
 
 	//1) Tournament entry + tournament_ID
 	const tournamentsMap = new Map<number, { name: string; tourney_wins: number; tourney_losses: number }>();
-	
+
 	//2) Update the tournamentsMap
 	matches.data.forEach((m: CreateMatchBody) => {
 		const tournamentId = Number(m.tournament_id);
@@ -391,7 +391,7 @@ export async function statsProfile(container: HTMLElement) {
 	const slicedLabels = tournamentLabels.slice(-MAX_TOURNEYS);
 	const slicedWins = winsData.slice(-MAX_TOURNEYS);
 	const slicedLosses = lossesData.slice(-MAX_TOURNEYS);
-	
+
 	//5) update with tournamentID (also why type line?)
     new Chart(lineCanvas, {
       type: "line",
@@ -445,7 +445,7 @@ export type CreateMatchBody = {
 };
 
 export async function obtainBackendData(endpoint: string, userId: string): Promise<BackendUserResponse> {
-  const response = await fetch(`http://localhost:3000/api/${endpoint}/${userId}`, {
+  const response = await fetch(`${API_BASE}/api/${endpoint}/${userId}`, {
 	method: "GET",
     credentials: "include",
   });
