@@ -10,8 +10,6 @@ export async function loginHandler(formId: string) {
 		e.preventDefault(); //prevent reload
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 		const password = (document.getElementById("password") as HTMLInputElement).value;
-		//const loginForm = document.getElementById("login-form") as HTMLFormElement;
-		//const email2fa = document.getElementById("email2fa-input") as HTMLElement;
 
 		if (localStorage.getItem("id")) {
 			console.log("Already logged in, skipping login request");
@@ -32,6 +30,7 @@ export async function loginHandler(formId: string) {
 				const loginForm = document.getElementById("login-form") as HTMLFormElement;
 				const email2fa = document.getElementById("email2fa-input") as HTMLElement;
 				localStorage.setItem("id", data.id);
+				localStorage.setItem("twofa_method", data.twofa_method);
 				loginForm.classList.add("hidden");
 				email2fa.classList.remove("hidden");
 			}

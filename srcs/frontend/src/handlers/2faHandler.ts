@@ -77,7 +77,7 @@ export function initTwoFAToggleEmail(checkboxId: string) {
 	}})
 }
 
-export function verify2faHandler(buttonId: string, inputId: string) {
+export function verify2faHandler(buttonId: string, inputId: string, twofa_method: string) {
   const button = document.getElementById(buttonId) as HTMLButtonElement;
   const input = document.getElementById(inputId) as HTMLInputElement;
   const qrSection = document.getElementById("twofa-section") as HTMLElement;
@@ -103,7 +103,8 @@ export function verify2faHandler(buttonId: string, inputId: string) {
 			credentials: "include",
 			body: JSON.stringify({
 			id: userId,
-			token: token
+			token: token,
+			twofa_method: twofa_method
 		}),
 	});
 
@@ -137,12 +138,12 @@ export function verify2faLoginHandler(buttonId: string, inputId: string) {
 	button.addEventListener("click", async () => {
 	const token = input.value.trim();
 	const userId = localStorage.getItem("id");
+	const twofa_method = localStorage.getItem("twofa_method");
 
 	if (!token || !userId) {
 		alert("Please enter the 6-digit code.");
 		return;
 	}
-
 	try {
 		const res = await fetch("http://localhost:3000/2fa/verify", {
 			method: "POST",
@@ -150,7 +151,8 @@ export function verify2faLoginHandler(buttonId: string, inputId: string) {
 			credentials: "include",
 			body: JSON.stringify({
 			id: userId,
-			token: token
+			token: token,
+			twofa_method: twofa_method
 		}),
 	});
 

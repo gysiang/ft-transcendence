@@ -68,14 +68,25 @@ export async function updateProfilePic(db: Database, id: string, profile: string
 	return (result);
 }
 
-export async function update2faSecret(db: Database, id: string, twofa_method: string, twofa_secret: string){
+export async function update2faMethod(db: Database, id: string, twofa_method: string){
 	const date = getTimestamp();
 	const result = await db.run(
 		`UPDATE users
-		SET twofa_method = ?, twofa_enabled = ?, twofa_secret = ?, updated_at = ?
+		SET twofa_method = ?, twofa_enabled = ?, updated_at = ?
 		WHERE id = ?`,
-		[twofa_method, true, twofa_secret, date, id]
+		[twofa_method, true, date, id]
 		);
+	return (result);
+}
+
+export async function updateOnlySecret(db:Database, id: string, twofa_secret: string) {
+	const date = getTimestamp();
+	const result = await db.run(
+		`UPDATE users
+		SET twofa_secret = ?, updated_at = ?
+		where id = ?`,
+		[twofa_secret, date, id]
+	);
 	return (result);
 }
 
