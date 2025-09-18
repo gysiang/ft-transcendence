@@ -194,7 +194,8 @@ export class Tournament {
       const winners = round.map(mt => mt.winner!) ;
       if (winners.length === 1) {
         this.finished = true;
-        this.broadcastLobby({ type:'t.ended', champion: winners[0] });
+        const winner_name = this.players.get(winners[0])?.name;
+        this.broadcastLobby({ type:'t.ended', champion: winners[0] , winner_name});
         tournaments.delete(this.id);
         return;
       }
