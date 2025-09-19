@@ -199,4 +199,3 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		container.appendChild(errorMsg);
 	}
 }
-
