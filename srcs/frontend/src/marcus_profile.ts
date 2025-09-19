@@ -1,12 +1,12 @@
 import { renderHeader } from './components/header';
+import { all_2faswitches } from './handlers/marcus_2faHandler';
+import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
+import { API_BASE } from "./variable.ts"
 // import { marcus_2faEmail, marcus_2faGoogle } from './handlers/marcus_2faHandler';
 //import { marcus_2faGoogle } from './handlers/marcus_2faHandler';
-import { all_2faswitches } from './handlers/marcus_2faHandler';
 // import { profileHandler } from "./handlers/profileHandler";
 // import { verify2faHandler } from './handlers/2faHandler'
 // import { createLogger } from "vite";
-import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
-import { API_BASE } from "./variable.ts"
 
 
 //https://tailwind.build/classes
@@ -120,7 +120,8 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
 
 				//guranteed to be a number..... always but honestly how? -ask maybe xf?
-				const wins = matches.data.filter((m: Match) => m.winner && String(m.winner) === String(user.name)).length;
+				const wins = matches.data.filter((m: CreateMatchBody) => m.winner_id
+										&& String(m.winner_id) === String(userId)).length;
 				console.log ("VALUE OF WINS: ", wins);
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \
@@ -144,24 +145,8 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 									bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 \
 									focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
 				stats_link.textContent = "Check your stats"; // For textbox name
-
-
-				//create a second page for more details copy and paste the total matches + win/lose
-					//const totalMatches = document.createElement("a");-->/stats
-				//the wins and loses improve it by using a circle chart to show the stats
-					//https://flowbite.com/docs/plugins/charts/
-				//create a second box to contain the latest tournament data of wins/loses
 				win_lose_result.append(win_ratio, slash_win_lose, lose_ratio)
 			//user_matches--------
-
-
-
-
-			//determine also what they can present and print out here
-				//notes
-				//instead of “all tournaments created by this user,” you wanted “all tournaments this user participated in (as player1 or player2)”?
-			//fetch data from backend and print out the stats
-
 			//append
 			statsdiv.append(statsheader, totalMatches, win_lose_result, stats_link);
 			statsHeaderWrapper.append(statsdiv);
@@ -198,10 +183,6 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		// `gap-4` gives spacing, `justify-center` keeps them centered
 		fa2.appendChild(switchContainer);
 
-		//marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email") {}
-		//const email2faSwitch = marcus_2faEmail("Activate 2FA via Email", "toggle-2fa-email");
-		//const google2faSwitch = marcus_2faGoogle("Activate 2FA via google Auth", "toggle-2fa");
-		//const google2faSwitch = marcus_2faGoogle("Activate 2FA:", "toggle-2fa");
 		const all_2faSwitch = await all_2faswitches("Status Of 2FA:", "toggle-2fa");
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center \
@@ -209,12 +190,8 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		profileWrapper.append(profile_stats_div, fa2);
 
 		switchContainer.append(all_2faSwitch);
-		//switchContainer.append(email2faSwitch, google2faSwitch);
 		container.appendChild(profileWrapper);
 		//(e)--------------------------2fa section--------------------------
-
-		verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
-		verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
     } catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");
@@ -222,7 +199,3 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		container.appendChild(errorMsg);
 	}
 }
-
-//missing:
-// Upload button (styled to feel part of avatar)
-// Preview selected image
