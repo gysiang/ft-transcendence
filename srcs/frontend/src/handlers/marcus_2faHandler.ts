@@ -1,7 +1,9 @@
 import QRCode from "qrcode";
 import { verify2faHandler } from '../handlers/2faHandler'
+import { API_BASE } from '../variable.ts'
 
-export async function all_2faswitches(method: string, checkboxid1: string) {
+
+export async function all_2faswitches(method: string, checkboxid1: string): Promise<HTMLDivElement> {
 	//gap inside the containers all stuff will gap by 4
 	const overall_wrapper = document.createElement("div");
 	overall_wrapper.className = "flex flex-col items-center gap-4";
@@ -44,13 +46,13 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 	
 	try {
 		//twofa_enabledChecker
-		const twofa_switch = create_2faSwitch(method, checkboxid1);
+		const twofa_switch = create_2faSwitch(method, checkboxid1) as HTMLDivElement;
 		if (!twofa_switch)
 			console.error("create_2faSwitch returned null or undefined!");
+		button_wrapper.append(twofa_switch);
 		const hiddenSwitchInput= twofa_switch.querySelector(`#${checkboxid1}`) as HTMLInputElement | null;
 		if (!hiddenSwitchInput)
 			console.error("Hidden Switch Not found!");
-		button_wrapper.append(twofa_switch);
 
 		button_wrapper.addEventListener("click", async () => {
 			if (hiddenSwitchInput && hiddenSwitchInput.checked == true) {
@@ -62,16 +64,12 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 						hiddenSwitchInput.checked = false;
 					protect2faNotify("❌ 2FA has been disabled!");
 					const id = localStorage.getItem("id");
-					const disable_2fa = await fetch("http://localhost:3000/2fa/disable", {
+					await fetch(`${API_BASE}/2fa/disable`, {
 							method: "POST",
 							headers: { "Content-Type": "application/json" },
 							credentials: "include",
 							body: JSON.stringify({ id }),
 					});
-					const button_status = await disable_2fa.json();
-					if (button_status.ok) {
-
-					} 
 				} else {
 					// ❌ User clicked Cancel
 					console.log("User canceled disabling 2FA.");
@@ -100,18 +98,20 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 			verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600";
 			verifyBtn.textContent = "Verify";
 
-			// ✅ Attach event listener here (after DOM elements exist)
-			//verify2faHandler("verify-2fa-app", "twofa-token-app");
 			qrSection.append(twofaInput, verifyBtn);
 
 			// Request QR code from backend
 			const id = localStorage.getItem("id");
-			const res = await fetch("http://localhost:3000/2fa/setup", {
+			const res = await fetch(`${API_BASE}/2fa/setup`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
 				body: JSON.stringify({ id }),
 			});
+			if (!res.ok) {
+				console.error("❌ RES failed here", res.status);
+				throw alert("RES failed (googleBtn).");
+			}
 			const data = await res.json();
 			if (data && data.otpauth_url) {
 				console.log("VALUE OF THE data MARCUS HERE!:", data)
@@ -128,7 +128,7 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 			verifyBtn.addEventListener("click", async () => {
 				const token = twofaInput.value.trim();
 				if (!token) return alert("Enter the 6-digit code first!");
-				const verifyRes = await fetch("http://localhost:3000/2fa/verify", {
+				const verifyRes = await fetch(`${API_BASE}/2fa/verify`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					credentials: "include",
@@ -162,13 +162,11 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 			verifyBtn.className = "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600";
 			verifyBtn.textContent = "Verify";
 
-			// ✅ Attach event listener here (after DOM elements exist)
-			//verify2faHandler("verify-2fa-email", "twofa-token-email");
 			qrSection.append(input, verifyBtn);
 
 			//Generate a code and send it back to the user's email
 			const id = localStorage.getItem("id");
-			await fetch("http://localhost:3000/2fa/setup/email", {
+			await fetch(`${API_BASE}/2fa/setup/email`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
@@ -180,7 +178,7 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 				const token = input.value.trim();
 				if (!token)
 					return alert("Enter the 6-digit code first!");
-				const verifyRes = await fetch("http://localhost:3000/2fa/verify", {
+				const verifyRes = await fetch(`${API_BASE}/2fa/verify`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					credentials: "include",
@@ -200,19 +198,19 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 				}
 			});
     	});
-		const statusRes = await fetch("http://localhost:3000/2fa/status", {
+		const statusRes = await fetch(`${API_BASE}/2fa/status`, {
 			method: "GET",
 			credentials: "include"
 		});
+		if (!statusRes.ok) {
+			console.error("❌ RES failed here", statusRes.status);
+			throw alert("RES failed (emailBtn).");
+		}
 		const status = await statusRes.json();
-		//if (status.twofa_method === "totp") {
 		if (status.twofa_enabled) {
 			disableBoth(); // disables and greys out the buttons
 			if (hiddenSwitchInput)
 				hiddenSwitchInput.checked = true;
-			// optional: hide buttons entirely
-			// googleBtn.classList.add("hidden");
-			// emailBtn.classList.add("hidden");
 		} else {
 			showBoth();
 			if (hiddenSwitchInput)
@@ -220,7 +218,7 @@ export async function all_2faswitches(method: string, checkboxid1: string) {
 		}
 	} catch (err: any) {
 		console.error("Failed to verify Google 2FA:", err);
-		alert("Something went wrong. Please try again, never.");
+		alert("Something went wrong. Look at marcus_2faHandler.");
 	}
 
     // Append buttons + QR section to wrapper
@@ -252,8 +250,8 @@ export function create_2faSwitch(labeltext: string, checkboxid: string) {
 	// add the hidden checkbox for tailwind
 	const hiddenSwitchInput = document.createElement("input");
 	hiddenSwitchInput.type = "checkbox";
-		hiddenSwitchInput.disabled = true;//edit this ltr
-		//document.getElementById(checkboxid).disabled = false;
+	hiddenSwitchInput.disabled = true;//edit this ltr
+	//document.getElementById(checkboxid).disabled = false;
 	hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
 	hiddenSwitchInput.id = checkboxid;
 	switchLabel.appendChild(hiddenSwitchInput);

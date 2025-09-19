@@ -38,14 +38,13 @@ export function initTwoFAToggle(checkboxId: string) {
 	} else {
 		qrSection?.classList.add("hidden");
 
-	await fetch(`${API_BASE}/2fa/disable`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		credentials: "include",
-		body: JSON.stringify({ id }),
+		await fetch(`${API_BASE}/2fa/disable`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ id }),
 		});
-		}
-	});
+	}});
 }
 
 export function initTwoFAToggleEmail(checkboxId: string) {

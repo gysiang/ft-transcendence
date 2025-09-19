@@ -184,12 +184,12 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		fa2.appendChild(switchContainer);
 
 		const all_2faSwitch = await all_2faswitches("Status Of 2FA:", "toggle-2fa");
+		switchContainer.append(all_2faSwitch);
+
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen w-full mx-auto flex flex-col items-center \
 									justify-center bg-gray-100 dark:bg-slate-900 space-y-6";
 		profileWrapper.append(profile_stats_div, fa2);
-
-		switchContainer.append(all_2faSwitch);
 		container.appendChild(profileWrapper);
 		//(e)--------------------------2fa section--------------------------
     } catch (error) {
