@@ -1,4 +1,5 @@
 import { api } from "../registration/apiWrapper";
+import { API_BASE } from '../../variable.ts'
 
 export type CreateTournamentBody = {
     name: string;
@@ -19,7 +20,7 @@ export type CreateTournamentRes = {tournament_id?: number; message?: string};
   export type CreateMatchRes = { id: number };
   
   export async function createTournament(body: CreateTournamentBody, signal?: AbortSignal) {
-    const res = await api<CreateTournamentRes>('http://localhost:3000/api/game', {
+    const res = await api<CreateTournamentRes>(`${API_BASE}/api/game`, {
       method: 'POST',
       body: JSON.stringify(body),
       signal,
@@ -30,7 +31,7 @@ export type CreateTournamentRes = {tournament_id?: number; message?: string};
   }
   
   export async function createMatch(body: CreateMatchBody, signal?: AbortSignal) {
-    return api<CreateMatchRes>('http://localhost:3000/api/game/match', {
+    return api<CreateMatchRes>(`${API_BASE}/api/game/match`, {
       method: 'POST',
       body: JSON.stringify(body),
       signal,
