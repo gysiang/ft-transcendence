@@ -4,7 +4,6 @@ import { renderSignUpPage } from "./signup";
 import { renderProfilePage } from "./profile.js";
 import { renderFriendsPage } from "./friends.js";
 import { statsProfile } from "./stats.js";
-import { renderModes } from "./pong/registration/modes.js";
 import { renderGameModes } from "./pong/ui/gameMode.js";
 
 

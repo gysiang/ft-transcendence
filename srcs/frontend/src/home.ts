@@ -1,6 +1,4 @@
 import { renderHeader } from "./components/header";
-// import { openWs } from "./wsClient";
-import { renderGameModes } from "./pong/ui/gameMode";
 import { API_BASE } from "./variable"
 
 //For reference:
@@ -49,14 +47,13 @@ export async function renderHomePage(container: HTMLElement) {
       		user_name.textContent = "Error.exe";
 		}
 	}
-	const playBtn = document.createElement("button");
-	playBtn.type = "button";
-	playBtn.className =
-	  "w-48 bg-sky-500 text-white px-4 py-2 rounded-md text-center " +
-	  "hover:bg-sky-600 transition animate-pulse text-sm";
-	playBtn.textContent = "Open The Game!";
-
-	// tooltip
+	const playLink = document.createElement("a");
+	playLink.href = "/play";
+	playLink.className =
+	"w-48 bg-sky-500 text-white px-4 py-2 rounded-md text-center " +
+	"hover:bg-sky-600 transition animate-pulse text-sm inline-block";
+	playLink.textContent = "Open The Game!";
+	
 	const tooltipDiv = document.createElement("div");
 	tooltipDiv.className =
 	  "tooltip absolute left-1/2 -translate-x-1/2 mt-1 w-max text-sm text-gray-800 bg-white " +
@@ -66,12 +63,7 @@ export async function renderHomePage(container: HTMLElement) {
 
 	const wrapper = document.createElement("div");
 	wrapper.className = "relative group inline-block";
-	wrapper.append(playBtn, tooltipDiv);
-
-	playBtn.addEventListener("click", (e) => {
-	  e.preventDefault();
-	  renderGameModes(homePage);
-	});
+	wrapper.append(playLink, tooltipDiv);
 	homePage.append(title, wrapper);
 	container.append(homePage);
 

@@ -1,7 +1,7 @@
 export function validAlias(s: string): string | null {
     const t = s.trim();
     if (t.length < 1 || t.length > 32) return 'Alias must be less then 32 characters.';
-    if (!/^[A-Za-z0-9]+$/.test(t)) return 'Only letters and numbers are allowed.';
+    if (!/^[A-Za-z0-9 ]+$/.test(t)) return 'Only letters and numbers are allowed.';
     return null;
 }
 

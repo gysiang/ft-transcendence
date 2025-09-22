@@ -58,7 +58,7 @@ export function matchUI(players: Player[],rounds?: Match[][]): Promise<void> {
 	});
 }
 
-import type { TRounds, TPlayer} from '../onlineClient'
+import type { TRounds, TPlayer} from './Tournament/onlineClient'
 
 // Map TRounds to Match[][]
 export function adaptTRoundsToLocal(trounds: TRounds, players: TPlayer[]): Match[][] {

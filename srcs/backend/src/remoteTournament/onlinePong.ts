@@ -4,6 +4,7 @@ import { joinRoom, broadcast } from './rooms';
 
 type Intent = -1 | 0 | 1; 
 //- 1 = up , 1 = down, 0 stop
+type Phase = 'countdown' | 'active' | 'ended';
 
 type MatchState = {
   w: number;
@@ -24,7 +25,7 @@ function clampVY(vy: number) {
   if (vy < -max) return -max;
   return vy;
 }
-function sendSafe(ws: WebSocket, payload: unknown) {
+export function sendSafe(ws: WebSocket, payload: unknown) {
   try { ws.send(JSON.stringify(payload)); } catch {}
 }
 
@@ -40,7 +41,8 @@ export function startMatch(
   left: WebSocket,
   right: WebSocket,
   goalLimit: number,
-  onEnd?: OnMatchEnd
+  onEnd?: OnMatchEnd,
+  countdownMs: number = 3000
 ) {
 
   joinRoom(left, room);
@@ -56,18 +58,38 @@ export function startMatch(
     geom: { padX: 10, padW: 10, padH: 100, speed: 9 },
   };
 
+
   const world = { w: state.w, h: state.h };
   const ballR = state.ball.r;
   const geom  = state.geom;
 
+  let phase: Phase = 'countdown';
+  const serverNow = Date.now();
+  const startAt   = serverNow + Math.max(0, countdownMs);
+
+  let tickTimer: NodeJS.Timeout | null = null;
+  let countdownTimer: NodeJS.Timeout | null = null;
+  const startFrameShared = { goalLimit, world, ballR, geom, serverNow, startAt, countdownSec: Math.ceil(countdownMs / 1000) };
   sendSafe(left,  { type: 'match.start', room, side: 'left',  goalLimit, world, ballR, geom });
   sendSafe(right, { type: 'match.start', room, side: 'right', goalLimit, world, ballR, geom });
 
+  if (countdownMs > 0) {
+    countdownTimer = setInterval(() => {
+      const remain = Math.max(0, startAt - Date.now());
+      const sec = Math.ceil(remain / 1000);
+      broadcast(room, { type: 'countdown', remainingMs: remain, remainingSec: sec });
+      if (remain <= 0) {
+        try { clearInterval(countdownTimer!); } catch {}
+        countdownTimer = null;
+      }
+    }, 1000);
+  }
   const leftMsgHandler = (buf: any) => {
     try {
       const m = JSON.parse(typeof buf === 'string' ? buf : buf.toString());
       if (m?.type === 'input')
         {
+          if (phase !== 'active') return;
           const i = Number(m.intent);
           if (i === -1 || i === 0 || i === 1) {
             state.left.intent = i as -1 | 0 | 1;
@@ -79,6 +101,7 @@ export function startMatch(
     try {
       const m = JSON.parse(typeof buf === 'string' ? buf : buf.toString());
       if (m?.type === 'input'){
+        if (phase !== 'active') return;
         const i = Number(m.intent);
         if (i === -1 || i === 0 || i === 1) {
           state.right.intent = i as -1 | 0 | 1;
@@ -88,41 +111,67 @@ export function startMatch(
   };
   left.on('message', leftMsgHandler);
   right.on('message', rightMsgHandler);
-
-  const tick = setInterval(() => {
-    integrate(state);
-
+  const goActive = () => {
+    if (phase !== 'countdown') return;
+    phase = 'active';
     broadcast(room, {
       type: 'state',
       ball:  state.ball,
       left:  { y: state.left.y,  score: state.left.score  },
       right: { y: state.right.y, score: state.right.score },
     });
+    tickTimer = setInterval(() => {
+      // If ended, do nothing
+      if (phase !== 'active') return;
 
-    if (state.left.score >= state.goalLimit || state.right.score >= state.goalLimit) {
-      clearInterval(tick);
-      const winnerSide: 'left' | 'right' =
-        state.left.score > state.right.score ? 'left' : 'right';
+      integrate(state);
 
-      const payload: MatchEndPayload = {
-        winnerSide,
-        score: [state.left.score, state.right.score],
-      };
+      broadcast(room, {
+        type: 'state',
+        ball:  state.ball,
+        left:  { y: state.left.y,  score: state.left.score  },
+        right: { y: state.right.y, score: state.right.score },
+      });
 
-      broadcast(room, { type: 'match.end', ...payload });
-      try { onEnd?.(payload); } catch {}
-      cleanup();
-    }
-  }, 16);
+      if (state.left.score >= state.goalLimit || state.right.score >= state.goalLimit) {
+        endByScore();
+      }
+    }, 16);
+  };
+
+  
+  const delay = Math.max(0, startAt - Date.now());
+  setTimeout(goActive, delay);
+
 
   const onCloseLeft  = () => endByForfeit('right');
   const onCloseRight = () => endByForfeit('left');
   left.once('close', onCloseLeft);
   right.once('close', onCloseRight);
 
-  function endByForfeit(winnerSide: 'left' | 'right') {
-    try { clearInterval(tick); } catch {}
+  function endByScore() {
+    try { if (tickTimer) clearInterval(tickTimer); } catch {}
+    try { if (countdownTimer) clearInterval(countdownTimer); } catch {}
 
+    phase = 'ended';
+    const winnerSide: 'left' | 'right' =
+      state.left.score > state.right.score ? 'left' : 'right';
+
+    const payload: MatchEndPayload = {
+      winnerSide,
+      score: [state.left.score, state.right.score],
+    };
+
+    broadcast(room, { type: 'match.end', ...payload });
+    try { onEnd?.(payload); } catch {}
+    cleanup();
+  }
+
+  function endByForfeit(winnerSide: 'left' | 'right') {
+    try { if (tickTimer) clearInterval(tickTimer); } catch {}
+    try { if (countdownTimer) clearInterval(countdownTimer); } catch {}
+
+    phase = 'ended';
     const payload: MatchEndPayload = {
       winnerSide,
       score: [state.left.score, state.right.score],
@@ -205,20 +254,3 @@ function resetAfterGoal(s: MatchState, dir: -1 | 1) {
   s.ball.vx = 4 * dir;
   s.ball.vy = Math.random() > 0.5 ? 3 : -3;
 }
-/* online quick match for testing
-const queue: WebSocket[] = [];
-
-export function enqueue(ws: WebSocket, goalLimit = 5) {
-  if (ws.readyState !== ws.OPEN) return;
-  queue.push(ws);
-  tryMatch(goalLimit);
-}
-
-function tryMatch(goalLimit: number) {
-  while (queue.length >= 2) {
-    const left = queue.shift()!;
-    const right = queue.shift()!;
-    const room = `m:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 6)}`;
-    startAuthoritativeMatch(room, left, right, goalLimit);
-  }
-}*/

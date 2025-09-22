@@ -1,5 +1,8 @@
 import { renderApp } from './router';
 
+
+
+
 window.addEventListener("DOMContentLoaded", renderApp);
 window.addEventListener("popstate", renderApp);
 
@@ -19,7 +22,7 @@ window.addEventListener('click', (e: Event) => {
 		const href = anchor?.getAttribute('href');
 		if (href) {
 			history.pushState({}, '', href);
-			renderApp(); //renderpages
+			renderApp();
 		}
 	}
 	// console.log("Hey you did it!");
