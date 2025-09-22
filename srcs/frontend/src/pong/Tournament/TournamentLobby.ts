@@ -460,7 +460,6 @@ function updateLobbyCodeDisplay() {
         
         onState: (s: any) => {
           rawSubs.forEach(fn => fn({ type: 't.state', ...s }));
-          //console.log("[WS] state", s);
           TL.lastLobby = s;
         
           const hostId = s.host as string | undefined;
@@ -533,7 +532,6 @@ function updateLobbyCodeDisplay() {
         onMatchResult: () => {},
         onEnded: (m: any) => {  
           rawSubs.forEach(fn => fn({ type: 't.ended', ...m }));
-          //console.log('t.ended:', m);
           gh.onTournamentEnd(m);
         },
       },

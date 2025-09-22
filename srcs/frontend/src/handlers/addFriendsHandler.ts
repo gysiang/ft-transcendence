@@ -17,23 +17,17 @@ export async function addFriendsHandler(form: HTMLFormElement) {
 			});
 
 			const data = await res.json().catch(() => {
-				console.log("[Form Submit] ⚠️ Response was not valid JSON");
 				return {};
 			});
 
-			//console.log("[Form Submit] Response data:", data);
-
 			if (!res.ok) {
-				//console.log("[Form Submit] ❌ Server returned error");
 				errorDiv.textContent = data.message || "Unknown error";
 			} else {
-				//console.log("[Form Submit] ✅ Friend added successfully");
 				errorDiv.textContent = data.message || "Success!";
 				if (user_id)
 					fetchFriends(user_id);
 			}
 		} catch (err: any) {
-			//console.log("[Form Submit] ❌ Network error:", err);
 			errorDiv.textContent = "Network error. Try again.";
 		}
 	});

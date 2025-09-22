@@ -14,7 +14,7 @@ if (!form) return;
 		const email = (document.getElementById("email") as HTMLInputElement).value;
 
 		try {
-			const userId = localStorage.getItem("id"); // same as in profile.ts
+			const userId = localStorage.getItem("id");
 			const res = await fetch(`${API_BASE}/api/profile/${userId}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },

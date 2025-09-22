@@ -6,8 +6,6 @@ import { renderFriendsPage } from "./friends.js";
 import { statsProfile } from "./stats.js";
 import { renderGameModes } from "./pong/ui/gameMode.js";
 
-
-//delete later
 import { marcus_renderProfilePage } from "./marcus_profile.js"
 
 

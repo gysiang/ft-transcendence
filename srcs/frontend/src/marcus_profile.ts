@@ -2,21 +2,9 @@ import { renderHeader } from './components/header';
 import { all_2faswitches } from './handlers/marcus_2faHandler';
 import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
 import { API_BASE } from "./variable.ts"
-// import { marcus_2faEmail, marcus_2faGoogle } from './handlers/marcus_2faHandler';
-//import { marcus_2faGoogle } from './handlers/marcus_2faHandler';
-// import { profileHandler } from "./handlers/profileHandler";
-// import { verify2faHandler } from './handlers/2faHandler'
-// import { createLogger } from "vite";
 
-
-//https://tailwind.build/classes
-//https://tailwindcss.com/docs/vertical-align
-//https://tailwindcss.com/docs/hover-focus-and-other-states
-//https://szasz-attila.medium.com/vue3-radio-button-with-tailwind-css-a-step-by-step-guide-4a9c756b7b2a
 export async function marcus_renderProfilePage(container: HTMLElement) {
     renderHeader(container);
-
-
 	try {
 		const userId = localStorage.getItem("id");
 		const response = await fetch(`${API_BASE}/api/profile/${userId}`, {
@@ -25,8 +13,7 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		if (!response.ok) {
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
-		const user = await response.json();// Still in try block just in case json parsing to user fails
-		console.log("Data From USER:", user);
+		const user = await response.json();
 
 		//--------------------------Wrapper(profile/stats) Section--------------------------
 		const profile_stats_div = document.createElement("div");
@@ -48,25 +35,25 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 
 			const p_name = document.createElement("p");
 			p_name.className = "text-lg font-bold text-gray-900 dark:text-white text-shadow-lg/15";
-			p_name.textContent = user.name// Put user's name inside the <p>
+			p_name.textContent = user.name;
 
 			const p_email = document.createElement("p");
 			p_email.className = "text-sm text-gray-500 dark:text-gray-400";
 			p_email.textContent = user.email;
 
 			const link = document.createElement("a");
-			link.href = "/profile/update_profile"; //the "/location"
+			link.href = "/profile/update_profile";
 			link.className = "rounded-xl shadow-lg/40 px-2 py-0.5 text-center text-white font-bold \
 								bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 \
 								focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
-			link.textContent = "Update Profile"; // For textbox name
+			link.textContent = "Update Profile";
 
-			const tooltipDiv = document.createElement("div");//second div
+			const tooltipDiv = document.createElement("div");
 			tooltipDiv.className =
 				"tooltip absolute -left-5 mt-1 w-max text-sm text-gray-800 bg-white border \
 				border-gray-300 rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 \
 				transition-opacity duration-200 pointer-events-none transition-all duration-1000";
-			tooltipDiv.textContent = "Change your details here"; //prints out the string u wanna write
+			tooltipDiv.textContent = "Change your details here";
 
 			const update_profile = document.createElement("div");
 			update_profile.className = "relative group inline-block";
@@ -85,14 +72,12 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			const statsdiv = document.createElement("div");
 			statsdiv.className = "w-fit";
 
-			//create text as header (Add a box to surrond this as a header ltr)
 			const statsheader = document.createElement("h1");
 			statsheader.className = "inline-block align-top border bg-sky-500 \
                        					bg-gradient-to-r bg-clip-padding p-2 text-lg font-bold \
                         				text-yellow-300 dark:text-white shadow-lg m-0";
 			statsheader.textContent = "Stats";
 
-			//determine which files and which to fetch
 			const res = await fetch(`${API_BASE}/api/game/data/${userId}`, {
 				method: "GET",
 				credentials: "include",
@@ -101,14 +86,17 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 			 	throw new Error(`HTTP error! Status: ${res.status}`);
 			}
 			const matches = await res.json();
-			console.log("user:", user.name, " | userId:", userId, " | And their stats:", matches);
+			const match_wins = matches.data.filter((m: CreateMatchBody) => m.winner_id && String(m.winner_id) === userId).length;
+			const match_inTotal = matches.data.filter((m: CreateMatchBody) => 
+				((m.player1_id && (String(m.player1_id) === userId) 
+				|| (m.player2_id && String(m.player2_id) === userId)))).length;
+			const match_losses = match_inTotal - match_wins;
 			//user_matches--------
 				//Print total matches and put on statsboard
 				const totalMatches = document.createElement("p");
 				totalMatches.className = "text-center text-l font-bold \
 											text-yellow-300 dark:text-white";
-				totalMatches.textContent = "Total Matches played: " + matches.data.length;
-				console.log("[Total_Score]User:", user.name, totalMatches.textContent);
+				totalMatches.textContent = "Total Matches played: " + match_inTotal;
 
 				//print Win/loses and put on statsboard as words for now
 				const win_lose_result = document.createElement("p");
@@ -116,18 +104,11 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 											text-yellow-700 dark:text-white text-shadow-lg/15 \
 											flex gap-1";
 				win_lose_result.textContent = "Win/Lose Ratio: ";
-				//print console.log the JSON.string
-				console.log("THIS IS FOR JSON:---------->", JSON.stringify(matches));
 
-				//guranteed to be a number..... always but honestly how? -ask maybe xf?
-				const wins = matches.data.filter((m: CreateMatchBody) => m.winner_id
-										&& String(m.winner_id) === String(userId)).length;
-				console.log ("VALUE OF WINS: ", wins);
 				const win_ratio = document.createElement("p");
 				win_ratio.className = "text-center text-mid font-bold \
 											text-green-700 dark:text-white text-shadow-lg/15";
-				win_ratio.textContent = `${wins}`;
-				console.log("[Score(win)]User:", user.name, win_ratio.textContent);
+				win_ratio.textContent = `${match_wins}`;
 				const slash_win_lose = document.createElement("p");
 				slash_win_lose.className = "text-center text-mid font-bold \
 											text-yellow-300 dark:text-white text-shadow-lg/15";
@@ -135,19 +116,17 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 				const lose_ratio = document.createElement("p");
 				lose_ratio.className = "text-center text-mid font-bold \
 										text-red-700 dark:text-white text-shadow-lg/15";
-				const losses = matches.data.length - wins;
+				const losses = match_losses;
 				lose_ratio.textContent = `${losses}`;
-				console.log("[Score(lose)]User:", user.name, lose_ratio.textContent);
 
 				const stats_link = document.createElement("a");
-				stats_link.href = "/profile/stats"; //the "/location"
+				stats_link.href = "/profile/stats";
 				stats_link.className = "animate-pulse rounded-xl shadow-lg/40 px-2 py-0.5 text-center text-yellow-300 font-bold \
 									bg-sky-500 hover:underline hover:bg-blue-500 focus:outline-2 \
 									focus:outline-offset-2 focus:outline-sky-600 active:bg-blue-900";
-				stats_link.textContent = "Check your stats"; // For textbox name
+				stats_link.textContent = "Check your stats";
 				win_lose_result.append(win_ratio, slash_win_lose, lose_ratio)
 			//user_matches--------
-			//append
 			statsdiv.append(statsheader, totalMatches, win_lose_result, stats_link);
 			statsHeaderWrapper.append(statsdiv);
 			profile_stats_div.append(profilediv, statsHeaderWrapper)
@@ -171,7 +150,6 @@ export async function marcus_renderProfilePage(container: HTMLElement) {
 		fa2spantext.textContent = "Keep your account secure!";
 		fa2span.appendChild(fa2spantext);
 
-		//replace this with a button
 		const fa2spantext2 = document.createElement("div");
 		fa2spantext2.className = "flex flex-row justify-center mt-1 text-black dark:text-gray-950";
 		fa2spantext2.textContent = "Activate 2FA:";

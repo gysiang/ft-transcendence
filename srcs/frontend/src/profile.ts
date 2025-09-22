@@ -1,9 +1,7 @@
 import { renderHeader } from "./components/header";
 import { profileHandler, profilepicHandler } from "./handlers/profileHandler";
-import { initTwoFAToggle, initTwoFAToggleEmail, verify2faHandler, initTwoFAMutualExclusion } from './handlers/2faHandler'
 import { API_BASE } from "./variable.ts"
-//for colour change for buttons
-//https://tailwindcss.com/docs/hover-focus-and-other-states
+
 export async function renderProfilePage(container: HTMLElement) {
 	renderHeader(container);
 	try {
@@ -15,69 +13,8 @@ export async function renderProfilePage(container: HTMLElement) {
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 		const user = await response.json();
-
-		//console.log(user);
-		// Main wrapper for centering everything
-		// const toggleWrapper = document.createElement("div");
-		// toggleWrapper.innerHTML=`
-		// 	<label class="relative flex justify-between items-center p-2 text-xl">
-		// 	Activate 2FA via Google Auth
-		// 	<input id="toggle-2fa" type="checkbox" class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md" />
-		// 	<span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6"></span>
-		// 	</label>
-		// `
-		// const qrSection = document.createElement("div");
-		// qrSection.id = "twofa-section";
-		// qrSection.className = "mt-4 hidden flex flex-col items-center space-y-4";
-		// qrSection.innerHTML = `
-		// <div id="qrcode"></div>
-		// <input
-		// 	type="text"
-		// 	id="twofa-token-app"
-		// 	placeholder="Enter 6-digit code"
-		// 	class="border p-2 rounded w-40 text-center"
-		// />
-		// <button
-		// 	id="verify-2fa-app"
-		// 	class="bg-blue-500 text-white px-4 py-2 rounded"
-		// >
-		// 	Verify
-		// </button>
-		// `;
-		// toggleWrapper.appendChild(qrSection);
-
 		const profileWrapper = document.createElement("div");
 		profileWrapper.className = "h-screen flex flex-col items-center justify-center bg-gray-100 space-y-6";
-		// profileWrapper.appendChild(toggleWrapper);
-
-		// const emailToggleWrapper = document.createElement("div");
-		// emailToggleWrapper.innerHTML=`
-		// 	<label class="relative flex justify-between items-center p-2 text-xl">
-		// 	Activate 2FA via Email
-		// 	<input id="toggle-2fa-email" type="checkbox" class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md" />
-		// 	<span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6"></span>
-		// 	</label>
-		// `
-
-		// const inputBox = document.createElement("div");
-		// inputBox.id = "email2fa-input";
-		// inputBox.className = "mt-4 hidden flex flex-col items-center space-y-4";
-		// inputBox.innerHTML = `
-		// <input
-		// 	type="text"
-		// 	id="twofa-token-email"
-		// 	placeholder="Enter 6-digit code"
-		// 	class="border p-2 rounded w-40 text-center"
-		// />
-		// <button
-		// 	id="verify-2fa-email"
-		// 	class="bg-blue-500 text-white px-4 py-2 rounded"
-		// >
-		// 	Verify
-		// </button>
-		// `
-		// emailToggleWrapper.appendChild(inputBox);
-		// profileWrapper.appendChild(emailToggleWrapper);
 
 		// Profile image
 		const img = document.createElement("img");
@@ -100,6 +37,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		uploadBtn.className =
 			"text-sm text-gray-700 bg-gray-200 px-3 py-1 rounded-full hover:bg-gray-300 transition";
 		uploadBtn.addEventListener("click", () => fileInput.click());
+
 		// Profile form
 		const profileContainer = document.createElement("div");
 		profileContainer.innerHTML = `
@@ -141,17 +79,10 @@ export async function renderProfilePage(container: HTMLElement) {
 
 		container.appendChild(profileWrapper);
 
-		// Fill in form values
-		(document.getElementById("name") as HTMLInputElement).value = user.name;// show the original names in profile first
-		(document.getElementById("email") as HTMLInputElement).value = user.email;// show the original email in profile first
-		profileHandler("profile-form");
+		// Fill in form values, show the original names in profile first
+		(document.getElementById("name") as HTMLInputElement).value = user.name;
+		(document.getElementById("email") as HTMLInputElement).value = user.email;
 		profilepicHandler("file-input");
-		// initTwoFAToggle("toggle-2fa");
-		// initTwoFAToggleEmail("toggle-2fa-email");
-		// verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
-		// verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
-		// initTwoFAMutualExclusion(user.twofa_method);
-
 	} catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");

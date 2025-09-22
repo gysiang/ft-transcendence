@@ -58,7 +58,6 @@ export async function all_2faswitches(method: string, checkboxid1: string): Prom
 			if (hiddenSwitchInput && hiddenSwitchInput.checked == true) {
 				const confirmDisable = confirm("Are you sure you want to disable 2FA?");
 				if (confirmDisable) {
-					console.log("✅ User clicked OK");
 					showBoth();
 					if (hiddenSwitchInput)
 						hiddenSwitchInput.checked = false;
@@ -70,10 +69,8 @@ export async function all_2faswitches(method: string, checkboxid1: string): Prom
 							credentials: "include",
 							body: JSON.stringify({ id }),
 					});
-				} else {
-					// ❌ User clicked Cancel
+				} else
 					console.log("User canceled disabling 2FA.");
-				}
 			}
 		})
 	
@@ -114,7 +111,6 @@ export async function all_2faswitches(method: string, checkboxid1: string): Prom
 			}
 			const data = await res.json();
 			if (data && data.otpauth_url) {
-				console.log("VALUE OF THE data MARCUS HERE!:", data)
 				const canvas = document.createElement("canvas");
 				qrBox.appendChild(canvas);
 				QRCode.toCanvas(canvas, data.otpauth_url, { width: 200 }, (err: any) => {
@@ -142,7 +138,6 @@ export async function all_2faswitches(method: string, checkboxid1: string): Prom
 					protect2faNotify("✅ Google 2FA Activated!");
 					disableBoth();
 					qrSection.classList.add("hidden");
-					console.log("VALUE OF THE verifyRES MARCUS HERE!:", verifyRes);
 				} else {
 					alert("❌ Invalid code. Please try again.");
 				}
@@ -192,7 +187,6 @@ export async function all_2faswitches(method: string, checkboxid1: string): Prom
 					protect2faNotify("✅ Email 2FA Activated!");
 					disableBoth();
 					qrSection.classList.add("hidden");
-					console.log("VALUE OF THE verifyRES MARCUS HERE!:", verifyRes)
 				} else {
 					alert("❌ Invalid code. Please try again.");
 				}
@@ -220,39 +214,33 @@ export async function all_2faswitches(method: string, checkboxid1: string): Prom
 		console.error("Failed to verify Google 2FA:", err);
 		alert("Something went wrong. Look at marcus_2faHandler.");
 	}
-
     // Append buttons + QR section to wrapper
 	wrapper.append(googleBtn, emailBtn);
     overall_wrapper.append(button_wrapper, wrapper, qrSection);
-	// ✅ Attach event listener here (after DOM elements exist)
 	verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
 	verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
     return overall_wrapper;
 }
 
-// the => void is meant to tell TS that its just a callback function.
-// callback -> a function that you pass as an argument to another function, so it can be “called back” later.
-//export function create_2faSwitch(labeltext: string, id: string, onToggle: (checked: boolean, id: string) => void) {
 export function create_2faSwitch(labeltext: string, checkboxid: string) {
 	// *2fa -- for buttons
 	const switchWrapper = document.createElement("div");
 	switchWrapper.className = "p-6 bg-white rounded-xl shadow-md dark:bg-slate-800";
 
-	const switchLabel = document.createElement("label");// label that holds both text + switch
+	const switchLabel = document.createElement("label");
 	switchLabel.className = "flex flex-row inline-flex items-center justify-center w-full cursor-pointer gap-x-4";
 	switchWrapper.appendChild(switchLabel);
 
-	const switchText = document.createElement("span");// left side text
-	switchText.className = "text-center text-gray-700 dark:text-gray-300";//***Why is this not centered
+	const switchText = document.createElement("span");
+	switchText.className = "text-center text-gray-700 dark:text-gray-300";
 	switchText.textContent = labeltext;
 	switchLabel.appendChild(switchText);
 
 	// add the hidden checkbox for tailwind
 	const hiddenSwitchInput = document.createElement("input");
 	hiddenSwitchInput.type = "checkbox";
-	hiddenSwitchInput.disabled = true;//edit this ltr
-	//document.getElementById(checkboxid).disabled = false;
-	hiddenSwitchInput.className = "sr-only peer";//hide checkbox visually until clicked
+	hiddenSwitchInput.disabled = true;
+	hiddenSwitchInput.className = "sr-only peer";
 	hiddenSwitchInput.id = checkboxid;
 	switchLabel.appendChild(hiddenSwitchInput);
 
@@ -269,7 +257,7 @@ export function create_2faSwitch(labeltext: string, checkboxid: string) {
 	switchLabel.appendChild(track);
 
 	const thumb = document.createElement("span");
-	thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";//peer-checked:translate-x-5 → moves the thumb right when checked.
+	thumb.className = "ms-3 text-sm font-medium text-gray-900 dark:text-gray-300";
 	track.appendChild(thumb);
 	return switchWrapper;
 }
