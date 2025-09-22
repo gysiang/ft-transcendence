@@ -26,7 +26,6 @@ export function	loggedOutNotify(logoutMsg: string, duration = 3000) {
         opacity-0 transition-all duration-500";
 	smallbox.textContent = logoutMsg;
 	document.body.append(smallbox);
-	//document represents the whole page<body>, which we will append smallbox to it.
 
     // Animate in
     setTimeout(() => {

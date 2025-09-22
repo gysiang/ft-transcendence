@@ -37,6 +37,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		uploadBtn.className =
 			"text-sm text-gray-700 bg-gray-200 px-3 py-1 rounded-full hover:bg-gray-300 transition";
 		uploadBtn.addEventListener("click", () => fileInput.click());
+
 		// Profile form
 		const profileContainer = document.createElement("div");
 		profileContainer.innerHTML = `
@@ -78,17 +79,10 @@ export async function renderProfilePage(container: HTMLElement) {
 
 		container.appendChild(profileWrapper);
 
-		// Fill in form values
-		(document.getElementById("name") as HTMLInputElement).value = user.name;// show the original names in profile first
-		(document.getElementById("email") as HTMLInputElement).value = user.email;// show the original email in profile first
-		profileHandler("profile-form");
+		// Fill in form values, show the original names in profile first
+		(document.getElementById("name") as HTMLInputElement).value = user.name;
+		(document.getElementById("email") as HTMLInputElement).value = user.email;
 		profilepicHandler("file-input");
-		// initTwoFAToggle("toggle-2fa");
-		// initTwoFAToggleEmail("toggle-2fa-email");
-		// verify2faHandler("verify-2fa-app", "twofa-token-app", "totp");
-		// verify2faHandler("verify-2fa-email", "twofa-token-email", "email");
-		// initTwoFAMutualExclusion(user.twofa_method);
-
 	} catch (error) {
 		console.error("Failed to load profile:", error);
 		const errorMsg = document.createElement("p");
