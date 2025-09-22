@@ -8,7 +8,8 @@ import { checkAuthentication } from "./auth";
 import { api } from "./apiWrapper";
 import { validAlias,validGoal,setFieldError } from "./InputValidation";
 import { API_BASE } from "../../variable"
-export async function getLoggedInUserName(): Promise<string | null> {
+/*
+export async function getLoggedInUserName({ fresh = false }: { fresh?: boolean } = {}): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/api/me`, {
       credentials: 'include',
@@ -21,7 +22,32 @@ export async function getLoggedInUserName(): Promise<string | null> {
   } catch {
     return null;
   }
+}*/
+export async function getLoggedInUserName(
+  { fresh = false }: { fresh?: boolean } = {}
+): Promise<string | null> {
+  try {
+    const url = fresh
+      ? `${API_BASE}/api/me?ts=${Date.now()}`
+      : `${API_BASE}/api/me`;
+
+    const res = await fetch(url, {
+      credentials: 'include',
+      cache: 'no-store',                   // bypass browser HTTP cache
+      headers: { 'Cache-Control': 'no-cache' }, // nudge proxies/SW to revalidate
+    });
+
+    if (!res.ok) return null;
+
+    // Accept either { alias, name } shapes
+    const data = await res.json();
+    const raw = (data?.name ?? '').toString().trim();
+    return raw || null;
+  } catch {
+    return null;
+  }
 }
+/*
 export function quickplayForm(app: HTMLElement): void
 {
     app.innerHTML = `
@@ -105,8 +131,8 @@ onlineBtn?.addEventListener("click", () => {
   const { canvas, container } = createGameCanvas();
   app.appendChild(container);
   startGame(canvas);
-});*/
-}
+});
+}*/
 export function tournamentForm(app: HTMLElement): void {
   app.innerHTML = `
     <div class="max-w-md mx-auto mt-12 text-black space-y-6">
@@ -190,7 +216,7 @@ export function tournamentForm(app: HTMLElement): void {
 
   (async () => {
     try {
-      userAlias = await getLoggedInUserName();
+      userAlias = await getLoggedInUserName({ fresh: true });
     } catch { userAlias = null; }
     updateAliasFields(userAlias);
     playerCountInput.addEventListener("input", () => updateAliasFields(userAlias || undefined));
@@ -238,7 +264,7 @@ export function tournamentForm(app: HTMLElement): void {
 
     aliasInputs.forEach((input, i) => {
       const name = (input.value.trim() || `Player ${i + 1}`);
-      players.push({ name, side: "left" }); // side is used by your game; you can assign real sides later
+      players.push({ name, side: "left" });
     });
 
     await handleStartTournament(app, players, goal);

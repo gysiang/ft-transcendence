@@ -6,7 +6,7 @@ import { matchUI} from "./matchUI";
 import { createMatch } from "./Tournament/backendutils";
 import { checkAuthentication } from "./registration/auth";
 import { clearGameStorage } from "./Tournament/TournamentUtils";
-import { openWs,type MatchHandlers, type StartMsg,type StateMsg, type EndMsg } from "../wsClient";
+import { openWs,type MatchHandlers, type StartMsg,type StateMsg, type EndMsg } from "./Tournament/wsClient";
 import { lockCanvasAtCurrent, unlockCanvas,lockCanvasWorld } from "./Renderer";
 import { getLoggedInUserName } from "./registration/registrationForm";
 import { renderTournamentVictoryScreen } from "./ui/victoryScreen";

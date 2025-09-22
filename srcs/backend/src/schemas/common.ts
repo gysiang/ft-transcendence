@@ -3,7 +3,7 @@ export const AliasPattern = {
     type: 'string',
     minLength: 1,
     maxLength: 32,
-    pattern: "^[A-Za-z0-9]+$",
+    pattern: "^[A-Za-z0-9 ]+$",
     errorMessage: {
         minLength: 'Alias is required.',
         maxLength: 'Alias must be 32 characters or fewer.',
