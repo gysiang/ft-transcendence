@@ -44,8 +44,6 @@ export async function statsProfile(container: HTMLElement) {
 		//2) Update the tournamentsMap
 		matches.data.forEach((m: CreateMatchBody) => {
 			const tournamentId = Number(m.tournament_id);
-			console.log("VALUE OF THIS TOURNAMENT ID BTW:_____>", tournamentId);
-
 			if (!tournamentsMap.has(tournamentId)) {
 				tournamentsMap.set(tournamentId, {
 					name: `Tourney-${tournamentId}`,

@@ -26,7 +26,6 @@ export async function signupHandler(formId: string) {
 			errorDiv!.textContent = data.message;
 		} else {
 			localStorage.setItem("id", data.id);
-			console.log("Sign UP success! Check local Storage!");
 			history.pushState({}, '', "/");
 			renderApp();
 		}} catch (err : any) {
