@@ -1,12 +1,13 @@
 import { tournamentForm } from "../registration/registrationForm";
 import { checkAuthentication } from "../registration/auth";
 import { getLoggedInUserName } from "../registration/registrationForm";
-import { renderTournamentScreen } from "../../TournamentLobby";
+import { renderTournamentScreen } from "../Tournament/TournamentLobby";
+import { renderControlsBanner } from "./controls";
 
 type Mode = "local" | "online";
 
 export async function renderGameModes(mountInto: HTMLElement) {
-  history.pushState({ page: 'play' }, '', '/play');
+  //history.pushState({ page: 'play' }, '', '/play');
   const root = document.createElement("section");
   root.className = "min-h-[70vh] px-6 py-10 bg-gray-100";
 
@@ -59,6 +60,11 @@ export async function renderGameModes(mountInto: HTMLElement) {
 
   //mountInto.replaceWith(root);
   mountInto.replaceChildren(root);
+  renderControlsBanner(root, 'tournament', [
+    { alias: 'Player 1', side: 'left'  as const },
+    { alias: 'Player 2', side: 'right' as const },
+  ]);
+  
 
   const cardLocal   = root.querySelector<HTMLDivElement>("#cardLocal")!;
   const cardOnline  = root.querySelector<HTMLDivElement>("#cardOnline")!;
@@ -113,11 +119,19 @@ export async function renderGameModes(mountInto: HTMLElement) {
   async function mountLocal() {
     setActive("local");
     const body = panelBody(panelLocal);
+    renderControlsBanner(root, 'tournament', [
+      { alias: 'Player 1', side: 'left'  },
+      { alias: 'Player 2', side: 'right' },
+    ]);
     tournamentForm(body);
     panelLocal.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function mountOnline() {
+    renderControlsBanner(root, 'online', [
+      { alias: 'You',     side: 'left'  }, 
+      { alias: 'Opponent', side: 'right' },
+    ]);
     setActive("online");
     const body = panelBody(panelOnline);
 

@@ -1,6 +1,7 @@
 import type { Player } from "../types";
-import { renderModes } from "../registration/modes.js";
+import { renderApp } from "../../router";
 import { tournamentForm, handleStartTournament } from "../registration/registrationForm";
+import { clearGameStorage } from "../Tournament/TournamentUtils";
 
 type TournamentSnapshot = {
     id?: number | null;
@@ -22,15 +23,11 @@ type TournamentSnapshot = {
   }
   function saveSnapshot(snap: TournamentSnapshot) {
     localStorage.setItem("tournamentSnapshot", JSON.stringify(snap));
-  }
-  function clearTournamentState() {
-    localStorage.removeItem("tournamentData");
-    localStorage.removeItem("mode");
-  }
-  
+  }  
   function goHome(app: HTMLElement) {
     app.innerHTML = "";
-    renderModes(app);
+    history.pushState({}, '', '/');
+    renderApp();
   }
   
   async function playAnotherRound(app: HTMLElement) {
@@ -61,8 +58,7 @@ type TournamentSnapshot = {
   function startNewTournament(app: HTMLElement) {
     const snap = getSnapshot();
     const sameName = snap?.name || "";
-  
-    clearTournamentState();
+    clearGameStorage();
     tournamentForm(app);
   
     queueMicrotask(() => {
@@ -128,17 +124,13 @@ type TournamentSnapshot = {
               Start new tournament
             </button>
           </div>
-  
-          <button id="btnClose" class="mt-6 text-xs text-gray-500 hover:text-gray-700 underline">
-            Close
-          </button>
         </div>
       </div>
     `;
   
 
     document.getElementById("btnHome")!.addEventListener("click", () => {
-      clearTournamentState();
+      clearGameStorage();
       goHome(app);
     });
     document.getElementById("btnRematch")!.addEventListener("click", () => {
@@ -146,8 +138,5 @@ type TournamentSnapshot = {
     });
     document.getElementById("btnNew")!.addEventListener("click", () => {
       startNewTournament(app);
-    });
-    document.getElementById("btnClose")!.addEventListener("click", () => {
-      (document.querySelector(".fixed.inset-0.z-50") as HTMLElement)?.remove();
     });
   }

@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { signupUser, loginUser, getUser, googleSignIn, logoutUser, editUser, editPicture, setUp2fa, verify2fa, get2faStatus, setUpEmail2FA, turnOff2FA } from '../controllers/users.controller';
-import { IUserParams, IUserBody, IProfileBody } from '../models/user.model';
+import { IUserParams, IUserBody, IProfileBody, findUserById } from '../models/user.model';
 import fastifyPassport from '@fastify/passport'
+
 
 export async function authRoutes(app: FastifyInstance) {
 	app.post('/api/signup',{schema: {body:{ $ref:'SignupSchema#' }},}, signupUser);
@@ -27,8 +28,12 @@ export async function authRoutes(app: FastifyInstance) {
 		return reply.send({ ok: true });
 	});
 	app.get('/api/me', { onRequest: [app.authenticate] }, async (req: any, reply) => {
-		const user = req.userData;
-		if (!user?.id) return reply.code(401).send({ message: 'Unauthenticated' });
+		const id = req.userData?.id;
+  		if (!id) return reply.code(401).send({ message: 'Unauthenticated' });
+
+  		const user = await findUserById(app.db,id); 
+  		if (!user) return reply.code(404).send({ message: 'Not found' });
+		const name = user.name;
 		return reply.code(200).send({ name: String(user.name || '') });
 	  });
 }

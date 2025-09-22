@@ -5,6 +5,7 @@ import { leaveAll } from "../remoteTournament/rooms";
 export async function wsRoutes(app: FastifyInstance){
 
 app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) => {
+  //console.log('[WS] handshake user:', req.userData);
   const raw: any = conn;
   const socket: WebSocket = raw?.socket ? raw.socket as WebSocket : raw as WebSocket;
 
@@ -17,6 +18,16 @@ app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) 
 
   let myTournamentId: string | null = null;
   let myPlayerId: string | null = null;
+
+  socket.once('close', () => {
+    if (!myTournamentId) return;
+    const t = tournaments.get(myTournamentId);
+    if (!t) return;
+    try { t.removeBySocket(socket); } catch {}
+    try { leaveAll(socket); } catch {}
+    myTournamentId = null;
+    myPlayerId = null;
+  });
 
   socket.on('message', (buf) => {
     let msg: any; 
@@ -34,6 +45,9 @@ app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) 
 
         const t = createTournament({ name, goalLimit, maxPlayers });
         const pid = t.addPlayer(socket, alias, uid);
+        if (!pid) {
+          break;
+        }
         t.setHost(pid);
 
         myTournamentId = t.id;
@@ -60,12 +74,17 @@ app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) 
           socket.send(JSON.stringify({ type:'t.error', msg:'Tournament is full' }));
           break;
         }
-        for (const p of t.players.values()) {
-          if (p.userId != null && p.userId === uid) {
-            socket.send(JSON.stringify({ type:'t.error', msg:'You are already in this tournament' }));
+        if (uid != null) {
+          let duplicate = false;
+          for (const p of t.players.values()) {
+            if (p.userId != null && p.userId === uid) { duplicate = true; break; }
+          }
+          if (duplicate) {
+            socket.send(JSON.stringify({ type: 't.error', msg: 'You are already in this tournament' }));
             break;
           }}
         const pid = t.addPlayer(socket, alias, uid);
+        if (!pid) break;
         myTournamentId = t.id;
         myPlayerId = pid;
 
@@ -89,23 +108,22 @@ app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) 
           socket.send(JSON.stringify({ type: 't.error', msg: 'Only host can start' }));
           break;
         }
+        if (!t.players.has(t.host)) {
+          (t as any).reassignHost?.();
+          t['pushState']?.();
+          socket.send(JSON.stringify({ type: 't.info', msg: 'Host changed. New host must start.' }));
+          break;
+        }
         void t.start();
         break;
       }
       case 't.leave': {
         if (!myTournamentId || !myPlayerId) break;
         const t = tournaments.get(myTournamentId);
-        if (!t)
-          break;
-        const p = t.players.get(myPlayerId);
-        if (p)
-          leaveAll(p.ws);
-        t.players.delete(myPlayerId);
-        if (t.host === myPlayerId) {
-          const first = [...t.players.keys()][0];
-          if (first) t.setHost(first);
-        }
-        t['pushState']?.();
+        if (!t) break;
+        try { t.removeBySocket(socket); } catch {}
+        try { leaveAll(socket); } catch {}
+
         myTournamentId = null;
         myPlayerId = null;
         break;

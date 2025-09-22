@@ -1,4 +1,4 @@
-import { tournamentForm, quickplayForm } from "./registrationForm";
+/*import { tournamentForm, quickplayForm } from "./registrationForm";
 import { renderTournamentScreen } from "../../TournamentLobby";
 import { checkAuthentication } from "./auth";
 import { getLoggedInUserName } from "./registrationForm";
@@ -41,4 +41,4 @@ export function renderModes(app: HTMLElement): void {
     renderTournamentScreen(app, { alias, lockAlias: true });});
   }, 0);
 }
-
+*/
