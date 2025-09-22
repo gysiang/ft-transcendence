@@ -1,9 +1,0 @@
-1. Change frontend REST request
-
-etc.
-const response = await fetch(`https://pong.42.fr/api/signup`, {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify({ name, email, password }),
-    headers: { "Content-Type": "application/json" }
-});

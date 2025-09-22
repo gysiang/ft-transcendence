@@ -12,7 +12,7 @@ dist
 dist-ssr
 secrets
 *.local
-.pong.db
+pong.db
 
 # Editor directories and files
 .vscode/*
