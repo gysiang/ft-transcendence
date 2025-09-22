@@ -3,12 +3,7 @@ import { renderApp } from './router';
 window.addEventListener("DOMContentLoaded", renderApp);
 window.addEventListener("popstate", renderApp);
 
-//change the color of the box + text here
-// window.addEventListener('mouseover', () => {
-// 	console.log("Changing colour!");
-// });
 
-//Also change the Box and text colour
 window.addEventListener('click', (e: Event) => {
 	const target = e.target as HTMLElement;
 	const anchor = target.closest('a');
@@ -19,10 +14,9 @@ window.addEventListener('click', (e: Event) => {
 		const href = anchor?.getAttribute('href');
 		if (href) {
 			history.pushState({}, '', href);
-			renderApp(); //renderpages
+			renderApp();
 		}
 	}
-	// console.log("Hey you did it!");
 });
 
 window.addEventListener("DOMContentLoaded", () => {

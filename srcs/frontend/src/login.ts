@@ -51,7 +51,6 @@ export function renderLoginPage(container: HTMLElement) {
 
 	loginForm.querySelector("div")?.appendChild(inputBox);
 	container.append(loginForm);
-	console.log("heading to loginHandler--->");
 	loginHandler("login-form");
 	verify2faLoginHandler("verify-2fa-email", "twofa-token-email");
 }

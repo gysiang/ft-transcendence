@@ -1,26 +1,18 @@
 import { renderHeader } from "./components/header.ts";
 import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
 import { API_BASE } from "./variable.ts"
-//https://www.chartjs.org/docs/latest/getting-started/integration.html
 import { Chart } from 'chart.js/auto';
 import { DoughnutController, ArcElement,
 		BarController, BarElement, CategoryScale, LinearScale,
 		Decimation, SubTitle, Title, Tooltip, Legend } from 'chart.js'; // these are from here:
 
-// register controllers and elements
+// after import, also still need to register controllers and elements
 Chart.register(
 	DoughnutController, ArcElement,
 	BarController, BarElement, CategoryScale, LinearScale,
 	Decimation, SubTitle, Title, Tooltip, Legend 
 );
 
-//reference:
-// https://www.positech.co.uk/cliffsblog/2014/06/16/stats-overload-a-lesson-in-game-over-design/
-// https://www.chartjs.org/docs/latest/getting-started/
-// https://www.igniteui.com/doughnut-chart/overview
-
-//installed:
-//npm install chart.js
 export async function statsProfile(container: HTMLElement) {
     renderHeader(container);
 
@@ -45,11 +37,6 @@ export async function statsProfile(container: HTMLElement) {
 			|| (m.player2_id && String(m.player2_id) === userId)))).length;
 		
 		const match_losses = match_inTotal - match_wins;
-		console.log("VALUE OF WINS: ", match_wins);
-		console.log("VALUE OF LOSSES: ", match_losses);
-		console.log("VALUE OF TOTAL_MATCHES: ", match_inTotal);
-		console.log("THIS data for this \"USER\":", user);
-		console.log("THIS data is from stats.ts:", matches);
 
 		//1) Tournament entry + tournament_ID
 		const tournamentsMap = new Map<number, { name: string; tourney_wins: number; tourney_losses: number }>();
@@ -61,7 +48,7 @@ export async function statsProfile(container: HTMLElement) {
 
 			if (!tournamentsMap.has(tournamentId)) {
 				tournamentsMap.set(tournamentId, {
-					name: `Tourney-${tournamentId}`, // You can replace with actual tournament name if available
+					name: `Tourney-${tournamentId}`,
 					tourney_wins: 0,
 					tourney_losses: 0,
 				})
@@ -89,12 +76,12 @@ export async function statsProfile(container: HTMLElement) {
 									bg-stone-400 p-6 outline outline-black/5 \
 									dark:bg-slate-800 dark:shadow-none \
 									dark:-outline-offset-1 dark:outline-white/10";
-				//1.1) Top is line chart and bottom will be total matches played
+				//1.1) This will be a Bar Chart
 				const barchartWrapper = document.createElement("div");
 				barchartWrapper.className = "flex flex-col max-w-sm"
 				const barWrapper = document.createElement("div");
-				barWrapper.className = "w-76 h-32 relative"; // fixed container
-				// Line chart
+				barWrapper.className = "w-76 h-32 relative";
+				// Bar chart
 				const barCanvas = document.createElement("canvas");
 				barCanvas.id = "barChart";
 				barCanvas.className = "flex flex-col w-50 p-1";
@@ -117,46 +104,44 @@ export async function statsProfile(container: HTMLElement) {
 
 					// Show details on selection
 					tournamentSelect.addEventListener("change", () => {
-					
-					
-					const selectedId = Number(tournamentSelect.value);
-					if (!selectedId) {
-						detailsBox.classList.add("hidden");
-						return;
-					}
+						const selectedId = Number(tournamentSelect.value);
+						if (!selectedId) {
+							detailsBox.classList.add("hidden");
+							return;
+						}
 
-					const t = tournamentsMap.get(selectedId);
-					if (!t) return;
+						const t = tournamentsMap.get(selectedId);
+						if (!t) return;
 
-					detailsBox.classList.remove("hidden");
-					//Ordered list (<ol>) – numbered list
-					//Unordered list (<ul>) – bullet points
-					detailsBox.innerHTML = `
-						<p class="font-bold">${t.name}</p>
-						<p>Wins: ${t.tourney_wins}</p>
-						<p>Losses: ${t.tourney_losses}</p>
-						<hr class="my-2"/>
-						<ul class="list-disc pl-5">
-						${matches.data
-							.filter((m: CreateMatchBody) => Number(m.tournament_id) === selectedId)
-							.map((m: CreateMatchBody) => {
-							const p1 = m.player1_id === Number(userId) ? "\"You\"" : `Player ${m.player1_id}`;
-							const p2 = m.player2_id === Number(userId) ? "\"You\"" : `Player ${m.player2_id}`;
-							let result: string;
-							if (m.player1_id === Number(userId) || m.player2_id === Number(userId)) {
-								if (m.winner_id === Number(userId)) {
-									result = "✅ Won";
-								} else if (m.winner_id != null) {
-									result = "❌ Lost"; // someone else won
+						detailsBox.classList.remove("hidden");
+						//Ordered list (<ol>) – numbered list
+						//Unordered list (<ul>) – bullet points
+						detailsBox.innerHTML = `
+							<p class="font-bold">${t.name}</p>
+							<p>Wins: ${t.tourney_wins}</p>
+							<p>Losses: ${t.tourney_losses}</p>
+							<hr class="my-2"/>
+							<ul class="list-disc pl-5">
+							${matches.data
+								.filter((m: CreateMatchBody) => Number(m.tournament_id) === selectedId)
+								.map((m: CreateMatchBody) => {
+								const p1 = m.player1_id === Number(userId) ? "\"You\"" : `Player ${m.player1_id}`;
+								const p2 = m.player2_id === Number(userId) ? "\"You\"" : `Player ${m.player2_id}`;
+								let result: string;
+								if (m.player1_id === Number(userId) || m.player2_id === Number(userId)) {
+									if (m.winner_id === Number(userId)) {
+										result = "✅ Won";
+									} else if (m.winner_id != null) {
+										result = "❌ Lost"; // someone else won
+									} else
+										result = "Irrelvant";
 								} else
-									result = "Irrelvant";
-							} else
-								result = "Not Recorded";
-							return `<li>${p1} vs ${p2} → ${result}</li>`;//li -> list item
-							})
-							.join("")}
-						</ul>
-					`;
+									result = "Not Recorded";
+								return `<li>${p1} vs ${p2} → ${result}</li>`;//li -> list item
+								})
+								.join("")}
+							</ul>
+						`;
 					});
 					// ---------------- Popup Modal ----------------
 					const popupOverlay = document.createElement("div");
@@ -209,18 +194,16 @@ export async function statsProfile(container: HTMLElement) {
 										else
 											result = "❌ Lost"; // someone else won
 									} else
-										result = "\"\""; // user did not play
+										result = "\"\"";
 									return `<li>${p1} vs ${p2} → ${result}</li>`;
 								})
 								.join("")}
 							</ul>
 						`;
-
 					// Show popup
 						popupOverlay.classList.remove("hidden");
 						tournamentSelect.value = "";
 					});
-
 					// Close popup
 					document.getElementById("closePopup")!.addEventListener("click", () => {
 						popupOverlay.classList.add("hidden");
@@ -241,7 +224,7 @@ export async function statsProfile(container: HTMLElement) {
 				donutchartWrapper.className = "flex flex-row max-w-sm"
 				// Donut chart
 				const donutWrapper = document.createElement("div");
-				donutWrapper.className = "w-32 h-32 relative";// fixed container
+				donutWrapper.className = "w-32 h-32 relative";
 				const donutCanvas = document.createElement("canvas");
 				donutCanvas.id = "donutChart";
 				donutCanvas.className = "w-32 h-32 p-1";
@@ -268,7 +251,7 @@ export async function statsProfile(container: HTMLElement) {
 				game_score_text.textContent = `${game_score}`;
 				gamescore_Wrapper.append(game_score_header, game_score_text);
 
-				//picture shrug
+				//picture shrug (for no data)
 				const shrug = document.createElement("img");
 				shrug.className = "w-24 h-24 rounded-full outline"
 				fetch('../imgs/shrug.png', { method: "HEAD" })
@@ -303,7 +286,7 @@ export async function statsProfile(container: HTMLElement) {
 				p_img.className = "w-24 h-24 rounded-full object-cover shadow-lg/40";
 				const p_name = document.createElement("p");
 				p_name.className = "text-lg font-bold text-center text-gray-900 dark:text-white text-shadow-lg/15";
-				p_name.textContent = "User: " + user.name// Put user's name inside the <p>
+				p_name.textContent = "User: " + user.name;
 				profile_user.append(p_img, p_name);
 
 
@@ -521,9 +504,6 @@ export async function statsProfile(container: HTMLElement) {
 			],
 		},
 		});
-
-
-
 		// Donut chart
 		new Chart(donutCanvas, {
 			type: "doughnut",
