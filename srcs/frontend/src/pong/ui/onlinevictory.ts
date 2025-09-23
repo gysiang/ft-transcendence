@@ -4,9 +4,25 @@ export type VictoryOverlayOptions = {
     onHome: () => void;                
     onNewTournament: () => void;        
   };
+  let lastWinnerName: string | null = null;
+
+  function stableWinnerName(next?: string): string {
+    const name = String(next ?? '');
+    if (name && name.toLowerCase() !== 'champion') {
+      lastWinnerName = name;
+      return name;
+    }
+    if (lastWinnerName)
+      return lastWinnerName;
+    return 'Champion';
+  }
+  
+
   
   export function showOnlineVictoryOverlay(opts: VictoryOverlayOptions): () => void {
     document.getElementById("onlineVictoryOverlay")?.remove();
+    const winner = stableWinnerName(opts.winnerName);
+
   
     const overlay = document.createElement("div");
     overlay.id = "onlineVictoryOverlay";
@@ -17,7 +33,7 @@ export type VictoryOverlayOptions = {
       <div class="w-full max-w-xl bg-white border border-slate-200 shadow-xl rounded-2xl p-6 text-center space-y-4">
         <div class="text-5xl">🏆</div>
         <h3 class="text-2xl font-bold">
-          Champion: <span class="text-blue-700">${escapeHtml(opts.winnerName || "Champion")}</span>
+          Champion: <span class="text-blue-700">${escapeHtml(winner)}</span>
         </h3>
         <p class="text-slate-600">“${escapeHtml(opts.tournamentName || "Tournament")}” has finished.</p>
   
