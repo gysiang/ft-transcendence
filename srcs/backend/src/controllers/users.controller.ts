@@ -128,7 +128,6 @@ export async function googleSignIn(req: FastifyRequest, reply: FastifyReply) {
 
 	try {
 		const db = req.server.db;
-		//const frontend = process.env.FRONTEND_URL;
 		const production = process.env.PRODUCTION_URL;
 		const password = null;
 		const user = req.user as any;
@@ -242,7 +241,6 @@ export async function editUser(req: FastifyRequest<{ Params: IUserParams; Body: 
 	try {
 		const { id } = req.params;
 		const { name, email } = req.body;
-		const db = req.server.db;
 
 		if (req.userData?.id != id) {
 			return reply.status(400).send({ message: "Forbidden" });
@@ -250,6 +248,12 @@ export async function editUser(req: FastifyRequest<{ Params: IUserParams; Body: 
 
 		let sanename = processUsername(name);
 		let sanemail = processEmailInput(email);
+	
+		const db = req.server.db;
+		const existing = await findUserByEmail(db, sanemail);
+		if (existing) {
+			return reply.status(400).send({ message: 'Email already exists' });
+		}
 
 		await db.run(
 			`UPDATE users SET name = ?, email = ?, updated_at = ? WHERE id = ?`,
