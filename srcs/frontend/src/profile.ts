@@ -82,6 +82,7 @@ export async function renderProfilePage(container: HTMLElement) {
 		// Fill in form values, show the original names in profile first
 		(document.getElementById("name") as HTMLInputElement).value = user.name;
 		(document.getElementById("email") as HTMLInputElement).value = user.email;
+		profileHandler("profile-form");
 		profilepicHandler("file-input");
 	} catch (error) {
 		console.error("Failed to load profile:", error);
