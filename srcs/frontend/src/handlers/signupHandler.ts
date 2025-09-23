@@ -42,7 +42,6 @@ export async function googleHandler(buttonId: string) {
 		const isLocal = window.location.hostname.includes("localhost");
 		const authPath = isLocal ? "/auth/re-google" : "/auth/google";
 		const redirectUrl = `${API_BASE}${authPath}`;
-		console.log("Redirecting to:", redirectUrl);
 		window.location.href = redirectUrl;
 	});
 
