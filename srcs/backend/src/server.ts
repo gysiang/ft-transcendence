@@ -84,26 +84,41 @@ const startServer = async () => {
 		await app.register(gameRoutes);
 		await app.register(friendRoutes);
 		await app.register(wsRoutes);
-
-		fastifyPassport.use('google', new GoogleStrategy({
-			clientID:     process.env.GOOGLE_CLIENT_ID,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+		fastifyPassport.use("google-vm",new GoogleStrategy({
+			clientID: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
 			callbackURL: "https://pong.42.fr/auth/google/callback",
-			passReqToCallback   : true
-		}, async function (
-				request: Request,
+			passReqToCallback: true,
+			},
+				async (request: Request,
 				accessToken: string,
 				refreshToken: string,
 				profile: any,
-				done: VerifyCallback
-			) {
+				done: VerifyCallback) => {
 				try {
+					done(undefined, profile);
+				} catch (err) {
+					done(err as Error);}
+				})
+			);
+
+		fastifyPassport.use("google-local",new GoogleStrategy({
+			clientID: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+			callbackURL: "https://localhost:4242/auth/re-google/callback",
+			passReqToCallback: true,
+			},
+			async (request: Request,
+				accessToken: string,
+				refreshToken: string,
+				profile: any,
+				done: VerifyCallback) => {
+			try {
 				done(undefined, profile);
 			} catch (err) {
-				done(err as Error);
-			};
-			}
-		));
+				done(err as Error);}
+			})
+		);
 		await app.listen({ port: 3000, host: '0.0.0.0' });
 
 		console.log('Server running at http://localhost:3000')

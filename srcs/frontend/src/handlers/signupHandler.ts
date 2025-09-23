@@ -39,8 +39,13 @@ export async function googleHandler(buttonId: string) {
 	if (!googleButton) return;
 
 	googleButton.addEventListener('click', () => {
-		window.location.href = `${API_BASE}/auth/google`;
+		const isLocal = window.location.hostname.includes("localhost");
+		const authPath = isLocal ? "/auth/re-google" : "/auth/google";
+		const redirectUrl = `${API_BASE}${authPath}`;
+		console.log("Redirecting to:", redirectUrl);
+		window.location.href = redirectUrl;
 	});
+
 	window.addEventListener("DOMContentLoaded", () => {
 	const params = new URLSearchParams(window.location.search);
 	const userId = params.get("userId");
@@ -48,8 +53,7 @@ export async function googleHandler(buttonId: string) {
 	if (userId) {
 		console.log("Logged in user:", userId);
 		localStorage.setItem("userId", userId);
-
 		window.history.replaceState({}, document.title, "/");
-  }
-});
+	}
+	});
 }
