@@ -16,6 +16,11 @@ function sanitizeEmail(email: string): string
 	return (normalized);
 }
 
+function isValidUsername(username: string): boolean {
+	return validator.matches(username, /^[a-zA-Z0-9_\-\s]+$/);
+}
+
+
 export function processEmailInput(email: string): string
 {
 	if (!validator.isEmail(email)) {
@@ -26,54 +31,12 @@ export function processEmailInput(email: string): string
 	return (sanitized);
 }
 
-function isValidUsername(username: string): boolean {
-	return validator.matches(username, /^[a-zA-Z0-9_-]{3,20}$/);
-}
-
-function sanitizeUsername(username: string): string
-{
-	let clean = validator.trim(username);
-	clean = validator.stripLow(clean);
-	clean = validator.blacklist(clean, "<>\"'&/");
-	return (clean);
-}
-
-export function processUsername(username: string): string
-{
-	const sanitized = sanitizeUsername(username);
-	if (!isValidUsername(sanitized)) {
+export function processUsername(name: string) {
+	if (!/^[a-zA-Z0-9_\-\s]+$/.test(name)) {
 		throw new Error("Invalid username format");
 	}
-	return (sanitized);
+	return name.trim();
 }
-
-/** *
-export function aliasPolicy(alias: string) : boolean
-{
-	if (alias.length < 1 || alias.length > 32) {
-		return false;
-	}
-	const regex = /^[A-Za-z0-9]+$/;
-	return regex.test(alias);
-}
-
-export function passwordPolicy(password: string): boolean
-{
-	if (password.length < 8 || password.length >= 128) {
-		return false;
-	}
-	if (!/[a-z]/.test(password)) {
-		return false;
-	}
-	if (!/[A-Z]/.test(password)){
-		return false;
-	}
-	if (!/[0-9]/.test(password)){
-		return false;
-	}
-	return (true);
-}
-**/
 
 export function check2faToken(token: string): boolean
 {

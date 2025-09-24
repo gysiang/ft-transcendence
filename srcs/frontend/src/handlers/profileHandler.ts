@@ -22,12 +22,12 @@ if (!form) return;
 				body: JSON.stringify({ name, email }),
 			});
 
-		if (!res.ok) {
-			const err = await res.json();
-			errorDiv!.textContent = err.message;
-		} else {
-			window.location.href = "/";
-		}} catch (err: any) {
+			if (!res.ok) {
+				const err = await res.json();
+				errorDiv!.textContent = err.message;
+			} else
+				window.location.href = "/";
+		} catch (err: any) {
 			errorDiv!.textContent = "Network error. Try again.";
 		}
 	});

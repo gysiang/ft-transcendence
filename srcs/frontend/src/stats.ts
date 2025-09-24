@@ -159,7 +159,7 @@ export async function statsProfile(container: HTMLElement) {
 					</div>
 					`;
 					popupOverlay.appendChild(popupBox);
-					document.body.appendChild(popupOverlay);
+					container.appendChild(popupOverlay);
 
 					//HandleDrop Down
 					tournamentSelect.addEventListener("change", () => {
@@ -406,11 +406,6 @@ export async function statsProfile(container: HTMLElement) {
 				}
 				player_rank_score.append(player_rank_badge, player_rank_msg);
 
-
-
-
-
-
 			//----FINAL step, append stuff----
 			const statsWrapper = document.createElement("div");
 			statsWrapper.id = "stats_data";
@@ -429,8 +424,6 @@ export async function statsProfile(container: HTMLElement) {
 			statsWrapper.append(totalmatches_against_others, stats_ranking, profile_user);
 			other_data.append(player_rank_score, match_history);
 			profile_column.append(statsWrapper, other_data);
-
-
 		//--------------------------Wrapper(stats) Section--------------------------
 		container.appendChild(profile_column);
 
