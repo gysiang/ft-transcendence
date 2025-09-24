@@ -2,20 +2,27 @@ import { FastifyInstance } from "fastify";
 import { WebSocket } from "ws";
 import { createTournament,getByCode, tournaments } from "../remoteTournament/realtimeTournament";
 import { leaveAll } from "../remoteTournament/rooms";
+import { findUserById } from "../models/user.model";
 export async function wsRoutes(app: FastifyInstance){
 
 app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) => {
-  //console.log('[WS] handshake user:', req.userData);
+  
   const raw: any = conn;
   const socket: WebSocket = raw?.socket ? raw.socket as WebSocket : raw as WebSocket;
 
   const rawId = req.userData?.id;
   const n = typeof rawId === 'number' ? rawId : Number(rawId);
   const uid: number | null = n;
-  
-  const aliasFromSession = req.userData?.name || 'Player';
-  (socket as any).alias = String(aliasFromSession);
+  (socket as any).alias = String(req.userData?.name ?? 'Player');
 
+  (async () => {
+    try {
+      if (uid != null) {
+        const u = await findUserById(app.db, String(uid));
+        if (u && u.name) (socket as any).alias = u.name;
+      }
+    } catch {}
+  })();
   let myTournamentId: string | null = null;
   let myPlayerId: string | null = null;
 
@@ -29,7 +36,7 @@ app.get('/ws', { websocket: true, preHandler: [app.authenticate] }, (conn, req) 
     myPlayerId = null;
   });
 
-  socket.on('message', (buf) => {
+  socket.on('message',async (buf) => {
     let msg: any; 
     try { 
       msg = JSON.parse(typeof buf === 'string' ? buf : buf.toString()); 

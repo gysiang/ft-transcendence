@@ -5,11 +5,10 @@ import { startGame } from "../launch";
 import { renderTournamentBracket } from "../matchUI";
 import { createTournament } from "../Tournament/backendutils";
 import { checkAuthentication } from "./auth";
-import { api } from "./apiWrapper";
 import { validAlias,validGoal,setFieldError } from "./InputValidation";
 import { API_BASE } from "../../variable"
-/*
-export async function getLoggedInUserName({ fresh = false }: { fresh?: boolean } = {}): Promise<string | null> {
+
+export async function getLoggedInUserName(): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/api/me`, {
       credentials: 'include',
@@ -22,117 +21,7 @@ export async function getLoggedInUserName({ fresh = false }: { fresh?: boolean }
   } catch {
     return null;
   }
-}*/
-export async function getLoggedInUserName(
-  { fresh = false }: { fresh?: boolean } = {}
-): Promise<string | null> {
-  try {
-    const url = fresh
-      ? `${API_BASE}/api/me?ts=${Date.now()}`
-      : `${API_BASE}/api/me`;
-
-    const res = await fetch(url, {
-      credentials: 'include',
-      cache: 'no-store',                   // bypass browser HTTP cache
-      headers: { 'Cache-Control': 'no-cache' }, // nudge proxies/SW to revalidate
-    });
-
-    if (!res.ok) return null;
-
-    // Accept either { alias, name } shapes
-    const data = await res.json();
-    const raw = (data?.name ?? '').toString().trim();
-    return raw || null;
-  } catch {
-    return null;
-  }
 }
-/*
-export function quickplayForm(app: HTMLElement): void
-{
-    app.innerHTML = `
-        <div class = "max-w-md mx-auto mt-12 text-whitw space-y-6">
-            <h2 class="text-3xl text-center"> Quickplay Setup </h2>
-            <div>
-                <label class="block mb-2"> Player 1 Alias </label>
-                <input id ="player1" type ="text" class="w-full px-4 py-2 text-black rounded-md "/>
-            </div>
-            <div>
-                <label class="block mb-2"> Player 2 Alias </label>
-                <input id ="player2" type ="text" class="w-full px-4 py-2 text-black rounded-md"/>
-            </div>
-            <div class="flex items-center">
-            <p class="mr-4 text-sm font-medium text-gray-900 dark:text-black"> Player 1 side</p>
-            <label class="relative cursor-pointer">
-            <input type="checkbox" class="sr-only peer" />
-            <div class="w-[53px] h-7 flex items-center bg-gray-300 rounded-full text-[9px] peer-checked:text-[#007bff] text-gray-300 font-extrabold after:flex after:items-center after:justify-center peer after:content-['left'] peer-checked:after:content-['Right'] peer-checked:after:translate-x-full after:absolute after:left-[2px] peer-checked:after:border-white after:bg-white after:border after:border-gray-300 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#007bff]">
-            </div>
-            </label>
-            </div>
-            <div>
-                <label for="goalLimit" class="block mb-2"> Goals </label>
-                <input id="goalLimit" type = "number" min="1" max="10" value="5" class="w-full px-4 py-2 text-black rounded-md" />
-
-            <button id ="quickplayStart" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md text-xl">
-                Start
-            </button>
-            <button id="quickmatchOnline" class="mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-md text-xl">
-            Online Quickmatch
-            </button>
-        </div>
-            `;
-            let userAlias: string | null = null;
-            (async () => {
-              userAlias = await getLoggedInUserName();
-              if (userAlias)
-                {
-                const p1 = document.getElementById("player1") as HTMLInputElement | null;
-                if (p1)
-                  {
-                    p1.value = userAlias;
-                    p1.readOnly = true;
-                    p1.classList.add('bg-gray-100', 'cursor-not-allowed');
-                  }
-              }})();
-
-            setTimeout(() => {
-                const button = document.getElementById("quickplayStart");
-                button?.addEventListener("click", () => {
-                    const sideToggle = document.querySelector("input[type='checkbox'].peer") as HTMLInputElement;
-                    const players: { name: string; side: "left" | "right" }[] = [];
-                    const name1_Input = (document.getElementById("player1") as HTMLInputElement).value || "Player 1";
-                    const name1 = userAlias ?? name1_Input;
-                    const name2 = (document.getElementById("player2") as HTMLInputElement).value || "Player 2";
-                    const side1: "left" | "right" = sideToggle?.checked ? "right" : "left";
-                    const side2: "left" | "right" = side1 === "left" ? "right" : "left";
-                    players.push({ name: name1, side: side1 });
-                    players.push({ name: name2, side: side2 });
-                    const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
-                    localStorage.setItem("players", JSON.stringify(players));
-                    localStorage.setItem("goalLimit", goals.toString());
-                    localStorage.setItem("mode", "quickplay");
-                    app.innerHTML = "";
-                    const { canvas, container } = createGameCanvas();
-                    app.appendChild(container);
-                    startGame(canvas);
-                });
-            }, 0);
-            /*
-            const onlineBtn = document.getElementById("quickmatchOnline");
-onlineBtn?.addEventListener("click", () => {
-  const goals = parseInt((document.getElementById("goalLimit") as HTMLInputElement).value, 10) || 5;
-
-  // Persist only what online mode needs
-  localStorage.setItem("goalLimit", goals.toString());
-  localStorage.setItem("mode", "online");
-
-  // Clear page, mount canvas, and hand off to startGame
-  app.innerHTML = "";
-  const { canvas, container } = createGameCanvas();
-  app.appendChild(container);
-  startGame(canvas);
-});
-}*/
 export function tournamentForm(app: HTMLElement): void {
   app.innerHTML = `
     <div class="max-w-md mx-auto mt-12 text-black space-y-6">
@@ -216,7 +105,7 @@ export function tournamentForm(app: HTMLElement): void {
 
   (async () => {
     try {
-      userAlias = await getLoggedInUserName({ fresh: true });
+      userAlias = await getLoggedInUserName();
     } catch { userAlias = null; }
     updateAliasFields(userAlias);
     playerCountInput.addEventListener("input", () => updateAliasFields(userAlias || undefined));
@@ -304,7 +193,7 @@ export async function handleStartTournament(
       console.log('Backend tournament create failed;', e);
     }
   } else {
-    console.log('Not logged in. Local tournament only.');
+    //console.log('Not logged in. Local tournament only.');
   }
 
   localStorage.setItem(
@@ -321,10 +210,6 @@ export async function handleStartTournament(
       createdAt: new Date().toISOString(),
     })
   );
-  /*
-  app.innerHTML = '';
-  const { canvas, container } = createGameCanvas();
-  app.appendChild(container);*/
   const mount = document.getElementById('app') as HTMLElement;
 
   mount.innerHTML = '';

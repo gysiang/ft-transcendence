@@ -82,17 +82,13 @@ export class Tournament {
     this.maxPlayers = opts.maxPlayers;
   }
   addPlayer(ws: WebSocket, name: string, userId?: number | null): PlayerId {
-    // Block if finished or already started (no reconnects / no late joins)
     if (this.finished) { sendSafe(ws, { type: 't.error', msg: 'Tournament already ended' }); return ''; }
     if (this.started)  { sendSafe(ws, { type: 't.error', msg: 'Tournament already in progress' }); return ''; }
   
-    // Capacity
     if (this.players.size >= this.maxPlayers) {
       sendSafe(ws, { type: 't.error', msg: 'Lobby is full' });
       return '';
     }
-  
-    // Reject duplicates: prefer userId, fallback to display name (case-insensitive)
     const uid = (userId ?? null) as number | null;
     if (uid !== null && this.userToPid.has(uid)) {
       sendSafe(ws, { type: 't.error', msg: 'You have already joined this tournament' });
@@ -108,7 +104,6 @@ export class Tournament {
       }
     }
   
-    // New player
     const id = uidStr();
     const rec: TPlayer = { id, name, ws, ready: false, userId: uid };
     this.players.set(id, rec);
@@ -119,8 +114,7 @@ export class Tournament {
     this.pushState();
   
     if (!this.host) this.setHost(id);
-  
-    // On disconnect: purge from lobby (no reconnect path)
+    // On disconnect
     ws.once('close', () => { try { this.removeBySocket(ws); } catch {} });
   
     return id;
@@ -246,24 +240,19 @@ export class Tournament {
     const p = this.players.get(pid);
     if (!p) return;
   
-    // clean user index
     if (p.userId !== null && p.userId !== undefined) {
       const mapped = this.userToPid.get(p.userId);
       if (mapped === pid) this.userToPid.delete(p.userId);
     }
-  
-    // Drop player
+
     this.players.delete(pid);
-  
-    // Host handoff if needed (only in lobby phase)
+
     if (!this.started && this.host === pid) {
       this.reassignHost();
     }
   
     this.pushState();
   }
-
-  // Choose a new host: prefer ready players, then any remaining
   private reassignHost() {
     const all = [...this.players.values()];
     if (all.length === 0) {
@@ -277,37 +266,32 @@ export class Tournament {
   private advance() {
     const resolveByesInRound = (rIdx: number) => {
       const round = this.rounds[rIdx];
-      // Auto-resolve any bye matches from currentMatch onward
       while (this.currentMatch < round.length) {
         const m = round[this.currentMatch];
         const p1 = m.p1 ? this.players.get(m.p1) : undefined;
         const p2 = m.p2 ? this.players.get(m.p2) : undefined;
   
         if (!p1 || !p2) {
-          // Bye: advance the present player
           const only = p1 ?? p2;
           if (only) m.winner = only.id;
-          this.currentMatch++;               // move to next match in the same round
-          continue;                          // keep consuming byes
+          this.currentMatch++;               
+          continue;                          
         }
-        break; // found a playable match
+        break;
       }
     };
   
     const currentRoundIdx = this.currentRound;
     const round = this.rounds[currentRoundIdx];
-  
-    // If we just finished a match, try to gobble up any subsequent byes
+
     resolveByesInRound(currentRoundIdx);
-  
-    // If the round still has an unplayed, non-bye match, start it.
+
     if (this.currentMatch < round.length && !round[this.currentMatch].winner) {
       this.pushState();
       this.StartCurrentMatch();
       return;
     }
-  
-    // Round is done if every match has a winner (including byes)
+
     if (round.every(mt => !!mt.winner)) {
       const winners = round.map(mt => mt.winner!).filter(Boolean);
       if (winners.length === 1) {
@@ -317,37 +301,19 @@ export class Tournament {
         const winner_name = this.players.get(champId)?.name || 'Champion';
       
         const payload = { type: 't.ended', champion: champId, winner_name };
-      
-        // (A) broadcast to lobby, as before
         this.broadcastLobby(payload);
-      
-        // (B) direct-send to every player socket to guarantee delivery
         for (const p of this.players.values()) {
           try { sendSafe(p.ws, payload); } catch {}
         }
       
         tournaments.delete(this.id);
         return;
-      }/*
-      if (winners.length === 1) {
-        // True terminal case
-        this.finished = true;
-        // Include the alias right here (see part B too)
-        const champId = winners[0];
-        const winner_name = this.players.get(champId)?.name || 'Champion';
-        this.broadcastLobby({ type: 't.ended', champion: champId, winner_name });
-        tournaments.delete(this.id);
-        return;
-      }*/
-  
-      // Build next round from winners, move to it, and again consume byes
+      }
       this.rounds.push(advanceWinners(winners));
       this.currentRound++;
       this.currentMatch = 0;
   
       resolveByesInRound(this.currentRound);
-  
-      // If the next round begins with a real match, start it; otherwise loop via advance()
       if (
         this.currentMatch < this.rounds[this.currentRound].length &&
         !this.rounds[this.currentRound][this.currentMatch].winner
@@ -356,15 +322,10 @@ export class Tournament {
         this.StartCurrentMatch();
         return;
       }
-  
-      // If the next round had only byes and produced a single winner, we may already be done.
-      // Re-run advance() to re-check state and possibly finish or continue.
       this.pushState();
       this.advance();
       return;
     }
-  
-    // Not all matches were winners yet, move to next match index and handle again.
     this.currentMatch++;
     this.pushState();
     this.StartCurrentMatch();

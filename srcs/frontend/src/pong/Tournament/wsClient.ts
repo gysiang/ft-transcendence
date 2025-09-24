@@ -82,7 +82,7 @@ export function openWs(handlers: MatchHandlers = {}): OpenWsApi {
       const p = pending.shift()!;
       try { ws.send(JSON.stringify(p)); } catch {}
     }
-    handlers.onOpen?.(ev); // optional
+    handlers.onOpen?.(ev);
   }, { once: true });
 
   const sendJson = (payload: unknown) => {
