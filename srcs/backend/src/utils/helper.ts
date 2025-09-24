@@ -17,16 +17,9 @@ function sanitizeEmail(email: string): string
 }
 
 function isValidUsername(username: string): boolean {
-	return validator.matches(username, /^[a-zA-Z0-9_-]{3,20}$/);
+	return validator.matches(username, /^[a-zA-Z0-9_\-\s]+$/);
 }
 
-function sanitizeUsername(username: string): string
-{
-	let clean = validator.trim(username);
-	clean = validator.stripLow(clean);
-	clean = validator.blacklist(clean, "<>\"'&/");
-	return (clean);
-}
 
 export function processEmailInput(email: string): string
 {
@@ -38,13 +31,11 @@ export function processEmailInput(email: string): string
 	return (sanitized);
 }
 
-export function processUsername(username: string): string
-{
-	const sanitized = sanitizeUsername(username);
-	if (!isValidUsername(sanitized)) {
+export function processUsername(name: string) {
+	if (!/^[a-zA-Z0-9_\-\s]+$/.test(name)) {
 		throw new Error("Invalid username format");
 	}
-	return (sanitized);
+	return name.trim();
 }
 
 export function check2faToken(token: string): boolean
