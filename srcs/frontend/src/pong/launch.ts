@@ -5,8 +5,6 @@ import type { Match } from "./Tournament/singleElim";
 import { matchUI} from "./matchUI";
 import { createMatch } from "./Tournament/backendutils";
 import { checkAuthentication } from "./registration/auth";
-import { clearGameStorage } from "./Tournament/TournamentUtils";
-import { openWs,type MatchHandlers, type StartMsg,type StateMsg, type EndMsg } from "./Tournament/wsClient";
 import { lockCanvasAtCurrent, unlockCanvas,lockCanvasWorld } from "./Renderer";
 import { getLoggedInUserName } from "./registration/registrationForm";
 import { renderTournamentVictoryScreen } from "./ui/victoryScreen";
@@ -32,52 +30,9 @@ export async function startGame(canvas: HTMLCanvasElement) {
 		throw new Error("Canvas not supported");
 	}
 
-	const rawMode = localStorage.getItem("mode");
+	const mode = localStorage.getItem("mode");
 	const goalLimit = parseInt(localStorage.getItem("goalLimit") || "5", 10);
-	const mode = (rawMode === "online-quickmatch") ? "online" : rawMode;
-  	console.log("[startGame] mode =", rawMode, "→", mode, "goalLimit =", goalLimit);
-	  if (mode === 'online') {
-		let game: Game | null = null;
-	  
-		const handlers: MatchHandlers = {
-		  onStart: (msg: StartMsg) => {
-			const { goalLimit: gl, side, world } = msg;
-			const W = world?.w ?? 800;
-			const H = world?.h ?? 600;
-			lockCanvasWorld(canvas, world?.w ?? 800, world?.h ?? 600);
-	  
-			const players: Player[] = side === 'left'
-			  ? [{ name: 'You', side: 'left' }, { name: 'Opponent', side: 'right' }]
-			  : [{ name: 'Opponent', side: 'left' }, { name: 'You', side: 'right' }];
-	  
-			game = new Game(canvas, ctx, players, gl);
-			game.enableNetMode();
-			game.startCountdown();
-		  },
-		  onState: (s: StateMsg) => game?.applyNetState(s as any),
-		  onEnd:   (e: EndMsg)   => {
-			unlockCanvas(canvas);
-			alert(`${e.winnerSide === 'left' ? 'Left' : 'Right'} wins ${e.score[0]}–${e.score[1]}`);
-			setTimeout(() => { localStorage.removeItem('mode'); window.location.href = '/play'; }, 1000);
-		  }
-		};
-	  
-		const api = openWs(handlers);
-		api.queue(goalLimit);
-		return;
-	  }
-	if (mode === "quickplay") {
-		const players = JSON.parse(localStorage.getItem("players") || "[]");
-		lockCanvasAtCurrent(canvas);
-		await launchGame(canvas, ctx, players, goalLimit, () => {
-			clearGameStorage();
-			unlockCanvas(canvas);
-			setTimeout(() => {
-				window.location.href = "/play";
-			}, 2000);
-		});
-	}
-	else if (mode === "tournament")
+	if (mode === "tournament")
 	{
 
 		const tournamentData = JSON.parse(localStorage.getItem("tournamentData") || "{}");

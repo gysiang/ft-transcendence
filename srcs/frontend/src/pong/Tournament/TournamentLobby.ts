@@ -5,6 +5,7 @@ import { lockCanvasWorld, unlockCanvas } from '../Renderer.ts';
 import { renderTournamentBracket, adaptTRoundsToLocal } from '../matchUI.ts';
 import {extractTournamentNameFromState,showOnlineVictoryOverlay } from '../ui/onlinevictory.ts';
 import {mountMatchAnnouncer,showMatchAnnouncement} from '../ui/matchAnnouncer.ts';
+import { enableUnloadGuard, disableUnloadGuard } from '../ui/refreshPrompt.ts';
 
 enum TLState{
   Idle = 'Idle',
@@ -365,6 +366,7 @@ function updateLobbyCodeDisplay() {
             TL.worldW = 800; TL.worldH = 600;
           }
           relockWorld();
+          enableUnloadGuard();
         
           const { left, right } = currentMatchNamesFromLobby();
           const ctx = TL.gameCanvas!.getContext("2d")!;
@@ -395,6 +397,7 @@ function updateLobbyCodeDisplay() {
           TL.game = null;
           try { unlockCanvas(TL.gameCanvas!); } catch {}
           if (TL.unmuteKeys) { TL.unmuteKeys(); TL.unmuteKeys = null; }
+          disableUnloadGuard();
           const ctx = TL.gameCanvas!.getContext("2d");
           ctx?.setTransform(1, 0, 0, 1, 0, 0);
           ctx?.clearRect(0, 0, TL.gameCanvas!.width, TL.gameCanvas!.height);
@@ -405,6 +408,7 @@ function updateLobbyCodeDisplay() {
         onTournamentEnd: (m: any) => {
           TL.game = null;
           try { unlockCanvas(TL.gameCanvas!); } catch {}
+          disableUnloadGuard();
           const ctx = TL.gameCanvas!.getContext("2d");
           ctx?.setTransform(1, 0, 0, 1, 0, 0);
           ctx?.clearRect(0, 0, TL.gameCanvas!.width, TL.gameCanvas!.height);
