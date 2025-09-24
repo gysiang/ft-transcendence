@@ -248,11 +248,11 @@ export async function editUser(req: FastifyRequest<{ Params: IUserParams; Body: 
 
 		let sanename = processUsername(name);
 		let sanemail = processEmailInput(email);
-	
+
 		const db = req.server.db;
 		const existing = await findUserByEmail(db, sanemail);
-		if (existing) {
-			return reply.status(400).send({ message: 'Email already exists' });
+		if (existing && existing.id != id) {
+			return reply.status(400).send({ message: "Email already exists" });
 		}
 
 		await db.run(
@@ -416,7 +416,7 @@ export async function get2faStatus(req: FastifyRequest, reply: FastifyReply) {
     try {
 		const userId = req.userData?.id;
         	if (!userId) return reply.status(401).send({ message: "Unauthenticated" });
-		
+
         const db = req.server.db;
         const user = await db.get(`SELECT twofa_enabled, twofa_method FROM users WHERE id = ?`, [userId]);
         if (!user) return reply.status(404).send({ message: "User not found" });
