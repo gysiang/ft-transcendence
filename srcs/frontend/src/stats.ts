@@ -136,8 +136,8 @@ export async function statsProfile(container: HTMLElement) {
 							${matches.data
 								.filter((m: CreateMatchBody) => Number(m.tournament_id) === selectedId)
 								.map((m: CreateMatchBody) => {
-								const p1 = m.player1_id === Number(userId) ? "\"You\"" : `Player ${m.player1_id}`;
-								const p2 = m.player2_id === Number(userId) ? "\"You\"" : `Player ${m.player2_id}`;
+								const p1 = m.player1_id === Number(userId) ? "\"You\"" : m.player1_alias;
+								const p2 = m.player2_id === Number(userId) ? "\"You\"" : m.player2_alias;
 								let result: string;
 								if (m.player1_id === Number(userId) || m.player2_id === Number(userId)) {
 									if (m.winner_id === Number(userId)) {
@@ -195,8 +195,8 @@ export async function statsProfile(container: HTMLElement) {
 							${matches.data
 								.filter((m: CreateMatchBody) => Number(m.tournament_id) === selectedId)
 								.map((m: CreateMatchBody) => {
-									const p1 = m.player1_id === Number(userId) ? "[You]" : `Player ${m.player1_id}`;
-									const p2 = m.player2_id === Number(userId) ? "[You]" : `Player ${m.player2_id}`;
+									const p1 = m.player1_id === Number(userId) ? "[You]" : m.player1_alias;
+									const p2 = m.player2_id === Number(userId) ? "[You]" : m.player2_alias;
 									
 									let result: string;
 									if (m.player1_id === Number(userId) || m.player2_id === Number(userId)) {
