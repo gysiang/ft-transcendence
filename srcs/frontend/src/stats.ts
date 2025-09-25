@@ -1,5 +1,5 @@
 import { renderHeader } from "./components/header.ts";
-import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
+//import type { CreateMatchBody } from "./pong/Tournament/backendutils.ts"
 import { API_BASE } from "./variable.ts"
 import { Chart } from 'chart.js/auto';
 import { DoughnutController, ArcElement,
@@ -13,6 +13,19 @@ Chart.register(
 	Decimation, SubTitle, Title, Tooltip, Legend 
 );
 
+type CreateMatchBody = {
+	tournament_id: number;
+	player1_alias: string;
+	player2_alias: string | null;
+	player1_score: number;
+	player2_score: number;
+	player1_id?: number | null;
+	player2_id?: number | null;
+	winner_id: number | null;
+	winner_alias: string;
+	created_at?: string;
+	tournament_name?: string;
+  };
 export async function statsProfile(container: HTMLElement) {
     renderHeader(container);
 
@@ -46,7 +59,7 @@ export async function statsProfile(container: HTMLElement) {
 			const tournamentId = Number(m.tournament_id);
 			if (!tournamentsMap.has(tournamentId)) {
 				tournamentsMap.set(tournamentId, {
-					name: `Tourney-${tournamentId}`,
+					name: m.tournament_name || `Tourney-${tournamentId}`,
 					tourney_wins: 0,
 					tourney_losses: 0,
 				})
