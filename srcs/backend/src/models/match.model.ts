@@ -44,8 +44,10 @@ export async function findMatchById(db: Database, id: string) {
 export async function getAllMatchData(db: Database, id: string) {
 	const result = await db.all(
 		
-		`SELECT m.*
+		`SELECT m.*,
+		t.name AS tournament_name
 		FROM matches m
+		JOIN tournaments t ON m.tournament_id = t.id
 		WHERE (m.player1_id = ? OR m.player2_id = ?)
 		ORDER BY m.created_at DESC;
 		`,
